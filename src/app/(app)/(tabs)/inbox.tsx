@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { useRouter, type Href } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, Platform, RefreshControl, ScrollView, TextInput, View } from 'react-native';
@@ -15,6 +16,7 @@ import { BadgeCheck, CheckCheck, MessageCircle, Search, SquarePen } from '@/ui/i
 type Filter = 'all' | 'unread' | 'matches';
 
 function ConversationRow({ convo, myId }: { convo: Conversation; myId: string | null }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const { c } = useTheme();
   const other = convo.other;
@@ -25,17 +27,17 @@ function ConversationRow({ convo, myId }: { convo: Conversation; myId: string | 
     <PressableScale
       scaleTo={0.985}
       onPress={() => router.push(`/chat/${convo.id}` as Href)}
-      accessibilityLabel={`Conversation with ${other?.full_name ?? 'member'}${unread ? `, ${convo.unread} unread` : ''}`}
+      accessibilityLabel={t('Conversation with {{name}}', {name:other?.full_name ?? t('Member')}) + (unread ? ', ' + t('{{count}} unread', {count:convo.unread}) : '')}
       style={{ flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 12 }}
     >
       <Avatar uri={other?.avatar_url} name={other?.full_name} size={54} ring={other?.verified} />
       <View style={{ flex: 1, minWidth: 0, gap: 3 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Text variant="headline" numberOfLines={1} style={{ flexShrink: 1 }}>{other?.full_name ?? 'Conversation'}</Text>
+          <Text variant="headline" numberOfLines={1} style={{ flexShrink: 1 }}>{other?.full_name ?? t("Conversation")}</Text>
           {other?.verified && <BadgeCheck size={14} color={c.accentText} />}
           {convo.is_match && (
             <View style={{ paddingHorizontal: 6, paddingVertical: 1, borderRadius: 6, backgroundColor: c.accentSoft }}>
-              <Text variant="mono" color="accentText" style={{ fontSize: 9.5 }}>MATCH</Text>
+              <Text variant="mono" color="accentText" style={{ fontSize: 9.5 }}>{t("MATCH")}</Text>
             </View>
           )}
           <View style={{ flex: 1 }} />
@@ -51,7 +53,7 @@ function ConversationRow({ convo, myId }: { convo: Conversation; myId: string | 
             color={unread ? 'text' : 'textSubtle'}
             style={{ flex: 1, fontFamily: unread ? font.sansSemibold : font.sans }}
           >
-            {convo.last_message ? `${mine ? 'You: ' : ''}${convo.last_message}` : `Say hi to ${firstName(other?.full_name)} 👋`}
+            {convo.last_message ? `${mine ? t("You: ") : ''}${convo.last_message}` : t('Say hi to {{name}} 👋', {name:firstName(other?.full_name)})}
           </Text>
           <CountBadge count={convo.unread} />
         </View>
@@ -61,6 +63,7 @@ function ConversationRow({ convo, myId }: { convo: Conversation; myId: string | 
 }
 
 export default function Inbox() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { c } = useTheme();
   const { userId } = useAuth();
@@ -93,22 +96,22 @@ export default function Inbox() {
         <TextInput
           value={query}
           onChangeText={setQuery}
-          placeholder="Search messages"
+          placeholder={t("Search messages")}
           placeholderTextColor={c.textFaint}
           style={[{ flex: 1, color: c.text, fontFamily: font.sans, fontSize: 15 }, Platform.OS === 'web' ? ({ outlineWidth: 0 } as object) : null]}
-          accessibilityLabel="Search messages"
+          accessibilityLabel={t("Search messages")}
         />
       </View>
 
       {fresh.length > 0 && !q && (
         <View style={{ gap: 10 }}>
-          <Text variant="label" color="textSubtle">NEW MATCHES</Text>
+          <Text variant="label" color="textSubtle">{t("NEW MATCHES")}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ gap: 14, paddingHorizontal: 16 }}>
             {fresh.map((m) => (
               <PressableScale
                 key={m.profile.id}
                 scaleTo={0.94}
-                accessibilityLabel={`Start a chat with ${m.profile.full_name}`}
+                accessibilityLabel={t('Start a chat with {{name}}', {name:m.profile.full_name})}
                 onPress={async () => {
                   const id = m.conversation_id ?? (await open.mutateAsync(m.profile.id));
                   router.push(`/chat/${id}` as Href);
@@ -128,9 +131,9 @@ export default function Inbox() {
         onChange={setFilter}
         size="sm"
         options={[
-          { value: 'all', label: 'All' },
-          { value: 'unread', label: 'Unread', badge: unreadCount },
-          { value: 'matches', label: 'Matches' },
+          { value: 'all', label: t("All") },
+          { value: 'unread', label: t("Unread"), badge: unreadCount },
+          { value: 'matches', label: t("Matches") },
         ]}
       />
     </View>
@@ -140,8 +143,8 @@ export default function Inbox() {
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <Header
         large
-        title="Messages"
-        right={<IconButton icon={SquarePen} onPress={() => router.push('/new-message')} accessibilityLabel="New message" />}
+        title={t("Messages")}
+        right={<IconButton icon={SquarePen} onPress={() => router.push('/new-message')} accessibilityLabel={t("New message")} />}
       />
       <FlatList
         data={list}
@@ -155,9 +158,9 @@ export default function Inbox() {
           ) : (
             <EmptyState
               icon={MessageCircle}
-              title={q ? `No results for “${query}”` : filter === 'unread' ? 'You’re all caught up' : 'No conversations yet'}
-              message={q ? undefined : 'Match with founders or message anyone from their profile.'}
-              actionLabel={q || filter !== 'all' ? undefined : 'Open Smart Match'}
+              title={q ? t('No results for “{{query}}”', {query}) : filter === 'unread' ? t("You’re all caught up") : t("No conversations yet")}
+              message={q ? undefined : t("Match with founders or message anyone from their profile.")}
+              actionLabel={q || filter !== 'all' ? undefined : t("Open Smart Match")}
               onAction={() => router.push('/match')}
             />
           )

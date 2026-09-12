@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
@@ -25,6 +26,7 @@ const grouped = (a?: Message, b?: Message) =>
   !!a && !!b && a.sender_id === b.sender_id && sameDay(a.created_at, b.created_at) && Math.abs(Date.parse(b.created_at) - Date.parse(a.created_at)) < GROUP_MS;
 
 export default function Chat() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const qc = useQueryClient();
@@ -105,8 +107,8 @@ export default function Chat() {
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginHorizontal: 4 }}>
               {m.pending && <Clock size={10} color={c.textFaint} />}
               <Text variant="mono" color="textFaint" style={{ fontSize: 10.5 }}>
-                {m.pending ? 'Sending…' : clockTime(m.created_at)}
-                {mine && index === lastMine && !m.pending ? (seen ? ' · Seen' : ' · Sent') : ''}
+                {m.pending ? t("Sending…") : clockTime(m.created_at)}
+                {mine && index === lastMine && !m.pending ? ' · ' + (seen ? t('Seen') : t('Sent')) : ''}
               </Text>
             </View>
           )}
@@ -116,37 +118,37 @@ export default function Chat() {
   };
 
   const iceBreakers = [
-    `Hey ${name}! Great to connect 👋`,
-    'What are you building right now?',
-    'Up for a quick call this week?',
+    t('Hey {{name}}! Great to connect 👋', {name}),
+    t("What are you building right now?"),
+    t("Up for a quick call this week?"),
   ];
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: c.bg }} behavior={KAV_BEHAVIOR}>
       <View style={{ paddingTop: insets.top + 6, paddingBottom: 8, paddingHorizontal: 8, flexDirection: 'row', alignItems: 'center', gap: 6, borderBottomWidth: 1, borderBottomColor: c.hairline, backgroundColor: c.bg }}>
-        <IconButton icon={ChevronLeft} variant="plain" size={40} iconSize={24} onPress={() => (router.canGoBack() ? router.back() : router.replace('/inbox'))} accessibilityLabel="Back" />
+        <IconButton icon={ChevronLeft} variant="plain" size={40} iconSize={24} onPress={() => (router.canGoBack() ? router.back() : router.replace('/inbox'))} accessibilityLabel={t("Back")} />
         <Pressable
           onPress={() => other && router.push(`/user/${other.id}` as Href)}
           style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 }}
           accessibilityRole="link"
-          accessibilityLabel={`Open ${other?.full_name ?? 'profile'}`}
+          accessibilityLabel={other ? t("Open {{name}}'s profile", { name: other.full_name }) : t('View profile')}
         >
           <Avatar uri={other?.avatar_url} name={other?.full_name} size={38} ring={other?.verified} />
           <View style={{ flex: 1, minWidth: 0 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-              <Text variant="headline" numberOfLines={1} style={{ flexShrink: 1 }}>{other?.full_name ?? 'Conversation'}</Text>
+              <Text variant="headline" numberOfLines={1} style={{ flexShrink: 1 }}>{other?.full_name ?? t("Conversation")}</Text>
               {other?.verified && <BadgeCheck size={14} color={c.accentText} />}
             </View>
             <Text variant="caption" color={typing ? 'accentText' : 'textSubtle'} numberOfLines={1}>
-              {typing ? 'typing…' : convo.data?.is_match ? 'Smart Match' : other?.headline ?? ''}
+              {typing ? t('typing…') : convo.data?.is_match ? t("Smart Match") : other?.headline ?? ''}
             </Text>
           </View>
         </Pressable>
-        <IconButton icon={Ellipsis} variant="plain" size={40} onPress={() => setMenu(true)} accessibilityLabel="Conversation options" />
+        <IconButton icon={Ellipsis} variant="plain" size={40} onPress={() => setMenu(true)} accessibilityLabel={t("Conversation options")} />
       </View>
 
       {error ? (
-        <EmptyState icon={CircleAlert} title="Conversation unavailable" message={(error as Error).message} />
+        <EmptyState icon={CircleAlert} title={t("Conversation unavailable")} message={(error as Error).message} />
       ) : loading ? (
         <View style={{ flex: 1, padding: 16 }}><SkeletonList count={5} /></View>
       ) : messages.length === 0 ? (
@@ -159,7 +161,7 @@ export default function Chat() {
           <View style={{ gap: 8, alignItems: 'center' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Sparkles size={13} color={c.accentText} />
-              <Text variant="label" color="textSubtle">ICE-BREAKERS</Text>
+              <Text variant="label" color="textSubtle">{t("ICE-BREAKERS")}</Text>
             </View>
             {iceBreakers.map((t) => <Chip key={t} label={t} onPress={() => submit(t)} />)}
           </View>
@@ -170,7 +172,7 @@ export default function Chat() {
           data={rows}
           keyExtractor={(r) => r.key}
           renderItem={renderRow}
-          ListHeaderComponent={hasOlder ? <Button title="Load older messages" variant="ghost" loading={loadingOlder} onPress={loadOlder} /> : null}
+          ListHeaderComponent={hasOlder ? <Button title={t("Load older messages")} variant="ghost" loading={loadingOlder} onPress={loadOlder} /> : null}
           maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
           ListFooterComponent={typing ? <View style={{ marginTop: 10, marginLeft: 36 }}><TypingBubble /></View> : null}
           onContentSizeChange={() => {
@@ -198,11 +200,11 @@ export default function Chat() {
               submit();
             }
           }}
-          placeholder={`Message ${name}…`}
+          placeholder={t('Message {{name}}…', {name})}
           placeholderTextColor={c.textFaint}
           multiline
           maxLength={4000}
-          accessibilityLabel="Message"
+          accessibilityLabel={t("Message")}
           style={[
             { flex: 1, minHeight: 44, maxHeight: 130, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12, borderRadius: 22, backgroundColor: c.input, borderWidth: 1, borderColor: c.border, color: c.text, fontFamily: font.sans, fontSize: 15.5 },
             Platform.OS === 'web' ? ({ outlineWidth: 0 } as object) : null,
@@ -212,20 +214,20 @@ export default function Chat() {
           onPress={() => submit()}
           disabled={!text.trim()}
           scaleTo={0.88}
-          accessibilityLabel="Send message"
+          accessibilityLabel={t("Send message")}
           style={{ width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: text.trim() ? c.action : c.tint08 }}
         >
           <ArrowUp size={20} color={text.trim() ? c.actionText : c.textFaint} strokeWidth={2.5} />
         </PressableScale>
       </View>
 
-      <Sheet open={menu} onClose={() => { setMenu(false); setReporting(false); }} title={reporting ? `Report ${name}` : undefined}>
+      <Sheet open={menu} onClose={() => { setMenu(false); setReporting(false); }} title={reporting ? t('Report {{name}}', { name }) : undefined}>
         {reporting ? (
           <ListGroup>
             {['Spam or scam', 'Harassment', 'Fake profile', 'Something else'].map((r, i, all) => (
               <ListRow
                 key={r}
-                title={r}
+                title={t(r)}
                 last={i === all.length - 1}
                 onPress={() => {
                   setMenu(false);
@@ -237,8 +239,8 @@ export default function Chat() {
           </ListGroup>
         ) : (
           <ListGroup>
-            <ListRow icon={User} title="View profile" onPress={() => { setMenu(false); if (other) router.push(`/user/${other.id}` as Href); }} />
-            <ListRow icon={Flag} title={`Report ${name}`} destructive last onPress={() => setReporting(true)} />
+            <ListRow icon={User} title={t("View profile")} onPress={() => { setMenu(false); if (other) router.push(`/user/${other.id}` as Href); }} />
+            <ListRow icon={Flag} title={t('Report {{name}}', { name })} destructive last onPress={() => setReporting(true)} />
           </ListGroup>
         )}
       </Sheet>

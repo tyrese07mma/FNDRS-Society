@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import React, { useState } from 'react';
 import { Platform, Pressable, TextInput, View, type StyleProp, type TextInputProps, type ViewStyle } from 'react-native';
 
@@ -40,6 +41,7 @@ export function Input({
   ref,
   ...rest
 }: InputProps) {
+  const { t } = useTranslation();
   const { c } = useTheme();
   const [focused, setFocused] = useState(false);
   const [reveal, setReveal] = useState(false);
@@ -104,7 +106,7 @@ export function Input({
             onPress={() => setReveal((r) => !r)}
             hitSlop={10}
             accessibilityRole="button"
-            accessibilityLabel={reveal ? 'Hide password' : 'Show password'}
+            accessibilityLabel={reveal ? t("Hide password") : t("Show password")}
           >
             {reveal ? <EyeOff size={18} color={c.textSubtle} /> : <Eye size={18} color={c.textSubtle} />}
           </Pressable>

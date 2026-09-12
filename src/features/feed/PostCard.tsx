@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { useNow } from '@/lib/useNow';
 import { useRouter, type Href } from 'expo-router';
 import React, { useState } from 'react';
@@ -63,6 +64,7 @@ function Action({
 }
 
 function Poll({ post }: { post: Post }) {
+  const { t } = useTranslation();
   const { c } = useTheme();
   const vote = useVote();
   const poll = post.poll!;
@@ -81,7 +83,7 @@ function Poll({ post }: { post: Post }) {
             disabled={ended}
             onPress={() => vote.mutate({ id: post.id, optionId: o.id })}
             accessibilityRole="button"
-            accessibilityLabel={`${o.label}${showResults ? `, ${pct} percent` : ''}`}
+            accessibilityLabel={o.label + (showResults ? ', ' + t('{{percent}} percent', {percent:pct}) : '')}
             accessibilityState={{ selected: mine }}
             style={{
               minHeight: 44,
@@ -106,13 +108,14 @@ function Poll({ post }: { post: Post }) {
         );
       })}
       <Text variant="caption" color="textSubtle">
-        {compact(total)} votes · {ended ? 'Final results' : poll.ends_at ? `Ends ${timeAgo(poll.ends_at).replace('now', 'soon')}` : 'Open'}
+        {t('{{count}} votes · {{status}}', {count:compact(total), status:ended ? t('Final results') : poll.ends_at ? t('Ends {{time}}', {time:timeAgo(poll.ends_at)}) : t('Open')})}
       </Text>
     </View>
   );
 }
 
 export function PostCard({ post, onOpen, expanded = false }: { post: Post; onOpen?: () => void; expanded?: boolean }) {
+  const { t } = useTranslation();
   const { c } = useTheme();
   const router = useRouter();
   const like = useLike();
@@ -135,7 +138,7 @@ export function PostCard({ post, onOpen, expanded = false }: { post: Post; onOpe
   return (
     <Card padded={false} style={{ padding: space[4], gap: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 11 }}>
-        <Pressable onPress={openAuthor} accessibilityRole="link" accessibilityLabel={`Open ${post.author.full_name}'s profile`}>
+        <Pressable onPress={openAuthor} accessibilityRole="link" accessibilityLabel={t("Open {{name}}'s profile", {name:post.author.full_name})}>
           <Avatar uri={post.author.avatar_url} name={post.author.full_name} size={42} ring={post.author.verified} />
         </Pressable>
         <Pressable onPress={openAuthor} style={{ flex: 1, minWidth: 0 }}>
@@ -150,21 +153,20 @@ export function PostCard({ post, onOpen, expanded = false }: { post: Post; onOpe
             {timeAgo(post.created_at)}
           </Text>
         </Pressable>
-        <Pressable onPress={() => setMenu(true)} hitSlop={10} accessibilityRole="button" accessibilityLabel="Post options">
+        <Pressable onPress={() => setMenu(true)} hitSlop={10} accessibilityRole="button" accessibilityLabel={t("Post options")}>
           <Ellipsis size={20} color={c.textSubtle} />
         </Pressable>
       </View>
 
-      {kind && <Badge tone={kind.tone}>{kind.label}</Badge>}
+      {kind && <Badge tone={kind.tone}>{t(kind.label)}</Badge>}
 
-      <Pressable onPress={open} accessibilityRole="button" accessibilityLabel="Open post">
+      <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={t("Open post")}>
         <Text variant="body" color="textMuted" numberOfLines={more || !long ? undefined : 7} style={{ color: c.text, opacity: 0.92 }}>
           {post.body}
         </Text>
         {long && !more && (
           <Text variant="footnote" color="textSubtle" onPress={() => setMore(true)} style={{ marginTop: 4 }}>
-            Show more
-          </Text>
+            {t("Show more")}</Text>
         )}
       </Pressable>
 
@@ -183,7 +185,7 @@ export function PostCard({ post, onOpen, expanded = false }: { post: Post; onOpe
       <View style={{ height: 1, backgroundColor: c.hairline, marginHorizontal: -space[4] }} />
       <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: -8, marginBottom: -6 }}>
         <Action
-          accessibilityLabel={post.liked ? 'Unlike' : 'Like'}
+          accessibilityLabel={post.liked ? t("Unlike") : t("Like")}
           active={post.liked}
           onPress={toggleLike}
           label={compact(post.like_count)}
@@ -194,19 +196,19 @@ export function PostCard({ post, onOpen, expanded = false }: { post: Post; onOpe
           }
         />
         <Action
-          accessibilityLabel="Comments"
+          accessibilityLabel={t("Comments")}
           onPress={open}
           label={compact(post.comment_count)}
           icon={<MessageCircle size={19} color={c.textSubtle} />}
         />
         <Action
-          accessibilityLabel="Share"
-          onPress={() => shareText(`${post.author.full_name} on FNDRS: “${post.body.slice(0, 180)}${post.body.length > 180 ? '…' : ''}”`, appLink(`/post/${post.id}`))}
+          accessibilityLabel={t("Share")}
+          onPress={() => shareText(t('{{name}} on FNDRS: “{{text}}”', {name:post.author.full_name,text:post.body.slice(0,180)+(post.body.length>180?'…':'')}), appLink(`/post/${post.id}`))}
           icon={<Share2 size={18} color={c.textSubtle} />}
         />
         <View style={{ flex: 1 }} />
         <Action
-          accessibilityLabel={post.saved ? 'Remove from saved' : 'Save'}
+          accessibilityLabel={post.saved ? t("Remove from saved") : t("Save")}
           active={post.saved}
           onPress={() => save.mutate({ id: post.id, saved: !post.saved })}
           icon={<Bookmark size={19} color={post.saved ? c.text : c.textSubtle} fill={post.saved ? c.text : 'transparent'} />}

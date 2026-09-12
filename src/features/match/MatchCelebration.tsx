@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { useRouter, type Href } from 'expo-router';
 import React, { useEffect } from 'react';
 import { Modal, StyleSheet, View } from 'react-native';
@@ -39,6 +40,7 @@ export function MatchCelebration({
   match: { candidate: MatchCandidate; conversationId: string | null } | null;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const { profile } = useAuth();
   if (!match) return null;
@@ -55,8 +57,7 @@ export function MatchCelebration({
         </View>
         <Animated.View entering={ZoomIn.springify().damping(14)} style={{ alignItems: 'center', gap: 20, width: '100%', maxWidth: 380 }}>
           <Text style={{ fontFamily: font.display, fontSize: 22, letterSpacing: 5, lineHeight: 30 }} tint={palette.gold400} maxFontSizeMultiplier={1}>
-            IT’S A MATCH
-          </Text>
+            {t("IT’S A MATCH")}</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <View style={{ transform: [{ rotate: '-6deg' }] }}>
               <Avatar uri={profile?.avatar_url} name={profile?.full_name} size={104} ring />
@@ -66,14 +67,13 @@ export function MatchCelebration({
             </View>
           </View>
           <Text variant="title2" align="center" tint={palette.ivory}>
-            You and {firstName(them.full_name)} want to build together.
-          </Text>
+            {t('You and {{name}} want to build together.', {name:firstName(them.full_name)})}</Text>
           <Text variant="callout" align="center" tint={palette.ink200}>
             {them.reasons.slice(0, 2).join(' · ')}
           </Text>
           <View style={{ width: '100%', gap: 10, marginTop: 6 }}>
             <Button
-              title={`Message ${firstName(them.full_name)}`}
+              title={t('Message {{name}}', {name:firstName(them.full_name)})}
               variant="accent"
               size="lg"
               icon={MessageCircle}
@@ -83,7 +83,7 @@ export function MatchCelebration({
                 if (match.conversationId) router.push(`/chat/${match.conversationId}` as Href);
               }}
             />
-            <Button title="Keep swiping" variant="ghost" block onPress={onClose} />
+            <Button title={t("Keep swiping")} variant="ghost" block onPress={onClose} />
           </View>
         </Animated.View>
       </View>

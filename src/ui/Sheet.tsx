@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import React, { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -33,6 +34,7 @@ const SPRING = { damping: 26, stiffness: 260, mass: 0.9 };
 
 /** Bottom sheet with spring entry, backdrop fade and drag-to-dismiss on the grabber. */
 export function Sheet({ open, onClose, title, subtitle, children, footer, scroll = true }: SheetProps) {
+  const { t } = useTranslation();
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const { height: screenH } = useWindowDimensions();
@@ -78,7 +80,7 @@ export function Sheet({ open, onClose, title, subtitle, children, footer, scroll
     <Modal transparent visible animationType="none" statusBarTranslucent navigationBarTranslucent onRequestClose={onClose}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: c.scrim }, backdropStyle]}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
+          <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel={t("Close")} />
         </Animated.View>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}

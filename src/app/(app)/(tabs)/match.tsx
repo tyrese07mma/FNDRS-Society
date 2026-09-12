@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { useRouter, type Href } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { View } from 'react-native';
@@ -46,6 +47,7 @@ function RoundButton({
 }
 
 export default function Match() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { c } = useTheme();
   const { isPro } = useAuth();
@@ -81,7 +83,7 @@ export default function Match() {
     } catch (e) {
       setDeck((d) => [cand, ...d]);
       if (isApiError(e, 'SWIPE_LIMIT')) setLimit(true);
-      else toast.error('That swipe did not save', e instanceof Error ? e.message : undefined);
+      else toast.error(t("That swipe did not save"), e instanceof Error ? e.message : undefined);
     }
   };
 
@@ -100,11 +102,11 @@ export default function Match() {
       <View style={{ flex: 1, borderRadius: radius.xl, borderWidth: 1, borderColor: c.accentBorder, backgroundColor: c.accentSoft, justifyContent: 'center', padding: 24 }}>
         <EmptyState
           icon={Crown}
-          title="That’s today’s 25 free swipes"
-          message="Pro members swipe without limits, see who already liked them and get warm investor intros."
+          title={t("That’s today’s 25 free swipes")}
+          message={t("Pro members swipe without limits, see who already liked them and get warm investor intros.")}
         />
-        <Button title="Unlock unlimited matches" variant="accent" size="lg" block icon={Sparkles} onPress={() => router.push('/premium')} />
-        <Button title="Come back tomorrow" variant="ghost" block onPress={() => setLimit(false)} style={{ marginTop: 6 }} />
+        <Button title={t("Unlock unlimited matches")} variant="accent" size="lg" block icon={Sparkles} onPress={() => router.push('/premium')} />
+        <Button title={t("Come back tomorrow")} variant="ghost" block onPress={() => setLimit(false)} style={{ marginTop: 6 }} />
       </View>
     );
   } else if (!top) {
@@ -112,12 +114,12 @@ export default function Match() {
       <View style={{ flex: 1, justifyContent: 'center' }}>
         <EmptyState
           icon={Sparkles}
-          title="You’re all caught up"
-          message={filterCount ? 'No one else matches these filters right now. Widen them to see more people.' : 'New founders join every day. Check back soon — or look at people you passed.'}
+          title={t("You’re all caught up")}
+          message={filterCount ? t("No one else matches these filters right now. Widen them to see more people.") : t("New founders join every day. Check back soon — or look at people you passed.")}
         />
         <View style={{ gap: 10, alignItems: 'center' }}>
-          {filterCount > 0 && <Button title="Adjust filters" variant="secondary" icon={SlidersHorizontal} onPress={() => setFiltersOpen(true)} />}
-          <Button title="Review people you passed" variant="ghost" icon={RotateCcw} loading={resetPasses.isPending} onPress={() => resetPasses.mutate()} />
+          {filterCount > 0 && <Button title={t("Adjust filters")} variant="secondary" icon={SlidersHorizontal} onPress={() => setFiltersOpen(true)} />}
+          <Button title={t("Review people you passed")} variant="ghost" icon={RotateCcw} loading={resetPasses.isPending} onPress={() => resetPasses.mutate()} />
         </View>
       </View>
     );
@@ -129,11 +131,11 @@ export default function Match() {
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <Header
         large
-        title="Smart Match"
-        subtitle={isPro ? 'Unlimited · Pro' : swipesLeft.data != null ? `${swipesLeft.data} free swipes left today` : 'Founder-fit, ranked for you'}
+        title={t("Smart Match")}
+        subtitle={isPro ? t("Unlimited · Pro") : swipesLeft.data != null ? t('{{count}} free swipes left today', {count:swipesLeft.data}) : t("Founder-fit, ranked for you")}
         right={
           <View>
-            <IconButton icon={SlidersHorizontal} onPress={() => setFiltersOpen(true)} accessibilityLabel="Match filters" />
+            <IconButton icon={SlidersHorizontal} onPress={() => setFiltersOpen(true)} accessibilityLabel={t("Match filters")} />
             {filterCount > 0 && (
               <View style={{ position: 'absolute', top: -2, right: -2, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: c.accent, alignItems: 'center', justifyContent: 'center' }}>
                 <Text variant="mono" tint={c.onAccent} style={{ fontSize: 10 }}>{filterCount}</Text>
@@ -146,13 +148,13 @@ export default function Match() {
       <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 4, paddingBottom: 16, width: '100%', maxWidth: 520, alignSelf: 'center' }}>{body}</View>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 22, paddingBottom: pad, opacity: top && !limit ? 1 : 0.35 }}>
-        <RoundButton label="Pass" size={60} bg={c.card} border={c.hairlineStrong} onPress={() => act('pass')}>
+        <RoundButton label={t("Pass")} size={60} bg={c.card} border={c.hairlineStrong} onPress={() => act('pass')}>
           <X size={26} color={c.danger} strokeWidth={2.4} />
         </RoundButton>
-        <RoundButton label="Super-like" size={50} bg={c.card} border={c.accentBorder} onPress={() => act('superlike')}>
+        <RoundButton label={t("Super-like")} size={50} bg={c.card} border={c.accentBorder} onPress={() => act('superlike')}>
           <Star size={21} color={c.accentText} fill={c.accentText} />
         </RoundButton>
-        <RoundButton label="Connect" size={70} bg={c.action} border={c.action} onPress={() => act('connect')}>
+        <RoundButton label={t("Connect")} size={70} bg={c.action} border={c.action} onPress={() => act('connect')}>
           <Handshake size={30} color={c.actionText} strokeWidth={2.1} />
         </RoundButton>
       </View>

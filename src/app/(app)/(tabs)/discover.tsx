@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { useNow } from '@/lib/useNow';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, type Href } from 'expo-router';
@@ -44,6 +45,7 @@ const AREAS: { icon: IconType; title: string; sub: string; href: Href }[] = [
 ];
 
 export default function Discover() {
+  const { t } = useTranslation();
   const router = useRouter();
   const qc = useQueryClient();
   const { c } = useTheme();
@@ -68,7 +70,7 @@ export default function Discover() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <Header large title="Discover" />
+      <Header large title={t("Discover")} />
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: pad, gap: 26, width: '100%', maxWidth: CONTENT_MAX, alignSelf: 'center' }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={c.textSubtle} />}
@@ -78,15 +80,15 @@ export default function Discover() {
           scaleTo={0.99}
           onPress={() => router.push('/search')}
           accessibilityRole="search"
-          accessibilityLabel="Search founders, startups, spaces and events"
+          accessibilityLabel={t("Search founders, startups, spaces and events")}
           style={{ flexDirection: 'row', alignItems: 'center', gap: 10, height: 48, paddingHorizontal: 16, borderRadius: radius.pill, backgroundColor: c.input, borderWidth: 1, borderColor: c.border }}
         >
           <Search size={18} color={c.textSubtle} />
-          <Text color="textFaint">Founders, startups, spaces, events…</Text>
+          <Text color="textFaint">{t("Founders, startups, spaces, events…")}</Text>
         </PressableScale>
 
         {!isPro && (
-          <PressableScale scaleTo={0.985} onPress={() => router.push('/premium')} accessibilityLabel="Upgrade to FNDRS Pro">
+          <PressableScale scaleTo={0.985} onPress={() => router.push('/premium')} accessibilityLabel={t("Upgrade to FNDRS Pro")}>
             <LinearGradient
               colors={[c.accentSoft, 'transparent']}
               start={{ x: 0, y: 0 }}
@@ -98,7 +100,7 @@ export default function Discover() {
               </LinearGradient>
               <View style={{ flex: 1 }}>
                 <Text variant="headline">FNDRS Pro</Text>
-                <Text variant="caption" color="textMuted">Unlimited matches · warm investor intros · analytics</Text>
+                <Text variant="caption" color="textMuted">{t("Unlimited matches · warm investor intros · analytics")}</Text>
               </View>
               <ChevronRight size={18} color={c.accentText} />
             </LinearGradient>
@@ -113,22 +115,22 @@ export default function Discover() {
                 key={a.title}
                 scaleTo={0.96}
                 onPress={() => router.push(a.href)}
-                accessibilityLabel={a.title}
+                accessibilityLabel={t(a.title)}
                 style={{ width: '47%', flexGrow: 1, padding: 14, gap: 10, borderRadius: radius.lg, backgroundColor: c.card, borderWidth: 1, borderColor: c.hairline }}
               >
                 <View style={{ width: 36, height: 36, borderRadius: 11, backgroundColor: c.tint08, alignItems: 'center', justifyContent: 'center' }}>
                   <Icon size={18} color={c.text} />
                 </View>
                 <View>
-                  <Text variant="headline">{a.title}</Text>
-                  <Text variant="caption" color="textSubtle" numberOfLines={1}>{a.sub}</Text>
+                  <Text variant="headline">{t(a.title)}</Text>
+                  <Text variant="caption" color="textSubtle" numberOfLines={1}>{t(a.sub)}</Text>
                 </View>
               </PressableScale>
             );
           })}
         </View>
 
-        <PressableScale scaleTo={0.99} onPress={() => router.push('/copilot')} accessibilityLabel="Open FNDRS Copilot">
+        <PressableScale scaleTo={0.99} onPress={() => router.push('/copilot')} accessibilityLabel={t("Open FNDRS Copilot")}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: radius.lg, backgroundColor: c.card, borderWidth: 1, borderColor: c.hairline }}>
             <View style={{ width: 44, height: 44, borderRadius: 13, backgroundColor: c.action, alignItems: 'center', justifyContent: 'center' }}>
               <Bot size={22} color={c.actionText} />
@@ -138,13 +140,13 @@ export default function Discover() {
                 <Text variant="headline">FNDRS Copilot</Text>
                 <Badge tone="accent">AI</Badge>
               </View>
-              <Text variant="caption" color="textSubtle">Pitch reviews, intro drafts and hiring plans — grounded in your profile.</Text>
+              <Text variant="caption" color="textSubtle">{t("Pitch reviews, intro drafts and hiring plans — grounded in your profile.")}</Text>
             </View>
             <ChevronRight size={18} color={c.textFaint} />
           </View>
         </PressableScale>
 
-        <Section title="Trending startups" action="See all" onAction={() => router.push('/startups')}>
+        <Section title={t("Trending startups")} action={t("See all")} onAction={() => router.push('/startups')}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ gap: 12, paddingHorizontal: 16 }}>
             {startups.isLoading
               ? [0, 1].map((i) => <Skeleton key={i} width={230} height={190} r={radius.lg} />)
@@ -152,7 +154,7 @@ export default function Discover() {
           </ScrollView>
         </Section>
 
-        <Section title="Upcoming events" action="All events" onAction={() => router.push('/events')}>
+        <Section title={t("Upcoming events")} action={t("All events")} onAction={() => router.push('/events')}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ gap: 12, paddingHorizontal: 16 }}>
             {events.isLoading
               ? [0, 1].map((i) => <Skeleton key={i} width={250} height={170} r={radius.lg} />)
@@ -161,14 +163,14 @@ export default function Discover() {
         </Section>
 
         {(people.data ?? []).length > 0 && (
-          <Section title="Founders you should meet" action="Smart Match" onAction={() => router.push('/match')}>
+          <Section title={t("Founders you should meet")} action={t("Smart Match")} onAction={() => router.push('/match')}>
             <View>
               {(people.data ?? []).slice(0, 4).map((p) => (
                 <PersonRow
                   key={p.id}
                   person={p}
                   subtitle={`${p.score}% fit · ${p.reasons[0] ?? p.headline}`}
-                  right={<Button title="View" size="sm" variant="secondary" onPress={() => router.push(`/user/${p.id}` as Href)} />}
+                  right={<Button title={t("View")} size="sm" variant="secondary" onPress={() => router.push(`/user/${p.id}` as Href)} />}
                 />
               ))}
             </View>
@@ -176,7 +178,7 @@ export default function Discover() {
         )}
 
         {spaces.length > 0 && (
-          <Section title="Spaces to join" action="Browse" onAction={() => router.push('/communities')}>
+          <Section title={t("Spaces to join")} action={t("Browse")} onAction={() => router.push('/communities')}>
             <View style={{ gap: 10 }}>
               {spaces.map((s) => <CommunityRow key={s.id} community={s} />)}
             </View>

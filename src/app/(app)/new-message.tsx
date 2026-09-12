@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { useRouter, type Href } from 'expo-router';
 import React, { useState } from 'react';
 import { Platform, SectionList, TextInput, View } from 'react-native';
@@ -12,6 +13,7 @@ import { EmptyState, Header, SkeletonList, Text } from '@/ui';
 import { MessageCircle, Search } from '@/ui/icons';
 
 export default function NewMessage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { c } = useTheme();
   const { userId } = useAuth();
@@ -26,8 +28,8 @@ export default function NewMessage() {
   const matchIds = new Set(matchPeople.map((p) => p.id));
   const followPeople = (following.data ?? []).filter((p) => !matchIds.has(p.id)).filter(filter);
   const sections = [
-    { title: 'MATCHES', data: matchPeople },
-    { title: 'PEOPLE YOU FOLLOW', data: followPeople },
+    { title: t("MATCHES"), data: matchPeople },
+    { title: t("PEOPLE YOU FOLLOW"), data: followPeople },
   ].filter((s) => s.data.length);
 
   const start = async (p: ProfileLite) => {
@@ -41,7 +43,7 @@ export default function NewMessage() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <Header modal title="New message" />
+      <Header modal title={t("New message")} />
       <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, height: 44, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: c.input, borderWidth: 1, borderColor: c.border }}>
           <Search size={17} color={c.textSubtle} />
@@ -49,9 +51,9 @@ export default function NewMessage() {
             value={query}
             onChangeText={setQuery}
             autoFocus
-            placeholder="Search matches and people you follow"
+            placeholder={t("Search matches and people you follow")}
             placeholderTextColor={c.textFaint}
-            accessibilityLabel="Search people"
+            accessibilityLabel={t("Search people")}
             style={[{ flex: 1, color: c.text, fontFamily: font.sans, fontSize: 15 }, Platform.OS === 'web' ? ({ outlineWidth: 0 } as object) : null]}
           />
         </View>
@@ -70,7 +72,7 @@ export default function NewMessage() {
           matches.isLoading || following.isLoading ? (
             <SkeletonList count={6} />
           ) : (
-            <EmptyState icon={MessageCircle} title={q ? 'Nobody found' : 'No one to message yet'} message="Match with founders or follow people to message them here. You can also message anyone from their profile." />
+            <EmptyState icon={MessageCircle} title={q ? t("Nobody found") : t("No one to message yet")} message={t("Match with founders or follow people to message them here. You can also message anyone from their profile.")} />
           )
         }
       />

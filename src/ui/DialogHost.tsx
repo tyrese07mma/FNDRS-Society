@@ -3,6 +3,7 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 
 import { useDialogStore } from '@/state/dialog';
+import { useTranslation } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius } from '@/theme/tokens';
 import { Button } from './Button';
@@ -10,6 +11,7 @@ import { Text } from './Text';
 
 /** Renders the cross-platform confirm() dialog. Mounted once at the root. */
 export function DialogHost() {
+  const { t } = useTranslation();
   const current = useDialogStore((s) => s.current);
   const close = useDialogStore((s) => s.close);
   const { c } = useTheme();
@@ -45,10 +47,10 @@ export function DialogHost() {
           )}
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
             {current.cancelLabel && (
-              <Button title={current.cancelLabel} variant="secondary" style={{ flex: 1 }} onPress={() => close(false)} />
+              <Button title={t(current.cancelLabel)} variant="secondary" style={{ flex: 1 }} onPress={() => close(false)} />
             )}
             <Button
-              title={current.confirmLabel}
+              title={t(current.confirmLabel)}
               variant={current.destructive ? 'danger' : 'primary'}
               style={{ flex: 1 }}
               onPress={() => close(true)}

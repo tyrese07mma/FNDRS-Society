@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { useNow } from '@/lib/useNow';
 import { useRouter, type Href } from 'expo-router';
 import React, { useState } from 'react';
@@ -73,6 +74,7 @@ function RailCard({
 }
 
 function TodayRail() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { profile } = useAuth();
   const filters = useMatchFilters((s) => s.filters);
@@ -91,36 +93,37 @@ function TodayRail() {
       <RailCard
         icon={Sparkles}
         tone="accent"
-        eyebrow="SMART MATCH"
-        title={count ? `${count} founders fit you right now` : 'Find your co-founder'}
-        subtitle={candidates.data?.[0] ? `Top match: ${candidates.data[0].full_name} · ${candidates.data[0].score}%` : 'Swipe through today’s picks'}
+        eyebrow={t("SMART MATCH")}
+        title={count ? t('{{count}} founders fit you right now', {count}) : t("Find your co-founder")}
+        subtitle={candidates.data?.[0] ? t('Top match: {{name}} · {{score}}%', {name:candidates.data[0].full_name,score:candidates.data[0].score}) : t("Swipe through today’s picks")}
         onPress={() => router.push('/match')}
       />
       {nextEvent && (
         <RailCard
           icon={CalendarDays}
-          eyebrow={nextEvent.going ? 'YOU ARE GOING' : 'FEATURED EVENT'}
+          eyebrow={nextEvent.going ? t("YOU ARE GOING") : t("FEATURED EVENT")}
           title={nextEvent.title}
           subtitle={`${eventDate(nextEvent.starts_at).weekday} ${eventDate(nextEvent.starts_at).day} ${eventDate(nextEvent.starts_at).mo} · ${eventDate(nextEvent.starts_at).time}`}
           onPress={() => router.push(`/events/${nextEvent.id}` as Href)}
         />
       )}
       {challenge && (
-        <RailCard icon={Trophy} eyebrow="WEEKLY CHALLENGE" title={challenge.title} onPress={() => router.push('/challenges')}>
+        <RailCard icon={Trophy} eyebrow={t("WEEKLY CHALLENGE")} title={challenge.title} onPress={() => router.push('/challenges')}>
           <ProgressBar value={challenge.my_step} max={challenge.steps.length} tone="gold" height={5} />
         </RailCard>
       )}
       {strength && strength.pct < 100 && (
-        <RailCard icon={UserCheck} eyebrow={`PROFILE ${strength.pct}%`} title={strength.missing[0].label} subtitle="Help other founders understand what you bring" onPress={() => router.push('/edit-profile')}>
+        <RailCard icon={UserCheck} eyebrow={t('PROFILE {{score}}%', {score:strength.pct})} title={t(strength.missing[0].label)} subtitle={t("Help other founders understand what you bring")} onPress={() => router.push('/edit-profile')}>
           <ProgressBar value={strength.pct} height={5} />
         </RailCard>
       )}
-      <RailCard icon={Bot} eyebrow="COPILOT" title="Draft an investor email in seconds" subtitle="Grounded in your profile" onPress={() => router.push('/copilot')} />
+      <RailCard icon={Bot} eyebrow={t("COPILOT")} title={t("Draft an investor email in seconds")} subtitle={t("Grounded in your profile")} onPress={() => router.push('/copilot')} />
     </ScrollView>
   );
 }
 
 export default function Home() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { c } = useTheme();
   const { profile } = useAuth();
@@ -150,10 +153,10 @@ export default function Home() {
       <TodayRail />
 
       <Card style={{ gap: 12 }}>
-        <PressableScale scaleTo={0.99} onPress={() => router.push('/compose')} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }} accessibilityLabel="Write a post">
+        <PressableScale scaleTo={0.99} onPress={() => router.push('/compose')} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }} accessibilityLabel={t("Write a post")}>
           <Avatar uri={profile?.avatar_url} name={profile?.full_name} size={38} />
           <View style={{ flex: 1, height: 40, borderRadius: radius.pill, backgroundColor: c.tint04, borderWidth: 1, borderColor: c.hairline, justifyContent: 'center', paddingHorizontal: 14 }}>
-            <Text variant="callout" color="textSubtle">Share an update, win or question…</Text>
+            <Text variant="callout" color="textSubtle">{t("Share an update, win or question…")}</Text>
           </View>
         </PressableScale>
         <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -166,10 +169,10 @@ export default function Home() {
                 haptics="selection"
                 onPress={() => router.push({ pathname: '/compose', params: { kind: q.kind } })}
                 style={{ flex: 1, alignItems: 'center', gap: 5, paddingVertical: 8, borderRadius: radius.md, backgroundColor: c.tint04 }}
-                accessibilityLabel={`New ${q.label}`}
+                accessibilityLabel={t('New {{kind}}', {kind:t(q.label)})}
               >
                 <Icon size={16} color={c.textMuted} />
-                <Text variant="caption" color="textMuted">{q.label}</Text>
+                <Text variant="caption" color="textMuted">{t(q.label)}</Text>
               </PressableScale>
             );
           })}
@@ -180,9 +183,9 @@ export default function Home() {
         value={scope}
         onChange={setScope}
         options={[
-          { value: 'foryou', label: 'For you' },
-          { value: 'following', label: 'Following' },
-          { value: 'trending', label: 'Trending' },
+          { value: 'foryou', label: t("For you") },
+          { value: 'following', label: t("Following") },
+          { value: 'trending', label: t("Trending") },
         ]}
       />
     </View>
@@ -195,8 +198,8 @@ export default function Home() {
         titleNode={<Wordmark size={16} />}
         right={
           <>
-            <IconButton icon={Search} onPress={() => router.push('/search')} accessibilityLabel="Search" />
-            <IconButton icon={Bell} badge={unread.notifications} onPress={() => router.push('/notifications')} accessibilityLabel="Notifications" />
+            <IconButton icon={Search} onPress={() => router.push('/search')} accessibilityLabel={t("Search")} />
+            <IconButton icon={Bell} badge={unread.notifications} onPress={() => router.push('/notifications')} accessibilityLabel={t("Notifications")} />
           </>
         }
       />
@@ -204,7 +207,7 @@ export default function Home() {
         data={feed.data ?? []}
         keyExtractor={(p) => p.id}
         renderItem={({ item }) => <PostCard post={item} />}
-        ListFooterComponent={feed.hasNextPage ? <Button title="Load more posts" variant="ghost" loading={feed.isFetchingNextPage} onPress={feed.fetchNextPage} /> : null}
+        ListFooterComponent={feed.hasNextPage ? <Button title={t("Load more posts")} variant="ghost" loading={feed.isFetchingNextPage} onPress={feed.fetchNextPage} /> : null}
         onEndReached={() => { void feed.fetchNextPage(); }}
         onEndReachedThreshold={0.3}
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
@@ -215,9 +218,9 @@ export default function Home() {
           ) : (
             <EmptyState
               icon={Newspaper}
-              title={scope === 'following' ? 'Your following feed is quiet' : 'Nothing here yet'}
-              message={scope === 'following' ? 'Follow founders from Discover or Smart Match to fill it up.' : 'Be the first to share an update.'}
-              actionLabel={scope === 'following' ? 'Discover people' : 'Write a post'}
+              title={scope === 'following' ? t("Your following feed is quiet") : t("Nothing here yet")}
+              message={scope === 'following' ? t("Follow founders from Discover or Smart Match to fill it up.") : t("Be the first to share an update.")}
+              actionLabel={scope === 'following' ? t("Discover people") : t("Write a post")}
               onAction={() => router.push(scope === 'following' ? '/discover' : '/compose')}
             />
           )
