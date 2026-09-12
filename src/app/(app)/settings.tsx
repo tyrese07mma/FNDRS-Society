@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
@@ -14,6 +15,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { confirm } from '@/state/dialog';
 import { useSettings, type ThemeMode } from '@/state/settings';
 import { toast } from '@/state/toast';
+import { LanguagePicker } from '@/ui/LanguagePicker';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius } from '@/theme/tokens';
 import { Avatar, Badge, Header, ListGroup, ListRow, PressableScale, SegmentedControl, Switch, Text } from '@/ui';
@@ -50,6 +52,7 @@ function Group({ title, footer, children }: { title: string; footer?: string; ch
 }
 
 export default function Settings() {
+  const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { c } = useTheme();
@@ -76,20 +79,20 @@ export default function Settings() {
   };
 
   const signOut = async () => {
-    if (await confirm({ title: 'Sign out?', confirmLabel: 'Sign out' })) {
+    if (await confirm({ title: t("Sign out?"), confirmLabel: t("Sign out") })) {
       try { await api.signOut(); }
-      catch { toast.error('Could not sign out', 'Please check your connection and retry.'); }
+      catch { toast.error(t("Could not sign out"), t("Please check your connection and retry.")); }
     }
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <Header back title="Settings" />
+      <Header back title={t("Settings")} />
       <ScrollView contentContainerStyle={{ padding: 16, gap: 24, paddingBottom: insets.bottom + 40, width: '100%', maxWidth: CONTENT_MAX, alignSelf: 'center' }}>
         <PressableScale
           scaleTo={0.99}
           onPress={() => router.push('/edit-profile')}
-          accessibilityLabel="Edit profile"
+          accessibilityLabel={t("Edit profile")}
           style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: radius.lg, backgroundColor: c.card, borderWidth: 1, borderColor: c.hairline }}
         >
           <Avatar uri={profile.avatar_url} name={profile.full_name} size={56} ring={profile.verified} />
@@ -111,83 +114,85 @@ export default function Settings() {
             <View style={{ flex: 1 }}>
               <Text variant="headline">FNDRS Pro</Text>
               <Text variant="caption" color="textMuted">
-                {isPro ? `${subscription?.status === 'trialing' ? 'Trial active' : 'Active'} · manage your plan` : 'Unlimited matches, intros and analytics'}
+                {isPro ? t('{{status}} · manage your plan', { status: subscription?.status === 'trialing' ? t('Trial active') : t('Active') }) : t("Unlimited matches, intros and analytics")}
               </Text>
             </View>
-            <Badge tone="accent">{isPro ? 'Active' : 'Upgrade'}</Badge>
+            <Badge tone="accent">{isPro ? t("Active") : t("Upgrade")}</Badge>
           </LinearGradient>
         </PressableScale>
 
-        <Group title="ACCOUNT">
-          <ListRow icon={User} title="Edit profile" onPress={() => router.push('/edit-profile')} />
-          <ListRow icon={User} title="Email & password" onPress={() => router.push('/account-security')} />
-          <ListRow icon={Bookmark} title="Saved" onPress={() => router.push('/saved')} />
-          <ListRow icon={ChartColumn} title="Analytics" onPress={() => router.push('/analytics')} />
-          <ListRow icon={Sparkles} title="Subscription" value={isPro ? 'Pro' : 'Free'} onPress={() => router.push('/premium')} last />
+        <Group title={t("ACCOUNT")}>
+          <ListRow icon={User} title={t("Edit profile")} onPress={() => router.push('/edit-profile')} />
+          <ListRow icon={User} title={t("Email & password")} onPress={() => router.push('/account-security')} />
+          <ListRow icon={Bookmark} title={t("Saved")} onPress={() => router.push('/saved')} />
+          <ListRow icon={ChartColumn} title={t("Analytics")} onPress={() => router.push('/analytics')} />
+          <ListRow icon={Sparkles} title={t("Subscription")} value={isPro ? 'Pro' : t("Free")} onPress={() => router.push('/premium')} last />
         </Group>
 
-        <Group title="APPEARANCE">
+        <Group title={t("APPEARANCE")}>
           <View style={{ padding: 14, gap: 12 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: c.tint08, alignItems: 'center', justifyContent: 'center' }}>
                 <SunMoon size={17} color={c.text} />
               </View>
-              <Text variant="bodyStrong">Theme</Text>
+              <Text variant="bodyStrong">{t("Theme")}</Text>
             </View>
             <SegmentedControl<ThemeMode>
               size="sm"
               value={theme}
               onChange={setTheme}
               options={[
-                { value: 'system', label: 'System' },
-                { value: 'dark', label: 'Dark' },
-                { value: 'light', label: 'Light' },
+                { value: 'system', label: t("System") },
+                { value: 'dark', label: t("Dark") },
+                { value: 'light', label: t("Light") },
               ]}
             />
           </View>
           <View style={{ height: 1, backgroundColor: c.hairline, marginLeft: 60 }} />
-          <ListRow icon={Vibrate} title="Haptic feedback" right={<Switch value={haptics} onValueChange={setHaptics} accessibilityLabel="Haptic feedback" />} last />
+          <ListRow icon={Vibrate} title={t("Haptic feedback")} right={<Switch value={haptics} onValueChange={setHaptics} accessibilityLabel={t("Haptic feedback")} />} last />
         </Group>
 
-        <Group title="NOTIFICATIONS" footer="Applies to in-app alerts and to push notifications once they are enabled on this device.">
-          <ListRow icon={Sparkles} title="New matches" right={<Switch value={notif.matches} onValueChange={(v) => setNotif('matches', v)} accessibilityLabel="New matches" />} />
-          <ListRow icon={MessageCircle} title="Messages" right={<Switch value={notif.messages} onValueChange={(v) => setNotif('messages', v)} accessibilityLabel="Messages" />} />
-          <ListRow icon={CalendarDays} title="Event reminders" right={<Switch value={notif.events} onValueChange={(v) => setNotif('events', v)} accessibilityLabel="Event reminders" />} />
-          <ListRow icon={Newspaper} title="Weekly digest" subtitle="Top posts and new founders, every Monday" right={<Switch value={notif.digest} onValueChange={(v) => setNotif('digest', v)} accessibilityLabel="Weekly digest" />} last />
+        <Group title={t('LANGUAGE')}><LanguagePicker /></Group>
+
+        <Group title={t("NOTIFICATIONS")} footer={t("Applies to in-app alerts and to push notifications once they are enabled on this device.")}>
+          <ListRow icon={Sparkles} title={t("New matches")} right={<Switch value={notif.matches} onValueChange={(v) => setNotif('matches', v)} accessibilityLabel={t("New matches")} />} />
+          <ListRow icon={MessageCircle} title={t("Messages")} right={<Switch value={notif.messages} onValueChange={(v) => setNotif('messages', v)} accessibilityLabel={t("Messages")} />} />
+          <ListRow icon={CalendarDays} title={t("Event reminders")} right={<Switch value={notif.events} onValueChange={(v) => setNotif('events', v)} accessibilityLabel={t("Event reminders")} />} />
+          <ListRow icon={Newspaper} title={t("Weekly digest")} subtitle={t("Top posts and new founders, every Monday")} right={<Switch value={notif.digest} onValueChange={(v) => setNotif('digest', v)} accessibilityLabel={t("Weekly digest")} />} last />
         </Group>
 
-        <Group title="PRIVACY">
-          <ListRow icon={MapPin} title="Show my location" right={<Switch value={privacy.location_visible} onValueChange={(v) => setPriv('location_visible', v)} accessibilityLabel="Show my location" />} />
-          <ListRow icon={Eye} title="Discoverable in Smart Match" subtitle="Turn off to pause new matches" right={<Switch value={privacy.discoverable} onValueChange={(v) => setPriv('discoverable', v)} accessibilityLabel="Discoverable in Smart Match" />} />
+        <Group title={t("PRIVACY")}>
+          <ListRow icon={MapPin} title={t("Show my location")} right={<Switch value={privacy.location_visible} onValueChange={(v) => setPriv('location_visible', v)} accessibilityLabel={t("Show my location")} />} />
+          <ListRow icon={Eye} title={t("Discoverable in Smart Match")} subtitle={t("Turn off to pause new matches")} right={<Switch value={privacy.discoverable} onValueChange={(v) => setPriv('discoverable', v)} accessibilityLabel={t("Discoverable in Smart Match")} />} />
           <View style={{ padding: 14, gap: 10 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: c.tint08, alignItems: 'center', justifyContent: 'center' }}>
                 <BellRing size={17} color={c.text} />
               </View>
-              <Text variant="bodyStrong">Who can message me</Text>
+              <Text variant="bodyStrong">{t("Who can message me")}</Text>
             </View>
             <SegmentedControl<DmPolicy>
               size="sm"
               value={privacy.dm_policy}
               onChange={(v) => setPriv('dm_policy', v)}
               options={[
-                { value: 'everyone', label: 'Everyone' },
-                { value: 'matches', label: 'Matches only' },
+                { value: 'everyone', label: t("Everyone") },
+                { value: 'matches', label: t("Matches only") },
               ]}
             />
           </View>
         </Group>
 
-        <Group title="SUPPORT">
-          <ListRow icon={CircleHelp} title="Help center" onPress={() => router.push('/help')} />
-          <ListRow icon={LifeBuoy} title="Contact support" value={SUPPORT_EMAIL} onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}`)} />
-          <ListRow icon={ScrollText} title="Terms, privacy & guidelines" onPress={() => router.push('/legal')} last />
+        <Group title={t("SUPPORT")}>
+          <ListRow icon={CircleHelp} title={t("Help center")} onPress={() => router.push('/help')} />
+          <ListRow icon={LifeBuoy} title={t("Contact support")} value={SUPPORT_EMAIL} onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}`)} />
+          <ListRow icon={ScrollText} title={t("Terms, privacy & guidelines")} onPress={() => router.push('/legal')} last />
         </Group>
 
 
-        <Group title="SESSION">
-          <ListRow icon={LogOut} title="Sign out" onPress={signOut} />
-          <ListRow icon={Trash2} title="Delete account" destructive onPress={() => router.push('/account-security')} last />
+        <Group title={t("SESSION")}>
+          <ListRow icon={LogOut} title={t("Sign out")} onPress={signOut} />
+          <ListRow icon={Trash2} title={t("Delete account")} destructive onPress={() => router.push('/account-security')} last />
         </Group>
 
         <Text variant="mono" color="textFaint" align="center">

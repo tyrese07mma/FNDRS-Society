@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
@@ -15,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 import { Wordmark } from '@/features/brand/Wordmark';
+import { LanguagePicker } from '@/ui/LanguagePicker';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius } from '@/theme/tokens';
 import { Avatar, Button, Chip, Glass, Text } from '@/ui';
@@ -55,6 +57,7 @@ function Glow() {
 }
 
 function MatchPreview() {
+  const { t } = useTranslation();
   const { c } = useTheme();
   const float = useSharedValue(0);
   useEffect(() => {
@@ -69,18 +72,18 @@ function MatchPreview() {
           <View style={{ flexDirection: 'row' }}>
             <Avatar name="Founder" size={52} ring />
             <View style={{ marginLeft: -16, borderRadius: 30, borderWidth: 3, borderColor: c.bg }}>
-              <Avatar name="You" size={48} />
+              <Avatar name={t("You")} size={48} />
             </View>
           </View>
           <View style={{ flex: 1 }}>
-            <Text variant="headline">Find your co-founder</Text>
-            <Text variant="caption" color="textSubtle">Connect through shared goals</Text>
+            <Text variant="headline">{t("Find your co-founder")}</Text>
+            <Text variant="caption" color="textSubtle">{t("Connect through shared goals")}</Text>
           </View>
           <Handshake size={32} color={c.accentText} />
         </View>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
           <Chip label="AI / ML" size="sm" static />
-          <Chip label="Technical co-founder" size="sm" static />
+          <Chip label={t("Technical co-founder")} size="sm" static />
           <Chip label="Berlin" size="sm" static />
         </View>
       </Glass>
@@ -90,6 +93,7 @@ function MatchPreview() {
 }
 
 export default function Welcome() {
+  const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { c } = useTheme();
@@ -122,16 +126,15 @@ export default function Welcome() {
         <Animated.View entering={FadeIn.duration(500)}>
           <Wordmark size={17} society />
         </Animated.View>
+        <LanguagePicker />
 
         <View style={{ flex: 1, justifyContent: 'center', gap: 30, paddingVertical: 32 }}>
           <MatchPreview />
           <Animated.View entering={FadeInDown.delay(300).duration(500)} style={{ gap: 12 }}>
             <Text variant="largeTitle" style={{ fontSize: 36, lineHeight: 42, letterSpacing: -1.2 }}>
-              Where founders find their people.
-            </Text>
+              {t("Where founders find their people.")}</Text>
             <Text variant="body" color="textMuted" style={{ fontSize: 16.5, lineHeight: 25 }}>
-              Co-founders, investors, mentors and operators — matched on what you are actually building.
-            </Text>
+              {t("Co-founders, investors, mentors and operators — matched on what you are actually building.")}</Text>
           </Animated.View>
 
           <View style={{ gap: 14 }}>
@@ -140,8 +143,8 @@ export default function Welcome() {
                 <Icon size={19} color={c.accentText} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text variant="headline">{current.title}</Text>
-                <Text variant="footnote" color="textSubtle">{current.body}</Text>
+                <Text variant="headline">{t(current.title)}</Text>
+                <Text variant="footnote" color="textSubtle">{t(current.body)}</Text>
               </View>
             </Animated.View>
             <View style={{ flexDirection: 'row', gap: 6 }}>
@@ -153,13 +156,12 @@ export default function Welcome() {
         </View>
 
         <View style={{ gap: 10 }}>
-          <Button title="Create account" variant="primary" size="lg" block onPress={() => router.push('/sign-up')} />
-          <Button title="I already have an account" variant="ghost" block onPress={() => router.push('/sign-in')} />
+          <Button title={t("Create account")} variant="primary" size="lg" block onPress={() => router.push('/sign-up')} />
+          <Button title={t("I already have an account")} variant="ghost" block onPress={() => router.push('/sign-in')} />
           <Text variant="caption" color="textSubtle" align="center" style={{ marginTop: 4 }}>
-            By continuing you agree to our{' '}
+            {t("By continuing you agree to our")}{' '}
             <Text variant="caption" color="text" onPress={() => router.push('/legal')} suppressHighlighting>
-              Terms & Privacy Policy
-            </Text>
+              {t("Terms & Privacy Policy")}</Text>
             .
           </Text>
         </View>

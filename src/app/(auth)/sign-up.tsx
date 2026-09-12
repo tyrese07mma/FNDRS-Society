@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
@@ -21,6 +22,7 @@ function strength(pw: string) {
 const LABELS = ['Too short', 'Weak', 'Okay', 'Good', 'Strong'];
 
 export default function SignUp() {
+  const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { c } = useTheme();
@@ -33,9 +35,9 @@ export default function SignUp() {
   const score = strength(password);
 
   const submit = async () => {
-    if (name.trim().length < 2) return setError('Please tell us your name.');
-    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError('Enter a valid email address.');
-    if (password.length < 12) return setError('Use at least 12 characters for your password.');
+    if (name.trim().length < 2) return setError(t("Please tell us your name."));
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError(t("Enter a valid email address."));
+    if (password.length < 12) return setError(t("Use at least 12 characters for your password."));
     setBusy(true);
     setError(null);
     try {
@@ -47,7 +49,7 @@ export default function SignUp() {
       }
     } catch (e) {
       haptic.error();
-      setError(e instanceof Error ? e.message : 'Could not create your account.');
+      setError(e instanceof Error ? t(e.message) : t("Could not create your account."));
       setBusy(false);
     }
   };
@@ -59,9 +61,9 @@ export default function SignUp() {
         <Animated.View entering={FadeIn} style={{ flex: 1, justifyContent: 'center', padding: 24 }}>
           <EmptyState
             icon={Mail}
-            title="Check your inbox"
-            message={`We sent a confirmation link to ${sentTo}. Open it on this device to finish creating your account.`}
-            actionLabel="Back to sign in"
+            title={t("Check your inbox")}
+            message={t('We sent a confirmation link to {{email}}. Open it on this device to finish creating your account.', { email: sentTo })}
+            actionLabel={t("Back to sign in")}
             onAction={() => router.replace('/sign-in')}
           />
         </Animated.View>
@@ -79,13 +81,13 @@ export default function SignUp() {
         contentContainerStyle={{ padding: 24, paddingBottom: insets.bottom + 24, gap: 16, maxWidth: 520, width: '100%', alignSelf: 'center' }}
       >
         <View style={{ gap: 6, marginBottom: 8 }}>
-          <Text variant="largeTitle">Join the Society.</Text>
-          <Text color="textMuted">Two minutes to set up. Your profile powers every match you get.</Text>
+          <Text variant="largeTitle">{t("Join the Society.")}</Text>
+          <Text color="textMuted">{t("Two minutes to set up. Your profile powers every match you get.")}</Text>
         </View>
 
-        <Input label="Full name" icon={User} value={name} onChangeText={setName} placeholder="Your full name" autoComplete="name" textContentType="name" />
+        <Input label={t("Full name")} icon={User} value={name} onChangeText={setName} placeholder={t("Your full name")} autoComplete="name" textContentType="name" />
         <Input
-          label="Email"
+          label={t("Email")}
           icon={Mail}
           value={email}
           onChangeText={setEmail}
@@ -97,12 +99,12 @@ export default function SignUp() {
         />
         <View style={{ gap: 8 }}>
           <Input
-            label="Password"
+            label={t("Password")}
             icon={Lock}
             secure
             value={password}
             onChangeText={setPassword}
-            placeholder="At least 12 characters"
+            placeholder={t("At least 12 characters")}
             autoComplete="new-password"
             textContentType="newPassword"
             onSubmitEditing={submit}
@@ -115,25 +117,23 @@ export default function SignUp() {
                   <View key={i} style={{ flex: 1, height: 4, borderRadius: 2, backgroundColor: i < score ? barColor : c.tint12 }} />
                 ))}
               </View>
-              <Text variant="mono" color="textSubtle">{LABELS[score]}</Text>
+              <Text variant="mono" color="textSubtle">{t(LABELS[score])}</Text>
             </View>
           )}
         </View>
 
-        <Button title="Create account" size="lg" block loading={busy} onPress={submit} />
+        <Button title={t("Create account")} size="lg" block loading={busy} onPress={submit} />
 
         <Text variant="caption" color="textSubtle" align="center">
-          By creating an account you agree to our{' '}
+          {t("By creating an account you agree to our")}{' '}
           <Text variant="caption" color="text" onPress={() => router.push('/legal')} suppressHighlighting>
-            Terms & Privacy Policy
-          </Text>
+            {t("Terms & Privacy Policy")}</Text>
           .
         </Text>
         <Text variant="footnote" color="textSubtle" align="center">
-          Already a member?{' '}
+          {t("Already a member?")}{' '}
           <Text variant="footnote" color="text" onPress={() => router.replace('/sign-in')} suppressHighlighting>
-            Sign in
-          </Text>
+            {t("Sign in")}</Text>
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>

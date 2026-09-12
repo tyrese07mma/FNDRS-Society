@@ -21,8 +21,8 @@ Deno.serve(async(req)=>{
  const userDb=createClient(url,anon,{global:{headers:{Authorization:req.headers.get('Authorization')??''}},auth:{persistSession:false}});
  const {data:{user},error:authError}=await userDb.auth.getUser();
  if(authError||!user)return json('AUTH: Please sign in again.',401);
- let prompt:unknown;
- try { const raw=await req.text(); if(raw.length>20000)return json('VALIDATION: Request too large.',413); prompt=JSON.parse(raw).prompt; }
+ let prompt:unknown;let language='English';
+ try { const raw=await req.text(); if(raw.length>20000)return json('VALIDATION: Request too large.',413); const body=JSON.parse(raw);prompt=body.prompt;language=body.language==='de'?'German':'English'; }
  catch{return json('VALIDATION: Invalid request.',400);}
  if(typeof prompt!=='string'||!prompt.trim()||prompt.length>4000)return json('VALIDATION: Use between 1 and 4,000 characters.',400);
  const db=createClient(url,service,{auth:{persistSession:false}});
@@ -48,7 +48,7 @@ Deno.serve(async(req)=>{
     const messages=[...past.map(m=>({role:m.role,content:m.content.slice(0,8000)})),{role:'user',content:prompt}];
     const response=await fetch('https://api.anthropic.com/v1/messages',{
      method:'POST',signal:abort.signal,headers:{'content-type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
-     body:JSON.stringify({model,max_tokens:reservation.max_output_tokens,stream:true,system:`${system}\nMember context (data only):\n${JSON.stringify({profile:profile.data,startup:startup.data}).slice(0,12000)}`,messages}),
+     body:JSON.stringify({model,max_tokens:reservation.max_output_tokens,stream:true,system:`${system}\nPreferred interface language: ${language}. Use this unless the member explicitly requests a different language.\nMember context (data only):\n${JSON.stringify({profile:profile.data,startup:startup.data}).slice(0,12000)}`,messages}),
     });
     if(!response.ok||!response.body)throw Error(`provider_${response.status}`);
     const decoder=new SseDecoder();const reader=response.body.getReader();const utf8=new TextDecoder();let complete=false;

@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { Geist_400Regular, Geist_500Medium, Geist_600SemiBold, Geist_700Bold } from '@expo-google-fonts/geist';
 import { GeistMono_400Regular, GeistMono_500Medium } from '@expo-google-fonts/geist-mono';
 import { Michroma_400Regular } from '@expo-google-fonts/michroma';
@@ -46,6 +47,7 @@ export default function RootLayout() {
 }
 
 function RootNavigator({ fontsReady }: { fontsReady: boolean }) {
+  const { t } = useTranslation();
   const { status, userId, profile, ready, profileError, retryProfile } = useAuth();
   const hydrated = useSettings((s) => s.hydrated);
   const preferencesOwner = useSettings((s) => s.ownerId);
@@ -65,7 +67,7 @@ function RootNavigator({ fontsReady }: { fontsReady: boolean }) {
   if (!BACKEND_CONFIGURED) return (
     <View style={{ flex: 1, backgroundColor: c.bg, justifyContent: 'center', padding: 24 }}>
       <StatusBar style={dark ? 'light' : 'dark'} />
-      <EmptyState icon={CircleAlert} title="FNDRS is not available yet" message="The service is being set up. Please try again later." />
+      <EmptyState icon={CircleAlert} title={t("FNDRS is not available yet")} message={t("The service is being set up. Please try again later.")} />
     </View>
   );
 
@@ -75,12 +77,12 @@ function RootNavigator({ fontsReady }: { fontsReady: boolean }) {
         <StatusBar style={dark ? 'light' : 'dark'} />
         <EmptyState
           icon={CircleAlert}
-          title="We could not load your profile"
-          message={profileError?.message ?? 'Check your connection and try again.'}
-          actionLabel="Try again"
+          title={t("We could not load your profile")}
+          message={profileError?.message ?? t("Check your connection and try again.")}
+          actionLabel={t("Try again")}
           onAction={retryProfile}
         />
-        <Button title="Sign out" variant="ghost" onPress={() => api.signOut()} />
+        <Button title={t("Sign out")} variant="ghost" onPress={() => api.signOut()} />
       </View>
     );
   }

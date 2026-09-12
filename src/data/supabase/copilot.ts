@@ -4,6 +4,7 @@ import { SseDecoder } from '@/lib/sse';
 import type { CopilotMessage } from '../types';
 import { ApiError } from '../api';
 import { sb } from './client';
+import { useSettings } from '@/state/settings';
 
 export async function streamCopilot(prompt: string, onDelta?: (text: string) => void): Promise<CopilotMessage> {
  const {data:{session}}=await sb().auth.getSession();
@@ -12,7 +13,7 @@ export async function streamCopilot(prompt: string, onDelta?: (text: string) => 
  try {
   const response=await fetch(`${SUPABASE_URL}/functions/v1/copilot`,{
    method:'POST',signal:abort.signal,headers:{Authorization:`Bearer ${session.access_token}`,apikey:SUPABASE_ANON_KEY,'Content-Type':'application/json'},
-   body:JSON.stringify({prompt}),
+   body:JSON.stringify({prompt,language:useSettings.getState().language}),
   });
   if(!response.ok||!response.body)throw new Error(response.status===429?'Your Copilot limit has been reached, or a request is still running.':'Copilot is unavailable. Please try again.');
   const reader=response.body.getReader();const decoder=new SseDecoder();const utf8=new TextDecoder();

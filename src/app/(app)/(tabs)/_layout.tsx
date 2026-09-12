@@ -1,4 +1,5 @@
 import { Tabs, type BottomTabBarProps } from 'expo-router/js-tabs';
+import { useTranslation } from '@/i18n';
 import React, { useEffect } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
@@ -32,6 +33,7 @@ function TabItem({
   onPress: () => void;
 }) {
   const { c } = useTheme();
+  const { t } = useTranslation();
   const { profile } = useAuth();
   const tab = TABS[routeName] ?? { icon: House, label: routeName };
   const Icon = tab.icon;
@@ -47,7 +49,7 @@ function TabItem({
       onPress={onPress}
       accessibilityRole="tab"
       accessibilityState={{ selected: focused }}
-      accessibilityLabel={`${tab.label}${badge ? `, ${badge} unread` : ''}`}
+      accessibilityLabel={`${t(tab.label)}${badge ? ', ' + t('{{count}} unread', { count: badge }) : ''}`}
       style={{ flex: 1, height: TAB_BAR_HEIGHT - 12, alignItems: 'center', justifyContent: 'center' }}
     >
       <Animated.View style={[{ position: 'absolute', top: 0, bottom: 0, left: 4, right: 4, borderRadius: 22, backgroundColor: c.tint12 }, pill]} />
@@ -66,7 +68,7 @@ function TabItem({
         )}
       </View>
       <Text style={{ fontFamily: focused ? font.sansSemibold : font.sansMedium, fontSize: 10.5, lineHeight: 13, marginTop: 3 }} tint={color} maxFontSizeMultiplier={1.1}>
-        {tab.label}
+        {t(tab.label)}
       </Text>
     </Pressable>
   );

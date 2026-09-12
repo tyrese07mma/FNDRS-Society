@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import type { MatchFilters } from '@/data/types';
 import { switchAccountPreferences, type AccountPreferences } from '@/lib/account-preferences';
+import { getLocales } from 'expo-localization';
 
 export type ThemeMode = 'system' | 'dark' | 'light';
 
@@ -14,6 +15,8 @@ export interface NotificationPrefs {
 }
 
 interface SettingsState {
+  language: 'de' | 'en';
+  setLanguage: (language: 'de' | 'en') => void;
   savedAccounts: Record<string, AccountPreferences>;
   ownerId: string | null;
   dirty: boolean;
@@ -37,6 +40,8 @@ interface SettingsState {
 export const useSettings = create<SettingsState>()(
   persist(
     (set) => ({
+      language: getLocales()[0]?.languageCode === 'de' ? 'de' : 'en',
+      setLanguage: (language) => set({ language, dirty: true }),
       savedAccounts: {},
       ownerId: null,
       dirty: false,
@@ -71,6 +76,7 @@ export const useSettings = create<SettingsState>()(
       name: 'fndrs.settings.v2',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (s) => ({
+        language: s.language,
         savedAccounts: s.savedAccounts,
         ownerId: s.ownerId,
         dirty: s.dirty,

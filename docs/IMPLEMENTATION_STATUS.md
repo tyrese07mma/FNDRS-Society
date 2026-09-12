@@ -15,12 +15,13 @@ Kein Release-Nachweis. Diese Datei dokumentiert den Zwischenstand und muss bei w
 - Kontolöschung mit Passwortbestätigung, Stripe-Kundenlöschung, Storage-Bereinigung und abschließender Auth-Löschung implementiert. Wiederholungen nach Fehlern sind vorgesehen; siehe ACCOUNT_DELETION.md.
 - Checkout und Löschung über serverseitige Konto-Sperre serialisiert; frühere offene Checkouts werden geschlossen.
 - Match-Filter, Theme, Haptik und Benachrichtigungen werden kontobezogen gespeichert. Offline-Änderungen bleiben lokal erhalten und werden erneut synchronisiert. Eigener Query-Cache pro Anmeldung; Mutationen prüfen vor dem Start die Kontoidentität.
-- 23 lokale Tests bestanden; Geschäftsregeln, Auth-URL-/SSE-Parser, Bildbereinigung, Konto-Präferenzwechsel und Migrationen mit PostgreSQL-RLS. Deno-Typprüfung der geänderten und neuen Edge Functions bestanden.
+- DE/EN-Sprachwahl mit Gerätevorgabe und Kontosynchronisierung. Willkommen, Anmeldung, Passwortabläufe, Kontoeinstellungen und Tab-Navigation übersetzt; Datums-/Zahlformatierung berücksichtigt die Sprache. Weitere Fachbereiche sind noch nicht übersetzt.
+- 25 lokale Tests bestanden; zusätzlich Wörterbucheinträge und Interpolationsplatzhalter geprüft. Diese Tests belegen keine vollständige Übersetzung aller Screens und ersetzen keine visuelle Prüfung.
 - GitHub Actions für den ersten Entwicklungsimport erfolgreich, einschließlich Expo-Export für Web, Android und iOS. Neue Änderungen benötigen jeweils einen eigenen CI-Lauf.
 
 ## Noch erforderlich
 
-- Vollständiger DE/EN-Textbestand, Datums-/Zahlenformatierung und Sprachwahl.
+- DE/EN-Übersetzung der übrigen Fachbereiche, Server-Benachrichtigungen und Fehlertexte vervollständigen; Sprachwechsel und Textlängen visuell prüfen.
 - Einstellungssynchronisierung mit echten Konten auf mehreren Geräten sowie alle Profilfelder im UI prüfen.
 - Kontolöschung im Staging mit echten Diensten testen; Datenexport und vollständige Blockieren-Oberfläche.
 - Push-Zustellung, Ereignis-Erinnerungen und Digest tatsächlich implementieren und testen; aktuelle Schalter allein belegen keine Zustellung.

@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
@@ -8,6 +9,7 @@ import { Button, EmptyState, Header, Input, Text } from '@/ui';
 import { Mail, MessagesSquare } from '@/ui/icons';
 
 export default function ForgotPassword() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { c } = useTheme();
   const [email, setEmail] = useState('');
@@ -16,14 +18,14 @@ export default function ForgotPassword() {
   const [sent, setSent] = useState(false);
 
   const submit = async () => {
-    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError('Enter a valid email address.');
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError(t("Enter a valid email address."));
     setBusy(true);
     setError(null);
     try {
       await api.resetPassword(email);
       setSent(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not send the email.');
+      setError(e instanceof Error ? t(e.message) : t("Could not send the email."));
     } finally {
       setBusy(false);
     }
@@ -31,22 +33,22 @@ export default function ForgotPassword() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: c.bg }} behavior={Platform.OS === 'web' ? undefined : 'padding'}>
-      <Header close title="Reset password" noInset={Platform.OS === 'ios'} />
+      <Header close title={t("Reset password")} noInset={Platform.OS === 'ios'} />
       {sent ? (
         <View style={{ flex: 1, justifyContent: 'center', padding: 24 }}>
           <EmptyState
             icon={MessagesSquare}
-            title="Check your email"
-            message={`If an account exists for ${email.trim()}, you will get a link to set a new password in a minute.`}
-            actionLabel="Done"
+            title={t("Check your email")}
+            message={t('If an account exists for {{email}}, you will get a link to set a new password in a minute.', { email: email.trim() })}
+            actionLabel={t("Done")}
             onAction={() => router.back()}
           />
         </View>
       ) : (
         <View style={{ padding: 24, gap: 16, maxWidth: 520, width: '100%', alignSelf: 'center' }}>
-          <Text color="textMuted">Enter the email you signed up with and we will send you a reset link.</Text>
+          <Text color="textMuted">{t("Enter the email you signed up with and we will send you a reset link.")}</Text>
           <Input
-            label="Email"
+            label={t("Email")}
             icon={Mail}
             value={email}
             onChangeText={setEmail}
@@ -58,7 +60,7 @@ export default function ForgotPassword() {
             onSubmitEditing={submit}
             error={error}
           />
-          <Button title="Send reset link" size="lg" block loading={busy} onPress={submit} />
+          <Button title={t("Send reset link")} size="lg" block loading={busy} onPress={submit} />
         </View>
       )}
     </KeyboardAvoidingView>

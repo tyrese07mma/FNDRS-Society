@@ -1,7 +1,7 @@
 import type { OpportunityType, StartupStage, UserRole } from '@/data/types';
 
-/** All UI copy is English, so dates are formatted consistently in en-GB. */
-const LOCALE = 'en-GB';
+import { currentLocale, translateNow } from '@/i18n';
+
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -10,17 +10,18 @@ const DAY = 24 * HOUR;
 export function timeAgo(iso: string | null | undefined): string {
   if (!iso) return '';
   const diff = Date.now() - new Date(iso).getTime();
-  if (diff < MINUTE) return 'now';
-  if (diff < HOUR) return `${Math.floor(diff / MINUTE)}m`;
-  if (diff < DAY) return `${Math.floor(diff / HOUR)}h`;
+  const relative = new Intl.RelativeTimeFormat(currentLocale(), { numeric: 'auto', style: 'narrow' });
+  if (Math.abs(diff) < MINUTE) return relative.format(0, 'second');
+  if (Math.abs(diff) < HOUR) return relative.format(-Math.floor(diff / MINUTE), 'minute');
+  if (Math.abs(diff) < DAY) return relative.format(-Math.floor(diff / HOUR), 'hour');
   const days = Math.floor(diff / DAY);
-  if (days < 7) return `${days}d`;
-  if (days < 35) return `${Math.floor(days / 7)}w`;
-  return new Date(iso).toLocaleDateString(LOCALE, { day: 'numeric', month: 'short' });
+  if (Math.abs(days) < 7) return relative.format(-days, 'day');
+  if (Math.abs(days) < 35) return relative.format(-Math.floor(days / 7), 'week');
+  return new Date(iso).toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' });
 }
 
 export function clockTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString(LOCALE, { hour: '2-digit', minute: '2-digit' });
+  return new Date(iso).toLocaleTimeString(currentLocale(), { hour: '2-digit', minute: '2-digit' });
 }
 
 function startOfDay(d: Date) {
@@ -35,25 +36,24 @@ export function sameDay(a: string, b: string) {
 export function dayLabel(iso: string): string {
   const d = new Date(iso);
   const days = Math.round((startOfDay(new Date()) - startOfDay(d)) / DAY);
-  if (days === 0) return 'Today';
-  if (days === 1) return 'Yesterday';
-  if (days < 7) return d.toLocaleDateString(LOCALE, { weekday: 'long' });
-  return d.toLocaleDateString(LOCALE, { day: 'numeric', month: 'short', year: days > 300 ? 'numeric' : undefined });
+  if (days === 0 || days === 1) return new Intl.RelativeTimeFormat(currentLocale(), { numeric: 'auto' }).format(-days, 'day');
+  if (days < 7) return d.toLocaleDateString(currentLocale(), { weekday: 'long' });
+  return d.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short', year: days > 300 ? 'numeric' : undefined });
 }
 
 export function eventDate(iso: string) {
   const d = new Date(iso);
   return {
-    mo: d.toLocaleDateString(LOCALE, { month: 'short' }).toUpperCase(),
+    mo: d.toLocaleDateString(currentLocale(), { month: 'short' }).toUpperCase(),
     day: String(d.getDate()),
-    weekday: d.toLocaleDateString(LOCALE, { weekday: 'short' }),
+    weekday: d.toLocaleDateString(currentLocale(), { weekday: 'short' }),
     time: clockTime(iso),
   };
 }
 
 export function fullDate(iso: string): string {
   const d = new Date(iso);
-  return `${d.toLocaleDateString(LOCALE, { weekday: 'long', day: 'numeric', month: 'long' })} · ${clockTime(iso)}`;
+  return `${d.toLocaleDateString(currentLocale(), { weekday: 'long', day: 'numeric', month: 'long' })} · ${clockTime(iso)}`;
 }
 
 export function isPast(iso: string) {
@@ -63,23 +63,20 @@ export function isPast(iso: string) {
 /** "2d 4h left", "5h left", "Ends soon", "Ended". */
 export function countdown(iso: string): string {
   const diff = new Date(iso).getTime() - Date.now();
-  if (diff <= 0) return 'Ended';
+  if (diff <= 0) return translateNow('Ended');
   const d = Math.floor(diff / DAY);
   const h = Math.floor((diff % DAY) / HOUR);
-  if (d > 0) return `${d}d ${h}h left`;
-  if (h > 0) return `${h}h left`;
-  return 'Ends soon';
+  if (d > 0) return translateNow('{{days}}d {{hours}}h left', { days: d, hours: h });
+  if (h > 0) return translateNow('{{hours}}h left', { hours: h });
+  return translateNow('Ends soon');
 }
 
 export function compact(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
-  if (n >= 10_000) return `${Math.round(n / 1_000)}k`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(/\.0$/, '')}k`;
-  return String(n);
+  return new Intl.NumberFormat(currentLocale(), { notation: 'compact', maximumFractionDigits: 1 }).format(n);
 }
 
 export function money(cents: number, currency = 'EUR'): string {
-  return new Intl.NumberFormat(LOCALE, { style: 'currency', currency, maximumFractionDigits: 0 }).format(cents / 100);
+  return new Intl.NumberFormat(currentLocale(), { style: 'currency', currency, minimumFractionDigits: cents % 100 ? 2 : 0, maximumFractionDigits: 2 }).format(cents / 100);
 }
 
 export function plural(n: number, one: string, many = `${one}s`) {

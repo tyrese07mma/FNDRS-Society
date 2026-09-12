@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { useTranslation } from '@/i18n';
 import React from 'react';
 import { Platform, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,6 +31,7 @@ export interface HeaderProps {
 }
 
 export function Header({ title, subtitle, back, close: closeProp, right, large, titleNode, border, noInset: noInsetProp, modal, style }: HeaderProps) {
+  const { t } = useTranslation();
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -66,7 +68,7 @@ export function Header({ title, subtitle, back, close: closeProp, right, large, 
           variant={close ? 'tint' : 'plain'}
           size={38}
           iconSize={close ? 19 : 24}
-          accessibilityLabel={close ? 'Close' : 'Back'}
+          accessibilityLabel={close ? t('Close') : t('Back')}
           style={close ? undefined : { marginLeft: -8 }}
         />
       )}

@@ -12,6 +12,7 @@ import type * as T from '../types';
 import { sb } from './client';
 import { streamCopilot } from './copilot';
 import { useSettings } from '@/state/settings';
+import { authErrorMessage } from '@/lib/auth-errors';
 
 const LITE = 'id, handle, full_name, avatar_url, headline, verified';
 const CODES: ApiErrorCode[] = ['PRO_REQUIRED', 'SWIPE_LIMIT', 'NOT_FOUND', 'FORBIDDEN', 'AUTH', 'VALIDATION'];
@@ -132,7 +133,7 @@ export const supabaseApi: Api = {
   },
   async signIn(email, password) {
     const { error } = await sb().auth.signInWithPassword({ email: email.trim(), password });
-    if (error) throw new ApiError('AUTH', error.message);
+    if (error) throw new ApiError('AUTH', authErrorMessage(error.code));
   },
   async signUp({ email, password, fullName }) {
     const { data, error } = await sb().auth.signUp({
@@ -140,7 +141,7 @@ export const supabaseApi: Api = {
       password,
       options: { data: { full_name: fullName.trim() }, emailRedirectTo: appUrl('/auth-callback') },
     });
-    if (error) throw new ApiError('AUTH', error.message);
+    if (error) throw new ApiError('AUTH', authErrorMessage(error.code));
     return { needsConfirmation: !data.session };
   },
   async signOut() {
@@ -149,7 +150,7 @@ export const supabaseApi: Api = {
   },
   async resetPassword(email) {
     const { error } = await sb().auth.resetPasswordForEmail(email.trim(), { redirectTo: appUrl('/auth-callback?next=reset-password') });
-    if (error) throw new ApiError('VALIDATION', error.message);
+    if (error) throw new ApiError('VALIDATION', authErrorMessage(error.code));
   },
   async updatePassword(password) {
     if (password.length < 12) throw new ApiError('VALIDATION', 'Use at least 12 characters.');

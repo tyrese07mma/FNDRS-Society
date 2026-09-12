@@ -5,8 +5,8 @@ import { useSettings, type ThemeMode, type NotificationPrefs } from '@/state/set
 import { toast } from '@/state/toast';
 
 const prefs = () => {
-  const { theme, haptics, notifications, filters } = useSettings.getState();
-  return { theme, haptics, notifications, filters };
+  const { language, theme, haptics, notifications, filters } = useSettings.getState();
+  return { language, theme, haptics, notifications, filters };
 };
 
 /** Serial writes preserve the newest local changes across slow/offline responses. */
@@ -48,14 +48,14 @@ export function PreferencesSync({ userId }: { userId: string | null }) {
       timer = setTimeout(() => { void save(); }, 300);
     };
     const unsubscribe = useSettings.subscribe((state, previous) => {
-      if (state.dirty && (state.dirty !== previous.dirty || JSON.stringify(prefs()) !== JSON.stringify({ theme: previous.theme, haptics: previous.haptics, notifications: previous.notifications, filters: previous.filters }))) schedule();
+      if (state.dirty && (state.dirty !== previous.dirty || JSON.stringify(prefs()) !== JSON.stringify({ language: previous.language, theme: previous.theme, haptics: previous.haptics, notifications: previous.notifications, filters: previous.filters }))) schedule();
     });
     const load = async () => {
       if (reading || !current()) return;
       reading = true;
       try {
         const [settings, match] = await Promise.all([
-          sb().from('user_settings').select('theme,haptics,notifications').eq('user_id', userId).maybeSingle(),
+          sb().from('user_settings').select('language,theme,haptics,notifications').eq('user_id', userId).maybeSingle(),
           sb().from('match_preferences').select('roles,stages,industries,min_score').eq('user_id', userId).maybeSingle(),
         ]);
         if (!current()) return;
@@ -67,6 +67,7 @@ export function PreferencesSync({ userId }: { userId: string | null }) {
             if (typeof settings.data?.notifications?.[key] === 'boolean') notifications[key] = settings.data.notifications[key];
           }
           useSettings.setState({
+            language: settings.data?.language === 'de' || settings.data?.language === 'en' ? settings.data.language : useSettings.getState().language,
             theme: modes.includes(settings.data?.theme) ? settings.data!.theme : 'system',
             haptics: settings.data?.haptics ?? true,
             notifications,
