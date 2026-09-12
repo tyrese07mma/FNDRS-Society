@@ -1,3 +1,4 @@
+import { describeError } from '@/lib/errors';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
@@ -114,7 +115,7 @@ export default function Onboarding() {
       haptic.success();
       toast.accent('Welcome to FNDRS Society', '+100 XP — your first matches are ready.');
     } catch (e) {
-      toast.error('Could not save your profile', e instanceof Error ? e.message : undefined);
+      toast.error('Could not save your profile', describeError(e));
       setBusy(false);
     }
   };

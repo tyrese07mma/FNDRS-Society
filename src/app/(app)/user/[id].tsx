@@ -1,3 +1,4 @@
+import { describeError } from '@/lib/errors';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import React, { useState } from 'react';
 import { RefreshControl, View } from 'react-native';
@@ -5,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useFollow, useOpenConversation, useProfile, useReport } from '@/data/queries';
 import { ProfileView } from '@/features/profile/ProfileView';
+import { BlockAction } from '@/features/people/BlockAction';
 import { appLink, copy, shareText } from '@/lib/share';
 import { useTheme } from '@/theme/ThemeProvider';
 import { Button, EmptyState, Header, IconButton, ListGroup, ListRow, Sheet, SkeletonList } from '@/ui';
@@ -36,7 +38,7 @@ export default function UserProfile() {
     return (
       <View style={{ flex: 1, backgroundColor: c.bg }}>
         <Header back />
-        <EmptyState icon={CircleAlert} title="Profile unavailable" message={profile.error?.message ?? 'This member may have left FNDRS.'} />
+        <EmptyState icon={CircleAlert} title="Profile unavailable" message={describeError(profile.error)} />
       </View>
     );
   }
@@ -111,7 +113,8 @@ export default function UserProfile() {
         ) : (
           <ListGroup>
             <ListRow icon={AtSign} title={`Copy @${p.handle}`} onPress={() => { setMenu(false); copy(`@${p.handle}`, 'Handle copied'); }} />
-            <ListRow icon={Flag} title="Report profile" destructive last onPress={() => setReporting(true)} />
+            <ListRow icon={Flag} title="Report profile" destructive onPress={() => setReporting(true)} />
+            <BlockAction userId={p.id} name={p.full_name} onClose={() => setMenu(false)} />
           </ListGroup>
         )}
       </Sheet>

@@ -16,14 +16,17 @@ Kein Release-Nachweis. Diese Datei dokumentiert den Zwischenstand und muss bei w
 - Checkout und Löschung über serverseitige Konto-Sperre serialisiert; frühere offene Checkouts werden geschlossen.
 - Match-Filter, Theme, Haptik und Benachrichtigungen werden kontobezogen gespeichert. Offline-Änderungen bleiben lokal erhalten und werden erneut synchronisiert. Eigener Query-Cache pro Anmeldung; Mutationen prüfen vor dem Start die Kontoidentität.
 - DE/EN-Sprachwahl mit Gerätevorgabe und Kontosynchronisierung. Willkommen, Anmeldung, Passwortabläufe, Kontoeinstellungen und Tab-Navigation übersetzt; Matching, Discovery, Feed und Chat um Oberflächenübersetzungen ergänzt. Dynamische Namen und Inhalte bleiben unverändert. Datums-/Zahlformatierung berücksichtigt die Sprache. Weitere Fachbereiche und serverseitige Texte sind noch zu bearbeiten.
-- 25 lokale Tests bestanden; zusätzlich Wörterbucheinträge und Interpolationsplatzhalter geprüft. Diese Tests belegen keine vollständige Übersetzung aller Screens und ersetzen keine visuelle Prüfung.
+- Blockieren und Entblockieren in Profilen, Chats und Einstellungen; serverseitige Sperren für Folgen, Matching und Nachrichten in vorhandenen Chats. Bestehende Nachrichten bleiben erhalten.
+- Kontobezogener JSON-Datenexport mit paginierten, authentifizierten Abrufen und Datei-Ausgabe für Web/iOS/Android. Umfang und Grenzen in PRIVACY_CONTROLS.md; native Ausgabe noch nicht auf Geräten geprüft.
+- Zentrale Fehleranzeige mit freigegebenen DE/EN-Texten statt ungefilterter Provider-Meldungen.
+- 32 lokale Tests bestanden; zusätzlich Export, Blockierungen, Fehlertexte, Wörterbucheinträge und Interpolationsplatzhalter geprüft. Diese Tests belegen keine vollständige Übersetzung aller Screens und ersetzen keine visuelle Prüfung.
 - GitHub Actions für den ersten Entwicklungsimport erfolgreich, einschließlich Expo-Export für Web, Android und iOS. Neue Änderungen benötigen jeweils einen eigenen CI-Lauf.
 
 ## Noch erforderlich
 
 - DE/EN-Übersetzung der übrigen Fachbereiche, Server-Benachrichtigungen und Fehlertexte vervollständigen; Sprachwechsel und Textlängen visuell prüfen.
 - Einstellungssynchronisierung mit echten Konten auf mehreren Geräten sowie alle Profilfelder im UI prüfen.
-- Kontolöschung im Staging mit echten Diensten testen; Datenexport und vollständige Blockieren-Oberfläche.
+- Kontolöschung, Blockierungen und Datenexport im Staging mit echten Diensten und Geräten prüfen.
 - Push-Zustellung, Ereignis-Erinnerungen und Digest tatsächlich implementieren und testen; aktuelle Schalter allein belegen keine Zustellung.
 - Gleichzeitige Checkout-Vorgänge zusätzlich gegen Stripe testen und weitere RPCs auf Datenschutz-/Parallelitätsfehler prüfen.
 - Account-Wechsel bei laufenden mehrstufigen Mutationen im vollständigen Integrationstest prüfen.
@@ -35,3 +38,4 @@ Kein Release-Nachweis. Diese Datei dokumentiert den Zwischenstand und muss bei w
 ## Externe Voraussetzungen
 
 Ein vom Eigentümer zugeordnetes Supabase-Projekt mit sicher hinterlegten Secrets, Anthropic-Zugang, Stripe-Testprodukte und Webhook, Domain/SMTP sowie gegebenenfalls Apple-/Google-Entwicklerkonten. Es sind noch keine erfolgreichen Live-Tests gegen diese Dienste dokumentiert.
+

@@ -1,3 +1,4 @@
+import { describeError } from '@/lib/errors';
 import { useTranslation } from '@/i18n';
 import { Geist_400Regular, Geist_500Medium, Geist_600SemiBold, Geist_700Bold } from '@expo-google-fonts/geist';
 import { GeistMono_400Regular, GeistMono_500Medium } from '@expo-google-fonts/geist-mono';
@@ -78,7 +79,7 @@ function RootNavigator({ fontsReady }: { fontsReady: boolean }) {
         <EmptyState
           icon={CircleAlert}
           title={t("We could not load your profile")}
-          message={profileError?.message ?? t("Check your connection and try again.")}
+          message={describeError(profileError)}
           actionLabel={t("Try again")}
           onAction={retryProfile}
         />

@@ -1,3 +1,4 @@
+import { describeError } from '@/lib/errors';
 import { useRouter, type Href } from 'expo-router';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, ScrollView, View } from 'react-native';
@@ -58,7 +59,7 @@ export default function NewEvent() {
       });
       router.replace(`/events/${e.id}` as Href);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not publish the event.');
+      setError(describeError(err));
     }
   };
 

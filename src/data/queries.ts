@@ -14,6 +14,8 @@ import { useAccountMutation as useMutation } from './useAccountMutation';
 import { useEffect, useRef, useState } from 'react';
 
 import { haptic } from '@/lib/haptics';
+import { translateNow } from '@/i18n';
+import { describeError } from '@/lib/errors';
 import { toast } from '@/state/toast';
 import { api } from './index';
 import { sb } from './supabase/client';
@@ -84,6 +86,19 @@ export const useSubscription = (enabled = true) =>
 
 export const useProfile = (id: string) =>
   useQuery({ queryKey: qk.profile(id), queryFn: () => api.getProfile(id), enabled: !!id });
+
+export const useBlocked = (after?: string) => useQuery({ queryKey: ['blocked', after ?? null], queryFn: () => api.listBlocked(after) });
+
+export function useSetBlocked() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, blocked }: { userId: string; blocked: boolean }) => api.setBlocked(userId, blocked),
+    onSuccess: async () => {
+      await qc.cancelQueries();
+      await qc.resetQueries();
+    },
+  });
+}
 
 export const useFollowers = (id: string) => useQuery({ queryKey: qk.followers(id), queryFn: () => api.listFollowers(id) });
 export const useFollowing = (id: string) => useQuery({ queryKey: qk.following(id), queryFn: () => api.listFollowing(id) });
@@ -301,7 +316,7 @@ export function useAddComment(postId: string) {
 export function useReport() {
   return useMutation({
     mutationFn: ({ kind, id, reason }: { kind: 'post' | 'user' | 'comment'; id: string; reason: string }) => api.report(kind, id, reason),
-    onSuccess: () => toast.success('Thanks for letting us know', 'Our team reviews every report within 24 hours.'),
+    onSuccess: () => toast.success(translateNow('Thanks for letting us know'), translateNow('Your report was submitted for review.')),
   });
 }
 
@@ -423,7 +438,7 @@ export function useThread(conversationId: string, myId: string | null) {
       qc.invalidateQueries({ queryKey: qk.conversations });
     } catch (e) {
       qc.setQueryData<T.Message[]>(key, (cur = []) => cur.filter((x) => x.id !== tempId));
-      toast.error('Message not sent', e instanceof Error ? e.message : undefined);
+      toast.error(translateNow('Message not sent'), describeError(e));
     }
   };
 

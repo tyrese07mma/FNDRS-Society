@@ -1,3 +1,4 @@
+import { describeError } from '@/lib/errors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -89,7 +90,7 @@ export default function Investors() {
         setSelected(null);
         router.push('/premium');
       } else {
-        toast.error('Could not request the intro', e instanceof Error ? e.message : undefined);
+        toast.error('Could not request the intro', describeError(e));
       }
     }
   };

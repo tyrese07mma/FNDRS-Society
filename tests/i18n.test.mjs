@@ -23,7 +23,7 @@ test('every explicit literal translation call has a German entry',()=>{
   if(entry.isDirectory())visitFolder(path);
   else if(/\.tsx?$/.test(path)){
    const ast=ts.createSourceFile(path,readFileSync(path,'utf8'),ts.ScriptTarget.Latest,true);
-   function visit(n){if(ts.isCallExpression(n)&&n.expression.getText(ast)==='t'&&n.arguments[0]&&ts.isStringLiteral(n.arguments[0])&&!Object.hasOwn(de,n.arguments[0].text))missing.push(path+': '+n.arguments[0].text);ts.forEachChild(n,visit)}visit(ast);
+   function visit(n){if(ts.isCallExpression(n)&&['t','translateNow'].includes(n.expression.getText(ast))&&n.arguments[0]&&ts.isStringLiteral(n.arguments[0])&&!Object.hasOwn(de,n.arguments[0].text))missing.push(path+': '+n.arguments[0].text);ts.forEachChild(n,visit)}visit(ast);
   }
  }}visitFolder('src');
  assert.deepEqual(missing,[]);

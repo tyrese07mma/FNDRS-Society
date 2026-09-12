@@ -1,3 +1,5 @@
+import { describeError } from '@/lib/errors';
+import { translateNow } from '@/i18n';
 import { focusManager, MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from 'expo-router';
 import * as SystemUI from 'expo-system-ui';
@@ -15,9 +17,7 @@ import { BACKEND_CONFIGURED } from '@/lib/env';
 import { AccountScope } from './AccountScope';
 import { AccountChangedError } from '@/data/useAccountMutation';
 
-function describe(err: unknown) {
-  return err instanceof Error ? err.message : 'Please try again in a moment.';
-}
+
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -33,7 +33,7 @@ const createQueryClient = () => new QueryClient({
     onError: (err, _vars, _ctx, mutation) => {
       if (err instanceof AccountChangedError) return;
       if (mutation.meta?.silent) return;
-      toast.error(isApiError(err, 'VALIDATION') ? 'Check that again' : 'Something went wrong', describe(err));
+      toast.error(translateNow(isApiError(err, 'VALIDATION') ? 'Check that again' : 'Something went wrong'), describeError(err));
     },
   }),
 });

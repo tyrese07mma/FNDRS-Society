@@ -1,3 +1,4 @@
+import { describeError } from '@/lib/errors';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import React from 'react';
@@ -40,7 +41,7 @@ export default function StartupDetail() {
         {startup.isLoading ? (
           <View style={{ padding: 16 }}><SkeletonList variant="card" count={2} /></View>
         ) : (
-          <EmptyState icon={CircleAlert} title="Startup not found" message={startup.error?.message} />
+          <EmptyState icon={CircleAlert} title="Startup not found" message={describeError(startup.error)} />
         )}
       </View>
     );

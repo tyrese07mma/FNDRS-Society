@@ -39,6 +39,7 @@ import type {
   SwipeAction,
   SwipeResult,
 } from './types';
+import type { ExportDataset, ExportPage } from '@/lib/export-data';
 
 /** Error codes the UI reacts to (paywall, limits). Thrown as `new ApiError(code)`. */
 export type ApiErrorCode = 'PRO_REQUIRED' | 'SWIPE_LIMIT' | 'NOT_FOUND' | 'FORBIDDEN' | 'VALIDATION' | 'AUTH';
@@ -78,6 +79,7 @@ export interface Api {
   updatePassword(password: string): Promise<void>;
   updateEmail(email: string): Promise<void>;
   deleteAccount(password: string): Promise<void>;
+  exportDataPage(dataset: ExportDataset, after?: string): Promise<ExportPage>;
 
   // me
   getMe(): Promise<Profile>;
@@ -88,6 +90,8 @@ export interface Api {
   // people
   getProfile(id: string): Promise<PublicProfile>;
   setFollow(userId: string, follow: boolean): Promise<void>;
+  setBlocked(userId: string, blocked: boolean): Promise<void>;
+  listBlocked(after?: string): Promise<ProfileLite[]>;
   listFollowers(userId: string): Promise<ProfileLite[]>;
   listFollowing(userId: string): Promise<ProfileLite[]>;
   search(query: string): Promise<SearchResults>;

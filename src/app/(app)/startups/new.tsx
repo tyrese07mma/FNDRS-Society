@@ -1,3 +1,4 @@
+import { describeError } from '@/lib/errors';
 import { useRouter, type Href } from 'expo-router';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, ScrollView, View } from 'react-native';
@@ -46,7 +47,7 @@ export default function NewStartup() {
       });
       router.replace(`/startups/${s.id}` as Href);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not launch your startup.');
+      setError(describeError(e));
     }
   };
 

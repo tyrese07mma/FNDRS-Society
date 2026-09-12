@@ -1,3 +1,4 @@
+import { describeError } from '@/lib/errors';
 import { useTranslation } from '@/i18n';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -25,7 +26,7 @@ export default function ForgotPassword() {
       await api.resetPassword(email);
       setSent(true);
     } catch (e) {
-      setError(e instanceof Error ? t(e.message) : t("Could not send the email."));
+      setError(describeError(e));
     } finally {
       setBusy(false);
     }

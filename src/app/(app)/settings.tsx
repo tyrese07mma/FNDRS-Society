@@ -162,6 +162,8 @@ export default function Settings() {
         </Group>
 
         <Group title={t("PRIVACY")}>
+          <ListRow icon={ScrollText} title={t('Export my data')} onPress={() => router.push('/data-export')} />
+          <ListRow icon={User} title={t('Blocked members')} onPress={() => router.push('/blocked-users')} />
           <ListRow icon={MapPin} title={t("Show my location")} right={<Switch value={privacy.location_visible} onValueChange={(v) => setPriv('location_visible', v)} accessibilityLabel={t("Show my location")} />} />
           <ListRow icon={Eye} title={t("Discoverable in Smart Match")} subtitle={t("Turn off to pause new matches")} right={<Switch value={privacy.discoverable} onValueChange={(v) => setPriv('discoverable', v)} accessibilityLabel={t("Discoverable in Smart Match")} />} />
           <View style={{ padding: 14, gap: 10 }}>

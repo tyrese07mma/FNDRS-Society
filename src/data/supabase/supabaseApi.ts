@@ -13,6 +13,7 @@ import { sb } from './client';
 import { streamCopilot } from './copilot';
 import { useSettings } from '@/state/settings';
 import { authErrorMessage } from '@/lib/auth-errors';
+import type { ExportPage } from '@/lib/export-data';
 
 const LITE = 'id, handle, full_name, avatar_url, headline, verified';
 const CODES: ApiErrorCode[] = ['PRO_REQUIRED', 'SWIPE_LIMIT', 'NOT_FOUND', 'FORBIDDEN', 'AUTH', 'VALIDATION'];
@@ -206,6 +207,9 @@ export const supabaseApi: Api = {
   },
 
   // people
+  exportDataPage: (dataset, after) => rpc<ExportPage>('export_my_data_page', { p_dataset: dataset, p_after: after ?? null }),
+  setBlocked: (userId, blocked) => rpc<void>('set_user_block', { p_target: userId, p_blocked: blocked }),
+  listBlocked: (after) => rpc<T.ProfileLite[]>('list_blocked_users', { p_after: after ?? null }),
   getProfile: (id) => rpc<T.PublicProfile>('get_profile', { p_id: id }),
   async setFollow(userId, follow) {
     const me = await uid();

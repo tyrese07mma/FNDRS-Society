@@ -1,3 +1,4 @@
+import { describeError } from '@/lib/errors';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, View } from 'react-native';
@@ -48,7 +49,7 @@ export default function GuideReader() {
         guide.isLoading ? (
           <View style={{ padding: 16 }}><SkeletonList variant="post" count={2} /></View>
         ) : (
-          <EmptyState icon={CircleAlert} title="Guide not found" message={guide.error?.message} />
+          <EmptyState icon={CircleAlert} title="Guide not found" message={describeError(guide.error)} />
         )
       ) : (
         <ScrollView

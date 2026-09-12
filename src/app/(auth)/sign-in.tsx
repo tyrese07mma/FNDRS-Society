@@ -1,3 +1,4 @@
+import { describeError } from '@/lib/errors';
 import { useTranslation } from '@/i18n';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -31,7 +32,7 @@ export default function SignIn() {
       haptic.success();
     } catch (e) {
       haptic.error();
-      setError(e instanceof Error ? t(e.message) : t("Could not sign in."));
+      setError(describeError(e));
       setBusy(null);
     }
   };

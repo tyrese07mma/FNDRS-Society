@@ -1,3 +1,4 @@
+import { describeError } from '@/lib/errors';
 import { useTranslation } from '@/i18n';
 import { useRouter, type Href } from 'expo-router';
 import React, { useRef, useState } from 'react';
@@ -83,7 +84,7 @@ export default function Match() {
     } catch (e) {
       setDeck((d) => [cand, ...d]);
       if (isApiError(e, 'SWIPE_LIMIT')) setLimit(true);
-      else toast.error(t("That swipe did not save"), e instanceof Error ? e.message : undefined);
+      else toast.error(t("That swipe did not save"), describeError(e));
     }
   };
 

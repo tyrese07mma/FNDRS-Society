@@ -1,3 +1,4 @@
+import { describeError } from '@/lib/errors';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, ScrollView, View } from 'react-native';
@@ -52,7 +53,7 @@ export default function NewOpportunity() {
       });
       router.back();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not publish.');
+      setError(describeError(e));
     }
   };
 

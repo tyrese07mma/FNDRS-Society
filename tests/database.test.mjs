@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { PGlite } from '@electric-sql/pglite';
 import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm';
+import { EXPORT_DATASETS } from '../src/lib/export-data.ts';
 
 // Real PostgreSQL engine; minimal Supabase-owned schemas supplied by this harness.
 // Hosted Auth/Storage/Realtime services still require separate integration tests.
@@ -132,6 +133,63 @@ test('feed pagination uses a stable timestamp and ID cursor',async()=>{
 test('message pagination cannot bypass conversation membership',async()=>{
  const conv=(await db.query('select id from conversations where user_a=$1 and user_b=$2',[A,B])).rows[0].id;
  await asUser(C,async()=>{assert.equal((await db.query('select * from message_page($1)',[conv])).rows.length,0);});
+});
+
+test('blocking removes connections, protects discovery and stops messages in existing chats',async()=>{
+ await asUser(A,()=>db.query('insert into follows(follower_id,followee_id) values($1,$2) on conflict do nothing',[A,B]));
+ const conv=(await db.query('select id from conversations where user_a=$1 and user_b=$2',[A,B])).rows[0].id;
+ await asUser(A,()=>db.query('select set_user_block($1,true)',[B]));
+ await asUser(A,()=>db.query('select set_user_block($1,true)',[B]));
+ assert.equal((await db.query('select count(*)::int n from follows where follower_id=$1 and followee_id=$2',[A,B])).rows[0].n,0);
+ assert.equal((await db.query('select count(*)::int n from matches where user_a=$1 and user_b=$2',[A,B])).rows[0].n,0);
+ await asUser(A,async()=>assert.equal((await db.query('select list_blocked_users() data')).rows[0].data[0].id,B));
+ await asUser(B,async()=>{
+   assert.deepEqual((await db.query('select list_blocked_users() data')).rows[0].data,[]);
+   assert.equal((await db.query('select id from profiles where id=$1',[A])).rows.length,0);
+ });
+ for(const [sender,other] of [[A,B],[B,A]]) {
+   await assert.rejects(asUser(sender,()=>db.query('insert into messages(conversation_id,sender_id,body) values($1,$2,$3)',[conv,sender,'blocked'])),/FORBIDDEN/);
+   await assert.rejects(asUser(sender,()=>db.query('insert into follows(follower_id,followee_id) values($1,$2)',[sender,other])),/FORBIDDEN/);
+   await assert.rejects(asUser(sender,()=>db.query("select swipe($1,'connect')",[other])),/FORBIDDEN/);
+ }
+ await asUser(B,()=>db.query('select set_user_block($1,false)',[A]));
+ assert.equal((await db.query('select count(*)::int n from blocks where blocker_id=$1 and blocked_id=$2',[A,B])).rows[0].n,1);
+ await asUser(A,()=>db.query('select set_user_block($1,false)',[B]));
+ await asUser(A,()=>db.query('insert into messages(conversation_id,sender_id,body) values($1,$2,$3)',[conv,A,'unblocked']));
+ assert.equal((await db.query('select count(*)::int n from matches where user_a=$1 and user_b=$2',[A,B])).rows[0].n,0);
+ await assert.rejects(asUser(A,()=>db.query('select set_user_block($1,true)',[A])),/VALIDATION/);
+});
+
+test('export only includes the signed-in account and rejects unknown datasets',async()=>{
+ await asUser(A,async()=>{
+   for(const dataset of EXPORT_DATASETS) {
+     const page=(await db.query('select export_my_data_page($1) data',[dataset])).rows[0].data;
+     assert.ok(Array.isArray(page.rows),dataset);
+     assert.ok(page.rows.length<=100,dataset);
+     for(const row of page.rows) {
+       for(const field of ['stripe_customer_id','stripe_subscription_id','last_message']) assert.equal(field in row,false,dataset);
+     }
+     if(dataset==='profiles') assert.deepEqual(page.rows.map(r=>r.id),[A]);
+     if(dataset==='account') assert.deepEqual(page.rows,[{id:A,email:'Alpha@example.test'}]);
+     if(dataset==='messages') assert.ok(page.rows.every(r=>r.sender_id===A));
+     if(dataset==='ai_usage') assert.equal(page.rows.length,0);
+   }
+ });
+ await assert.rejects(asUser(A,()=>db.query('select export_my_data_page($1)',['auth.users'])),/VALIDATION/);
+ await assert.rejects(asUser(A,()=>db.query('select export_my_data_page($1)',['profiles; select 1'])),/VALIDATION/);
+ await db.query("select set_config('request.jwt.claim.sub','',false)");
+ await assert.rejects(db.query("select export_my_data_page('profiles')"),/AUTH/);
+});
+
+test('export database cursor visits every owned row across page boundaries',async()=>{
+ await db.query("insert into ai_messages(user_id,role,content) select $1,'user','Export row '||n from generate_series(1,101) n",[A]);
+ await asUser(A,async()=>{
+   const first=(await db.query("select export_my_data_page('ai_messages') data")).rows[0].data;
+   assert.equal(first.rows.length,100);
+   const second=(await db.query("select export_my_data_page('ai_messages',$1) data",[first.next])).rows[0].data;
+   assert.equal(second.rows.length,1); assert.equal(second.next,null);
+   assert.equal(new Set([...first.rows,...second.rows].map(r=>r.id)).size,101);
+ });
 });
 
 test('account cleanup cannot be bypassed and serializes checkout with deletion',async()=>{

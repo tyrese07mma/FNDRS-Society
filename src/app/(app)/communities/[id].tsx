@@ -1,3 +1,4 @@
+import { describeError } from '@/lib/errors';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { FlatList, View } from 'react-native';
@@ -31,7 +32,7 @@ export default function CommunityDetail() {
         {community.isLoading ? (
           <View style={{ padding: 16 }}><SkeletonList variant="card" count={2} /></View>
         ) : (
-          <EmptyState icon={CircleAlert} title="Space not found" message={community.error?.message} />
+          <EmptyState icon={CircleAlert} title="Space not found" message={describeError(community.error)} />
         )}
       </View>
     );

@@ -1,3 +1,4 @@
+import { describeError } from '@/lib/errors';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, Pressable, TextInput, View } from 'react-native';
@@ -59,7 +60,7 @@ export default function PostDetail() {
     return (
       <View style={{ flex: 1, backgroundColor: c.bg }}>
         <Header back title="Post" />
-        <EmptyState icon={Newspaper} title="This post is gone" message={post.error?.message} />
+        <EmptyState icon={Newspaper} title="This post is gone" message={describeError(post.error)} />
       </View>
     );
   }

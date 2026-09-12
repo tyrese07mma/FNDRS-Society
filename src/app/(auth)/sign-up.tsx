@@ -1,3 +1,4 @@
+import { describeError } from '@/lib/errors';
 import { useTranslation } from '@/i18n';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -49,7 +50,7 @@ export default function SignUp() {
       }
     } catch (e) {
       haptic.error();
-      setError(e instanceof Error ? t(e.message) : t("Could not create your account."));
+      setError(describeError(e));
       setBusy(false);
     }
   };

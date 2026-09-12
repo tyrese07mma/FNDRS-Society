@@ -1,3 +1,4 @@
+import { describeError } from '@/lib/errors';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Pressable, ScrollView, View } from 'react-native';
@@ -104,7 +105,7 @@ export default function EditProfile() {
       toast.success('Profile updated');
       router.back();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not save your profile.');
+      setError(describeError(e));
       setSaving(false);
     }
   };

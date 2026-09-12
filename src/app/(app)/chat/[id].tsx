@@ -1,4 +1,6 @@
+import { describeError } from '@/lib/errors';
 import { useTranslation } from '@/i18n';
+import { BlockAction } from '@/features/people/BlockAction';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
@@ -148,7 +150,7 @@ export default function Chat() {
       </View>
 
       {error ? (
-        <EmptyState icon={CircleAlert} title={t("Conversation unavailable")} message={(error as Error).message} />
+        <EmptyState icon={CircleAlert} title={t("Conversation unavailable")} message={describeError(error)} />
       ) : loading ? (
         <View style={{ flex: 1, padding: 16 }}><SkeletonList count={5} /></View>
       ) : messages.length === 0 ? (
@@ -240,7 +242,8 @@ export default function Chat() {
         ) : (
           <ListGroup>
             <ListRow icon={User} title={t("View profile")} onPress={() => { setMenu(false); if (other) router.push(`/user/${other.id}` as Href); }} />
-            <ListRow icon={Flag} title={t('Report {{name}}', { name })} destructive last onPress={() => setReporting(true)} />
+            <ListRow icon={Flag} title={t('Report {{name}}', { name })} destructive onPress={() => setReporting(true)} />
+            {other && <BlockAction userId={other.id} name={other.full_name} onClose={() => setMenu(false)} />}
           </ListGroup>
         )}
       </Sheet>
