@@ -133,3 +133,19 @@ test('message pagination cannot bypass conversation membership',async()=>{
  const conv=(await db.query('select id from conversations where user_a=$1 and user_b=$2',[A,B])).rows[0].id;
  await asUser(C,async()=>{assert.equal((await db.query('select * from message_page($1)',[conv])).rows.length,0);});
 });
+
+test('account cleanup cannot be bypassed and serializes checkout with deletion',async()=>{
+ await db.query("select set_config('request.jwt.claim.sub','',false)");
+ await assert.rejects(asUser(C,()=>db.query("select claim_account_operation($1,'delete')",[C])));
+ const token=(await db.query("select claim_account_operation($1,'checkout') token",[C])).rows[0].token;
+ await assert.rejects(db.query("select claim_account_operation($1,'delete')",[C]),/in progress/);
+ await db.query('select release_account_operation($1,$2)',[C,A]);
+ await assert.rejects(db.query("select claim_account_operation($1,'checkout')",[C]),/in progress/);
+ await db.query('select release_account_operation($1,$2)',[C,token]);
+ const deletion=(await db.query("select claim_account_operation($1,'delete') token",[C])).rows[0].token;
+ await assert.rejects(asUser(C,()=>db.query("update profiles set bio='still active' where id=$1",[C])),/deletion/);
+ await assert.rejects(asUser(C,()=>db.exec('select delete_my_account()')));
+ await db.query('select release_account_operation($1,$2)',[C,deletion]);
+ await assert.rejects(db.query("select claim_account_operation($1,'checkout')",[C]),/deletion/);
+ assert.ok((await db.query("select claim_account_operation($1,'delete') token",[C])).rows[0].token);
+});

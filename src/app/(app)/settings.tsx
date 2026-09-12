@@ -82,22 +82,6 @@ export default function Settings() {
     }
   };
 
-  const deleteAccount = async () => {
-    const ok = await confirm({
-      title: 'Delete your account?',
-      message: 'This permanently removes your profile, posts, messages and matches. It cannot be undone.',
-      confirmLabel: 'Delete forever',
-      destructive: true,
-    });
-    if (!ok) return;
-    try {
-      await api.deleteAccount();
-      toast.show('Account deleted', 'We are sad to see you go.');
-    } catch (e) {
-      toast.error('Could not delete your account', e instanceof Error ? e.message : undefined);
-    }
-  };
-
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <Header back title="Settings" />
@@ -203,7 +187,7 @@ export default function Settings() {
 
         <Group title="SESSION">
           <ListRow icon={LogOut} title="Sign out" onPress={signOut} />
-          <ListRow icon={Trash2} title="Delete account" destructive onPress={deleteAccount} last />
+          <ListRow icon={Trash2} title="Delete account" destructive onPress={() => router.push('/account-security')} last />
         </Group>
 
         <Text variant="mono" color="textFaint" align="center">

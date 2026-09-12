@@ -77,7 +77,7 @@ export interface Api {
   resetPassword(email: string): Promise<void>;
   updatePassword(password: string): Promise<void>;
   updateEmail(email: string): Promise<void>;
-  deleteAccount(): Promise<void>;
+  deleteAccount(password: string): Promise<void>;
 
   // me
   getMe(): Promise<Profile>;

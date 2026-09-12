@@ -18,7 +18,12 @@ Deno.serve(async(req)=>{
  const sub=await stripe.subscriptions.retrieve(id);
  const customer=typeof sub.customer==='string'?sub.customer:sub.customer.id;
  const db=admin();const {data:owner,error:ownerError}=await db.from('subscriptions').select('user_id').eq('stripe_customer_id',customer).maybeSingle();
- if(ownerError||!owner)throw Error('Unknown customer');
+ if(ownerError)throw Error('Customer lookup failed');
+ if(!owner){
+  const {data:deleted,error:deletedError}=await db.from('deleted_billing_customers').select('customer_id').eq('customer_id',customer).maybeSingle();
+  if(!deletedError&&deleted)return Response.json({received:true});
+  throw Error('Unknown customer');
+ }
  const price=sub.items.data[0]?.price.id;const tier=price?priceTiers().get(price):undefined;
  if(!tier)throw Error('Unknown price');
  const {error}=await db.rpc('apply_stripe_event',{p_event:event.id,p_created:event.created,p_user:owner.user_id,p_customer:customer,p_subscription:sub.id,p_tier:sub.status==='canceled'?'free':tier,p_status:statuses[sub.status]??'incomplete',p_period:new Date(sub.current_period_end*1000).toISOString(),p_cancel:sub.cancel_at_period_end});

@@ -162,8 +162,8 @@ export const supabaseApi: Api = {
     const { error } = await sb().auth.updateUser({ email: email.trim() }, { emailRedirectTo: appUrl('/auth-callback') });
     if (error) throw new ApiError('AUTH', 'Could not change your email. Please sign in again and retry.');
   },
-  async deleteAccount() {
-    await rpc('delete_my_account');
+  async deleteAccount(password) {
+    await invoke('delete-account', { password });
     await sb().auth.signOut({ scope: 'local' }).catch(() => {});
     uidCache = null;
   },

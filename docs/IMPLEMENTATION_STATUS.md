@@ -12,15 +12,18 @@ Kein Release-Nachweis. Diese Datei dokumentiert den Zwischenstand und muss bei w
 - Optionale Benachrichtigungskategorien werden serverseitig berücksichtigt. Theme und Benachrichtigungseinstellungen werden synchronisiert.
 - Copilot-SSE mit serverseitiger Authentifizierung, Einwilligung, Tageslimits und Verbrauchsprotokollierung.
 - Stripe-Checkout, Kundenportal und signierter Webhook mit Preiszuordnung, Ereignis-Deduplizierung und zeitlich begrenzten Berechtigungen.
-- 18 lokale Tests bestanden; Geschäftsregeln, Auth-URL-/SSE-Parser und Migrationen mit PostgreSQL-RLS. Deno-Typprüfung der fünf Edge Functions bestanden.
+- Kontolöschung mit Passwortbestätigung, Stripe-Kundenlöschung, Storage-Bereinigung und abschließender Auth-Löschung implementiert. Wiederholungen nach Fehlern sind vorgesehen; siehe ACCOUNT_DELETION.md.
+- Checkout und Löschung über serverseitige Konto-Sperre serialisiert; frühere offene Checkouts werden geschlossen.
+- 21 lokale Tests bestanden; Geschäftsregeln, Auth-URL-/SSE-Parser, Bildbereinigung und Migrationen mit PostgreSQL-RLS. Deno-Typprüfung der geänderten und neuen Edge Functions bestanden.
+- GitHub Actions für den ersten Entwicklungsimport erfolgreich, einschließlich Expo-Export für Web, Android und iOS. Neue Änderungen benötigen jeweils einen eigenen CI-Lauf.
 
 ## Noch erforderlich
 
 - Vollständiger DE/EN-Textbestand, Datums-/Zahlenformatierung und Sprachwahl.
 - Match-Filter dauerhaft mit dem Konto synchronisieren; alle Einstellungen und Profilfelder im UI prüfen.
-- Kontolöschung mit Stripe-/Storage-Bereinigung statt direkter SQL-Löschung; Datenexport und vollständige Blockieren-Oberfläche.
+- Kontolöschung im Staging mit echten Diensten testen; Datenexport und vollständige Blockieren-Oberfläche.
 - Push-Zustellung, Ereignis-Erinnerungen und Digest tatsächlich implementieren und testen; aktuelle Schalter allein belegen keine Zustellung.
-- Gleichzeitige Checkout-Vorgänge und weitere RPCs auf Datenschutz-/Parallelitätsfehler prüfen.
+- Gleichzeitige Checkout-Vorgänge zusätzlich gegen Stripe testen und weitere RPCs auf Datenschutz-/Parallelitätsfehler prüfen.
 - Account-Wechsel bei laufenden Mutationen und Einstellungen weiter absichern.
 - Native Käufe/App-Store-Anforderungen und Plattform-Icons abschließen.
 - Vollständiger visueller Durchlauf aller Screens und Zustände, Web-/iOS-/Android-Integrationstests, finaler Build und Abhängigkeitsprüfung.
