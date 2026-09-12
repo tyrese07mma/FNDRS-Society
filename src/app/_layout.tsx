@@ -46,10 +46,11 @@ export default function RootLayout() {
 }
 
 function RootNavigator({ fontsReady }: { fontsReady: boolean }) {
-  const { status, profile, ready, profileError, retryProfile } = useAuth();
+  const { status, userId, profile, ready, profileError, retryProfile } = useAuth();
   const hydrated = useSettings((s) => s.hydrated);
+  const preferencesOwner = useSettings((s) => s.ownerId);
   const { dark, c } = useTheme();
-  const appReady = fontsReady && hydrated && ready;
+  const appReady = fontsReady && hydrated && ready && preferencesOwner === userId;
 
   useEffect(() => {
     if (appReady) SplashScreen.hideAsync().catch(() => {});

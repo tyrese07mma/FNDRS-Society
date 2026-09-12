@@ -11,6 +11,7 @@ import { ApiError, type Api, type ApiErrorCode, type ThreadHandlers } from '../a
 import type * as T from '../types';
 import { sb } from './client';
 import { streamCopilot } from './copilot';
+import { useSettings } from '@/state/settings';
 
 const LITE = 'id, handle, full_name, avatar_url, headline, verified';
 const CODES: ApiErrorCode[] = ['PRO_REQUIRED', 'SWIPE_LIMIT', 'NOT_FOUND', 'FORBIDDEN', 'AUTH', 'VALIDATION'];
@@ -66,11 +67,10 @@ async function first<R>(fn: string, args: Record<string, unknown>, notFound: str
 let uidCache: string | null = null;
 
 async function uid(): Promise<string> {
-  if (uidCache) return uidCache;
   const { data } = await sb().auth.getSession();
-  uidCache = data.session?.user.id ?? null;
-  if (!uidCache) throw new ApiError('AUTH', DEFAULT_MESSAGES.AUTH);
-  return uidCache;
+  const id = data.session?.user.id;
+  if (!id) throw new ApiError('AUTH', DEFAULT_MESSAGES.AUTH);
+  return id;
 }
 
 function toSession(s: { user: { id: string; email?: string | null } } | null): T.Session | null {
@@ -121,7 +121,6 @@ export const supabaseApi: Api = {
   // auth
   async getSession() {
     const { data } = await sb().auth.getSession();
-    uidCache = data.session?.user.id ?? null;
     return toSession(data.session);
   },
   onAuthChange(cb) {
@@ -147,7 +146,6 @@ export const supabaseApi: Api = {
   async signOut() {
     const { error } = await sb().auth.signOut();
     if (error) throw new ApiError('AUTH', 'Could not sign out. Please retry.');
-    uidCache = null;
   },
   async resetPassword(email) {
     const { error } = await sb().auth.resetPasswordForEmail(email.trim(), { redirectTo: appUrl('/auth-callback?next=reset-password') });
@@ -163,9 +161,11 @@ export const supabaseApi: Api = {
     if (error) throw new ApiError('AUTH', 'Could not change your email. Please sign in again and retry.');
   },
   async deleteAccount(password) {
-    await invoke('delete-account', { password });
-    await sb().auth.signOut({ scope: 'local' }).catch(() => {});
-    uidCache = null;
+    const expectedUserId = await uid();
+    await invoke('delete-account', { password, expectedUserId });
+    useSettings.getState().forgetAccount(expectedUserId);
+    const { data } = await sb().auth.getSession();
+    if (data.session?.user.id === expectedUserId) await sb().auth.signOut({ scope: 'local' }).catch(() => {});
   },
 
   // me

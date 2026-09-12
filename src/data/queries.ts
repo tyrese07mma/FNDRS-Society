@@ -5,12 +5,12 @@
  */
 import {
   keepPreviousData,
-  useMutation,
   useQuery,
   useQueryClient,
   type QueryClient,
   type QueryKey,
 } from '@tanstack/react-query';
+import { useAccountMutation as useMutation } from './useAccountMutation';
 import { useEffect, useRef, useState } from 'react';
 
 import { haptic } from '@/lib/haptics';

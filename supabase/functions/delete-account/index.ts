@@ -13,7 +13,8 @@ Deno.serve(async (req) => {
   if(!user?.email) return json({error:'AUTH: Please sign in again.'},401);
   const raw=await req.text();
   if(raw.length>4096) return json({error:'Invalid request'},400);
-  const {password}=JSON.parse(raw);
+  const {password,expectedUserId}=JSON.parse(raw);
+  if(expectedUserId!==user.id) return json({error:'AUTH: The account changed. Please retry.'},409);
   if(typeof password!=='string'||!password||password.length>1024) return json({error:'Enter your current password.'},400);
   // Reauthenticate only this account. Passwords and temporary tokens are never logged.
   const auth=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_ANON_KEY')!,{auth:{persistSession:false,autoRefreshToken:false}});

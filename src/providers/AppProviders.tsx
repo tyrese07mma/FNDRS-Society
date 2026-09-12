@@ -1,7 +1,7 @@
 import { focusManager, MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from 'expo-router';
 import * as SystemUI from 'expo-system-ui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AppState, Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -10,12 +10,16 @@ import { isApiError } from '@/data/api';
 import { toast } from '@/state/toast';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 import { AuthProvider } from './AuthProvider';
+import { api } from '@/data';
+import { BACKEND_CONFIGURED } from '@/lib/env';
+import { AccountScope } from './AccountScope';
+import { AccountChangedError } from '@/data/useAccountMutation';
 
 function describe(err: unknown) {
   return err instanceof Error ? err.message : 'Please try again in a moment.';
 }
 
-const queryClient = new QueryClient({
+const createQueryClient = () => new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 30_000,
@@ -27,11 +31,18 @@ const queryClient = new QueryClient({
   },
   mutationCache: new MutationCache({
     onError: (err, _vars, _ctx, mutation) => {
+      if (err instanceof AccountChangedError) return;
       if (mutation.meta?.silent) return;
       toast.error(isApiError(err, 'VALIDATION') ? 'Check that again' : 'Something went wrong', describe(err));
     },
   }),
 });
+
+function AccountQueries({ owner, children }: { owner: string | null; children: React.ReactNode }) {
+  const [client] = useState(createQueryClient);
+  useEffect(() => () => { client.clear(); }, [client]);
+  return <AccountScope.Provider value={owner}><QueryClientProvider client={client}>{children}</QueryClientProvider></AccountScope.Provider>;
+}
 
 /** Feeds our tokens into the navigator so screen backgrounds never flash white. */
 function NavigationTheme({ children }: { children: React.ReactNode }) {
@@ -60,6 +71,11 @@ function NavigationTheme({ children }: { children: React.ReactNode }) {
 }
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
+  const [owner, setOwner] = useState<string | null>(null);
+  useEffect(() => {
+    if (!BACKEND_CONFIGURED) return;
+    return api.onAuthChange(session => setOwner(session?.userId ?? null));
+  }, []);
   useEffect(() => {
     if (Platform.OS === 'web') return;
     const sub = AppState.addEventListener('change', (s) => focusManager.setFocused(s === 'active'));
@@ -69,13 +85,13 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <QueryClientProvider client={queryClient}>
+        <AccountQueries key={owner ?? 'signed-out'} owner={owner}>
           <ThemeProvider>
             <NavigationTheme>
               <AuthProvider>{children}</AuthProvider>
             </NavigationTheme>
           </ThemeProvider>
-        </QueryClientProvider>
+        </AccountQueries>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
