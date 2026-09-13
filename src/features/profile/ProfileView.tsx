@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { useRouter, type Href } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useState } from 'react';
@@ -81,6 +82,7 @@ export interface ProfileViewProps {
 }
 
 export function ProfileView({ profile: p, isMe, isPro, actions, topLeft, topRight, bottomPadding, refreshControl }: ProfileViewProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { c } = useTheme();
@@ -93,19 +95,19 @@ export function ProfileView({ profile: p, isMe, isPro, actions, topLeft, topRigh
   const xpInLevel = p.xp % 500;
 
   const achievements: { icon: IconType; label: string; done: boolean }[] = [
-    { icon: BadgeCheck, label: 'Verified', done: p.verified },
-    { icon: PenLine, label: 'First post', done: p.posts_count > 0 },
-    { icon: Users, label: 'Connector', done: p.following_count >= 5 },
-    { icon: Flame, label: 'Rising', done: p.level >= 3 },
-    { icon: Trophy, label: 'Top founder', done: p.founder_score >= 85 },
-    { icon: Star, label: 'Magnet', done: p.followers_count >= 100 },
+    { icon: BadgeCheck, label: t("Verified"), done: p.verified },
+    { icon: PenLine, label: t("First post"), done: p.posts_count > 0 },
+    { icon: Users, label: t("Connector"), done: p.following_count >= 5 },
+    { icon: Flame, label: t("Rising"), done: p.level >= 3 },
+    { icon: Trophy, label: t("Top founder"), done: p.founder_score >= 85 },
+    { icon: Star, label: t("Magnet"), done: p.followers_count >= 100 },
   ];
 
   const links = [
     p.links?.website && { icon: Globe, label: prettyUrl(p.links.website), url: ensureUrl(p.links.website) },
     p.links?.linkedin && {
       icon: Link,
-      label: 'LinkedIn',
+      label: t("LinkedIn"),
       url: /^https?:/.test(p.links.linkedin) ? p.links.linkedin : `https://www.linkedin.com/in/${p.links.linkedin.replace(/^@/, '')}`,
     },
     p.links?.x && { icon: AtSign, label: `@${p.links.x.replace(/^@/, '').replace(/^https?:\/\/(x|twitter)\.com\//, '')}`, url: /^https?:/.test(p.links.x) ? p.links.x : `https://x.com/${p.links.x.replace(/^@/, '')}` },
@@ -137,27 +139,27 @@ export function ProfileView({ profile: p, isMe, isPro, actions, topLeft, topRigh
                   <Text variant="caption" color="textSubtle">{p.location}</Text>
                 </View>
               )}
-              <Badge>{ROLE_LABEL[p.role]}</Badge>
-              <Badge>{STAGE_LABEL[p.stage]}</Badge>
+              <Badge>{t(ROLE_LABEL[p.role])}</Badge>
+              <Badge>{t(STAGE_LABEL[p.stage])}</Badge>
               {isMe && isPro && <Badge tone="accent" dot>Pro</Badge>}
-              {p.open_to.includes('cofounder') && <Badge tone="success" icon={Handshake}>Open to co-founding</Badge>}
-              {pub?.follows_me && <Badge tone="info">Follows you</Badge>}
+              {p.open_to.includes('cofounder') && <Badge tone="success" icon={Handshake}>{t("Open to co-founding")}</Badge>}
+              {pub?.follows_me && <Badge tone="info">{t("Follows you")}</Badge>}
             </View>
           </View>
 
           <View style={{ flexDirection: 'row', marginTop: 18, paddingVertical: 14, borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.hairline }}>
-            <Stat value={compact(p.followers_count)} label="Followers" onPress={() => router.push({ pathname: '/connections/[id]', params: { id: p.id, tab: 'followers' } })} />
-            <Stat value={compact(p.following_count)} label="Following" onPress={() => router.push({ pathname: '/connections/[id]', params: { id: p.id, tab: 'following' } })} />
-            <Stat value={String(p.founder_score)} label="Founder score" />
-            <Stat value={`Lv ${p.level}`} label={`${compact(p.xp)} XP`} onPress={isMe ? () => router.push('/challenges') : undefined} />
+            <Stat value={compact(p.followers_count)} label={t("Followers")} onPress={() => router.push({ pathname: '/connections/[id]', params: { id: p.id, tab: 'followers' } })} />
+            <Stat value={compact(p.following_count)} label={t("Following")} onPress={() => router.push({ pathname: '/connections/[id]', params: { id: p.id, tab: 'following' } })} />
+            <Stat value={String(p.founder_score)} label={t("Founder score")} />
+            <Stat value={t("Level {{level}}", {level:p.level})} label={`${compact(p.xp)} XP`} onPress={isMe ? () => router.push('/challenges') : undefined} />
           </View>
 
           <View style={{ gap: 14, marginTop: 16 }}>
             {pub && !pub.is_me && pub.match_score != null && (
               <Card variant="accent" style={{ flexDirection: 'row', gap: 14, alignItems: 'center' }}>
-                <ScoreRing value={pub.match_score} size={62} accent label="FIT" />
+                <ScoreRing value={pub.match_score} size={62} accent label={t("FIT")} />
                 <View style={{ flex: 1, gap: 4 }}>
-                  <Text variant="headline">{pub.is_match ? 'You matched' : 'Why you fit'}</Text>
+                  <Text variant="headline">{pub.is_match ? t("You matched") : t("Why you fit")}</Text>
                   {pub.match_reasons.slice(0, 3).map((r) => (
                     <View key={r} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                       <Check size={13} color={c.accentText} strokeWidth={2.6} />
@@ -172,8 +174,8 @@ export function ProfileView({ profile: p, isMe, isPro, actions, topLeft, topRigh
               <Card style={{ gap: 12 }} onPress={() => router.push('/challenges')}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                   <Trophy size={18} color={c.accentText} />
-                  <Text variant="headline" style={{ flex: 1 }}>Level {p.level}</Text>
-                  <Text variant="mono" color="textSubtle">{500 - xpInLevel} XP to Lv {p.level + 1}</Text>
+                  <Text variant="headline" style={{ flex: 1 }}>{t("Level {{level}}", {level:p.level})}</Text>
+                  <Text variant="mono" color="textSubtle">{t("{{xp}} XP to level {{level}}", {xp:500-xpInLevel,level:p.level+1})}</Text>
                 </View>
                 <ProgressBar value={xpInLevel} max={500} tone="gold" />
               </Card>
@@ -182,14 +184,14 @@ export function ProfileView({ profile: p, isMe, isPro, actions, topLeft, topRigh
             {strength && strength.pct < 100 && (
               <Card style={{ gap: 12 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Text variant="headline">Profile strength</Text>
+                  <Text variant="headline">{t("Profile strength")}</Text>
                   <Text variant="mono" color="textSubtle">{strength.pct}%</Text>
                 </View>
                 <ProgressBar value={strength.pct} />
                 {strength.missing.slice(0, 3).map((m) => (
                   <Pressable key={m.key} onPress={() => router.push('/edit-profile')} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }} accessibilityRole="button">
                     <View style={{ width: 20, height: 20, borderRadius: 10, borderWidth: 1.5, borderColor: c.tint20 }} />
-                    <Text variant="callout" color="textMuted" style={{ flex: 1 }}>{m.label}</Text>
+                    <Text variant="callout" color="textMuted" style={{ flex: 1 }}>{t(m.label)}</Text>
                     <ChevronRight size={16} color={c.textFaint} />
                   </Pressable>
                 ))}
@@ -200,47 +202,47 @@ export function ProfileView({ profile: p, isMe, isPro, actions, topLeft, topRigh
               value={tab}
               onChange={setTab}
               options={[
-                { value: 'about', label: 'About' },
-                { value: 'posts', label: `Posts${p.posts_count ? ` · ${p.posts_count}` : ''}` },
-                { value: 'startups', label: 'Startups' },
+                { value: 'about', label: t("About") },
+                { value: 'posts', label: t("Posts") + (p.posts_count ? ` · ${p.posts_count}` : '') },
+                { value: 'startups', label: t("Startups") },
               ]}
             />
 
             {tab === 'about' && (
               <View style={{ gap: 22 }}>
                 {!!p.bio && (
-                  <Block title="About">
+                  <Block title={t("About")}>
                     <Text color="textMuted" style={{ lineHeight: 23 }}>{p.bio}</Text>
                   </Block>
                 )}
                 {p.looking_for.length > 0 && (
-                  <Block title="Looking for">
+                  <Block title={t("Looking for")}>
                     <View style={{ gap: 8 }}>
                       {p.looking_for.map((l) => (
                         <View key={l} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                           <Handshake size={16} color={c.accentText} />
-                          <Text color="textMuted">{l}</Text>
+                          <Text color="textMuted">{t(l)}</Text>
                         </View>
                       ))}
                     </View>
                   </Block>
                 )}
                 {p.skills.length > 0 && (
-                  <Block title="Skills">
+                  <Block title={t("Skills")}>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-                      {p.skills.map((s) => <Chip key={s} label={s} size="sm" static />)}
+                      {p.skills.map((s) => <Chip key={s} label={t(s)} size="sm" static />)}
                     </View>
                   </Block>
                 )}
                 {p.industries.length > 0 && (
-                  <Block title="Industries">
+                  <Block title={t("Industries")}>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-                      {p.industries.map((s) => <Chip key={s} label={s} size="sm" static />)}
+                      {p.industries.map((s) => <Chip key={s} label={t(s)} size="sm" static />)}
                     </View>
                   </Block>
                 )}
                 {links.length > 0 && (
-                  <Block title="Links">
+                  <Block title={t("Links")}>
                     <View style={{ gap: 8 }}>
                       {links.map((l) => {
                         const Icon = l.icon;
@@ -260,7 +262,7 @@ export function ProfileView({ profile: p, isMe, isPro, actions, topLeft, topRigh
                     </View>
                   </Block>
                 )}
-                <Block title="Achievements">
+                <Block title={t("Achievements")}>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                     {achievements.map((a) => {
                       const Icon = a.done ? a.icon : Lock;
@@ -290,9 +292,9 @@ export function ProfileView({ profile: p, isMe, isPro, actions, topLeft, topRigh
                 <EmptyState
                   compact
                   icon={Newspaper}
-                  title={isMe ? 'You haven’t posted yet' : 'No posts yet'}
-                  message={isMe ? 'Share a milestone or ask the community something.' : undefined}
-                  actionLabel={isMe ? 'Write a post' : undefined}
+                  title={isMe ? t("You haven’t posted yet") : t("No posts yet")}
+                  message={isMe ? t("Share a milestone or ask the community something.") : undefined}
+                  actionLabel={isMe ? t("Write a post") : undefined}
                   onAction={() => router.push('/compose')}
                 />
               ))}
@@ -306,9 +308,9 @@ export function ProfileView({ profile: p, isMe, isPro, actions, topLeft, topRigh
                 <EmptyState
                   compact
                   icon={Rocket}
-                  title={isMe ? 'Launch your startup' : 'No startups listed'}
-                  message={isMe ? 'Showcases get priority distribution to investors in their first 48 hours.' : undefined}
-                  actionLabel={isMe ? 'Launch on FNDRS' : undefined}
+                  title={isMe ? t("Launch your startup") : t("No startups listed")}
+                  message={isMe ? t("Show the community what you are building and who you want to meet.") : undefined}
+                  actionLabel={isMe ? t("Launch on FNDRS") : undefined}
                   onAction={() => router.push('/startups/new' as Href)}
                 />
               ))}

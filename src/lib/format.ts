@@ -99,7 +99,7 @@ export function firstName(name: string | null | undefined): string {
 
 export function greeting(): string {
   const h = new Date().getHours();
-  if (h < 5) return 'Up late';
+  if (h < 5) return translateNow('Up late');
   if (h < 12) return translateNow('Good morning');
   if (h < 18) return translateNow('Good afternoon');
   return translateNow('Good evening');

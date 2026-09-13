@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { describeError } from '@/lib/errors';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
@@ -54,7 +55,7 @@ const STEPS = [
   { title: 'Which spaces are you in?', sub: 'Pick up to five.' },
   { title: 'Who are you looking for?', sub: 'This is the strongest signal Smart Match uses.' },
   { title: 'What do you bring?', sub: 'Pick up to six — people looking for these skills will find you.' },
-  { title: 'Put a face to the name', sub: 'Profiles with a photo and headline get 4× more replies.' },
+  { title: 'Put a face to the name', sub: 'Help other members recognize you and understand what you are building.' },
 ];
 
 function toggle<T>(list: T[], item: T, max = 99): T[] {
@@ -63,6 +64,7 @@ function toggle<T>(list: T[], item: T, max = 99): T[] {
 }
 
 export default function Onboarding() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { c } = useTheme();
   const { profile } = useAuth();
@@ -113,9 +115,9 @@ export default function Onboarding() {
         onboarded: true,
       });
       haptic.success();
-      toast.accent('Welcome to FNDRS Society', '+100 XP — your first matches are ready.');
+      toast.accent(t("Welcome to FNDRS Society"), t("Your profile is ready. Discover people and start connecting."));
     } catch (e) {
-      toast.error('Could not save your profile', describeError(e));
+      toast.error(t("Could not save your profile"), describeError(e));
       setBusy(false);
     }
   };
@@ -128,7 +130,7 @@ export default function Onboarding() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <View style={{ width: 38 }}>
             {step > 0 && (
-              <IconButton icon={ArrowLeft} variant="plain" size={38} onPress={() => setStep((s) => s - 1)} accessibilityLabel="Previous step" />
+              <IconButton icon={ArrowLeft} variant="plain" size={38} onPress={() => setStep((s) => s - 1)} accessibilityLabel={t("Previous step")} />
             )}
           </View>
           <View style={{ flex: 1 }}>
@@ -146,8 +148,8 @@ export default function Onboarding() {
       >
         <Animated.View key={step} entering={FadeInRight.duration(260)} exiting={FadeOutLeft.duration(140)} style={{ gap: 20 }}>
           <View style={{ gap: 8, marginTop: 8 }}>
-            <Text variant="largeTitle">{STEPS[step].title}</Text>
-            <Text color="textMuted">{STEPS[step].sub}</Text>
+            <Text variant="largeTitle">{t(STEPS[step].title)}</Text>
+            <Text color="textMuted">{t(STEPS[step].sub)}</Text>
           </View>
 
           {step === 0 && (
@@ -180,8 +182,8 @@ export default function Onboarding() {
                       {on && <Check size={18} color={c.text} />}
                     </View>
                     <View>
-                      <Text variant="headline">{r.title}</Text>
-                      <Text variant="caption" color="textSubtle">{r.desc}</Text>
+                      <Text variant="headline">{t(r.title)}</Text>
+                      <Text variant="caption" color="textSubtle">{t(r.desc)}</Text>
                     </View>
                   </PressableScale>
                 );
@@ -215,8 +217,8 @@ export default function Onboarding() {
                       {on && <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: c.text }} />}
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text variant="headline">{STAGE_LABEL[s.value]}</Text>
-                      <Text variant="caption" color="textSubtle">{s.desc}</Text>
+                      <Text variant="headline">{t(STAGE_LABEL[s.value])}</Text>
+                      <Text variant="caption" color="textSubtle">{t(s.desc)}</Text>
                     </View>
                   </PressableScale>
                 );
@@ -227,7 +229,7 @@ export default function Onboarding() {
           {step === 2 && (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
               {INDUSTRIES.map((i) => (
-                <Chip key={i} label={i} size="lg" selected={industries.includes(i)} onPress={() => setIndustries((l) => toggle(l, i, 5))} />
+                <Chip key={i} label={t(i)} size="lg" selected={industries.includes(i)} onPress={() => setIndustries((l) => toggle(l, i, 5))} />
               ))}
             </View>
           )}
@@ -235,7 +237,7 @@ export default function Onboarding() {
           {step === 3 && (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
               {LOOKING_FOR.map((i) => (
-                <Chip key={i} label={i} size="lg" selected={lookingFor.includes(i)} onPress={() => setLookingFor((l) => toggle(l, i))} />
+                <Chip key={i} label={t(i)} size="lg" selected={lookingFor.includes(i)} onPress={() => setLookingFor((l) => toggle(l, i))} />
               ))}
             </View>
           )}
@@ -243,7 +245,7 @@ export default function Onboarding() {
           {step === 4 && (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
               {SKILLS.map((i) => (
-                <Chip key={i} label={i} size="lg" selected={skills.includes(i)} onPress={() => setSkills((l) => toggle(l, i, 6))} />
+                <Chip key={i} label={t(i)} size="lg" selected={skills.includes(i)} onPress={() => setSkills((l) => toggle(l, i, 6))} />
               ))}
             </View>
           )}
@@ -256,7 +258,7 @@ export default function Onboarding() {
                   if (uri) setAvatar(uri);
                 }}
                 accessibilityRole="button"
-                accessibilityLabel="Choose a profile photo"
+                accessibilityLabel={t("Choose a profile photo")}
                 style={{ alignSelf: 'center', alignItems: 'center', gap: 10 }}
               >
                 <View>
@@ -265,18 +267,18 @@ export default function Onboarding() {
                     <Camera size={15} color={c.actionText} />
                   </View>
                 </View>
-                <Text variant="footnote" color="textMuted">{avatar ? 'Change photo' : 'Add a photo'}</Text>
+                <Text variant="footnote" color="textMuted">{avatar ? t("Change photo") : t("Add a photo")}</Text>
               </Pressable>
-              <Input label="Headline" value={headline} onChangeText={setHeadline} placeholder="Founder @ Loomwork · AI back-office for agencies" maxLength={120} counter />
-              <Input label="Location" icon={MapPin} value={location} onChangeText={setLocation} placeholder="Berlin, Germany" />
-              <Input label="About you (optional)" value={bio} onChangeText={setBio} placeholder="What are you building and why you?" multiline maxLength={600} counter />
+              <Input label={t("Headline")} value={headline} onChangeText={setHeadline} placeholder={t("Founder @ Loomwork · AI back-office for agencies")} maxLength={120} counter />
+              <Input label={t("Location")} icon={MapPin} value={location} onChangeText={setLocation} placeholder={t("Berlin, Germany")} />
+              <Input label={t("About you (optional)")} value={bio} onChangeText={setBio} placeholder={t("What are you building and why you?")} multiline maxLength={600} counter />
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: radius.lg, backgroundColor: c.card, borderWidth: 1, borderColor: c.hairline }}>
                 <Handshake size={20} color={c.accentText} />
                 <View style={{ flex: 1 }}>
-                  <Text variant="headline">Open to co-founding</Text>
-                  <Text variant="caption" color="textSubtle">Shows a badge and boosts you in co-founder matches.</Text>
+                  <Text variant="headline">{t("Open to co-founding")}</Text>
+                  <Text variant="caption" color="textSubtle">{t("Shows a badge and boosts you in co-founder matches.")}</Text>
                 </View>
-                <Switch value={openCofounder} onValueChange={setOpenCofounder} accessibilityLabel="Open to co-founding" />
+                <Switch value={openCofounder} onValueChange={setOpenCofounder} accessibilityLabel={t("Open to co-founding")} />
               </View>
             </View>
           )}
@@ -285,7 +287,7 @@ export default function Onboarding() {
 
       <View style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: insets.bottom + 14, borderTopWidth: 1, borderTopColor: c.hairline, gap: 8 }}>
         <Button
-          title={last ? 'Enter FNDRS' : 'Continue'}
+          title={last ? t("Enter FNDRS") : 'Continue'}
           size="lg"
           block
           disabled={!canContinue}
@@ -295,7 +297,7 @@ export default function Onboarding() {
           style={{ maxWidth: 620, width: '100%', alignSelf: 'center' }}
         />
         {step === 0 && (
-          <Button title="Sign out" variant="ghost" size="sm" onPress={() => api.signOut()} />
+          <Button title={t("Sign out")} variant="ghost" size="sm" onPress={() => api.signOut()} />
         )}
       </View>
     </KeyboardAvoidingView>

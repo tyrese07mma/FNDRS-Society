@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { describeError } from '@/lib/errors';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import React, { useState } from 'react';
@@ -13,6 +14,7 @@ import { Button, EmptyState, Header, IconButton, ListGroup, ListRow, Sheet, Skel
 import { AtSign, ChevronLeft, CircleAlert, Ellipsis, Flag, MessageCircle, PenLine, Share2, UserCheck, UserPlus } from '@/ui/icons';
 
 export default function UserProfile() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -38,7 +40,7 @@ export default function UserProfile() {
     return (
       <View style={{ flex: 1, backgroundColor: c.bg }}>
         <Header back />
-        <EmptyState icon={CircleAlert} title="Profile unavailable" message={describeError(profile.error)} />
+        <EmptyState icon={CircleAlert} title={t("Profile unavailable")} message={describeError(profile.error)} />
       </View>
     );
   }
@@ -70,37 +72,37 @@ export default function UserProfile() {
             tintColor={c.textSubtle}
           />
         }
-        topLeft={<IconButton icon={ChevronLeft} variant="glass" iconSize={22} onPress={back} accessibilityLabel="Back" />}
+        topLeft={<IconButton icon={ChevronLeft} variant="glass" iconSize={22} onPress={back} accessibilityLabel={t("Back")} />}
         topRight={
           <>
-            <IconButton icon={Share2} variant="glass" onPress={() => shareText(`${p.full_name} on FNDRS Society — ${p.headline}`, appLink(`/user/${p.id}`))} accessibilityLabel="Share profile" />
-            {!p.is_me && <IconButton icon={Ellipsis} variant="glass" onPress={() => setMenu(true)} accessibilityLabel="More options" />}
+            <IconButton icon={Share2} variant="glass" onPress={() => shareText(t("{{name}} on FNDRS Society — {{headline}}", {name:p.full_name,headline:p.headline}), appLink(`/user/${p.id}`))} accessibilityLabel={t("Share profile")} />
+            {!p.is_me && <IconButton icon={Ellipsis} variant="glass" onPress={() => setMenu(true)} accessibilityLabel={t("More options")} />}
           </>
         }
         actions={
           p.is_me ? (
-            <Button title="Edit profile" icon={PenLine} variant="secondary" size="sm" onPress={() => router.push('/edit-profile')} />
+            <Button title={t("Edit profile")} icon={PenLine} variant="secondary" size="sm" onPress={() => router.push('/edit-profile')} />
           ) : (
             <>
               <Button
-                title={p.is_following ? 'Following' : p.follows_me ? 'Follow back' : 'Follow'}
+                title={p.is_following ? t("Following") : p.follows_me ? t("Follow back") : t("Follow")}
                 icon={p.is_following ? UserCheck : UserPlus}
                 variant={p.is_following ? 'secondary' : 'primary'}
                 size="sm"
                 onPress={() => follow.mutate({ userId: p.id, follow: !p.is_following })}
               />
-              <Button title="Message" icon={MessageCircle} variant="secondary" size="sm" loading={open.isPending} onPress={message} />
+              <Button title={t("Message")} icon={MessageCircle} variant="secondary" size="sm" loading={open.isPending} onPress={message} />
             </>
           )
         }
       />
-      <Sheet open={menu} onClose={() => { setMenu(false); setReporting(false); }} title={reporting ? `Report ${p.full_name}` : undefined}>
+      <Sheet open={menu} onClose={() => { setMenu(false); setReporting(false); }} title={reporting ? t("Report {{name}}", {name:p.full_name}) : undefined}>
         {reporting ? (
           <ListGroup>
-            {['Fake profile', 'Spam or scam', 'Harassment', 'Something else'].map((r, i, all) => (
+            {["Fake profile", "Spam or scam", "Harassment", "Something else"].map((r, i, all) => (
               <ListRow
                 key={r}
-                title={r}
+                title={t(r)}
                 last={i === all.length - 1}
                 onPress={() => {
                   setMenu(false);
@@ -112,8 +114,8 @@ export default function UserProfile() {
           </ListGroup>
         ) : (
           <ListGroup>
-            <ListRow icon={AtSign} title={`Copy @${p.handle}`} onPress={() => { setMenu(false); copy(`@${p.handle}`, 'Handle copied'); }} />
-            <ListRow icon={Flag} title="Report profile" destructive onPress={() => setReporting(true)} />
+            <ListRow icon={AtSign} title={t("Copy @{{handle}}", {handle:p.handle})} onPress={() => { setMenu(false); copy(`@${p.handle}`, t("Handle copied")); }} />
+            <ListRow icon={Flag} title={t("Report profile")} destructive onPress={() => setReporting(true)} />
             <BlockAction userId={p.id} name={p.full_name} onClose={() => setMenu(false)} />
           </ListGroup>
         )}

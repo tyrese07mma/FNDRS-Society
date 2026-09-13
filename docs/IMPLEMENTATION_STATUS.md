@@ -1,4 +1,4 @@
-# Arbeitsstand – 12. September 2026
+# Arbeitsstand – 13. September 2026
 
 Kein Release-Nachweis. Diese Datei dokumentiert den Zwischenstand und muss bei weiteren Änderungen aktualisiert werden.
 
@@ -19,6 +19,8 @@ Kein Release-Nachweis. Diese Datei dokumentiert den Zwischenstand und muss bei w
 - Blockieren und Entblockieren in Profilen, Chats und Einstellungen; serverseitige Sperren für Folgen, Matching und Nachrichten in vorhandenen Chats. Bestehende Nachrichten bleiben erhalten.
 - Kontobezogener JSON-Datenexport mit paginierten, authentifizierten Abrufen und Datei-Ausgabe für Web/iOS/Android. Umfang und Grenzen in PRIVACY_CONTROLS.md; native Ausgabe noch nicht auf Geräten geprüft.
 - Zentrale Fehleranzeige mit freigegebenen DE/EN-Texten statt ungefilterter Provider-Meldungen.
+- Onboarding, Profilansicht und Profilbearbeitung um DE/EN-Texte ergänzt. Unbelegte Demo-Versprechen zu garantierten Matches, Antwortquoten und Investor-Verteilung entfernt.
+- Vorschau lokal gestartet und Startzustand im Browser visuell geprüft: ohne Supabase-Konfiguration erscheint der vorgesehene deutsche Verfügbarkeitshinweis. Authentifizierte Abläufe konnten damit noch nicht durchgeklickt werden.
 - 32 lokale Tests bestanden; zusätzlich Export, Blockierungen, Fehlertexte, Wörterbucheinträge und Interpolationsplatzhalter geprüft. Diese Tests belegen keine vollständige Übersetzung aller Screens und ersetzen keine visuelle Prüfung.
 - GitHub Actions für den ersten Entwicklungsimport erfolgreich, einschließlich Expo-Export für Web, Android und iOS. Neue Änderungen benötigen jeweils einen eigenen CI-Lauf.
 
