@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { useRouter, type Href } from 'expo-router';
 import React from 'react';
 import { View } from 'react-native';
@@ -37,12 +38,13 @@ function DateBlock({ iso, hue, size = 54 }: { iso: string; hue: number; size?: n
 }
 
 export function EventCard({ event, variant = 'row' }: { event: EventItem; variant?: 'row' | 'mini' }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const { c } = useTheme();
   const d = eventDate(event.starts_at);
   const past = isPast(event.starts_at);
   const open = () => router.push(`/events/${event.id}` as Href);
-  const where = event.is_online ? 'Online' : event.location ?? 'TBA';
+  const where = event.is_online ? 'Online' : event.location ?? t("TBA");
 
   if (variant === 'mini') {
     return (
@@ -50,7 +52,7 @@ export function EventCard({ event, variant = 'row' }: { event: EventItem; varian
         <GradientCover hue={event.hue} height={78}>
           <View style={{ position: 'absolute', left: 12, bottom: 10, flexDirection: 'row', gap: 6 }}>
             <Badge tone="solid">{`${d.weekday} ${d.day} ${d.mo}`}</Badge>
-            {event.going && <Badge tone="success">Going</Badge>}
+            {event.going && <Badge tone="success">{t("Going")}</Badge>}
           </View>
         </GradientCover>
         <View style={{ padding: 14, gap: 6 }}>
@@ -71,9 +73,9 @@ export function EventCard({ event, variant = 'row' }: { event: EventItem; varian
       <DateBlock iso={event.starts_at} hue={event.hue} />
       <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
         <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
-          <Badge>{event.kind}</Badge>
-          {event.going && <Badge tone="success">{past ? 'Attended' : 'Going'}</Badge>}
-          {event.featured && !event.going && <Badge tone="accent">Featured</Badge>}
+          <Badge>{t(event.kind)}</Badge>
+          {event.going && <Badge tone="success">{past ? t("Attended") : t("Going")}</Badge>}
+          {event.featured && !event.going && <Badge tone="accent">{t("Featured")}</Badge>}
         </View>
         <Text variant="headline" numberOfLines={2}>{event.title}</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
@@ -85,7 +87,7 @@ export function EventCard({ event, variant = 'row' }: { event: EventItem; varian
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 }}>
           {event.attendees.length > 0 && <AvatarStack people={event.attendees} size={20} max={3} />}
           <Text variant="caption" color="textSubtle">
-            {compact(event.going_count)} going{event.capacity ? ` · ${Math.max(0, event.capacity - event.going_count)} spots left` : ''}
+            {t('{{count}} going', { count: compact(event.going_count) })}{event.capacity ? ` · ${t('{{remaining}} spots left', { remaining: Math.max(0, event.capacity - event.going_count) })}` : ''}
           </Text>
         </View>
       </View>

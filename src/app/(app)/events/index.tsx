@@ -1,3 +1,5 @@
+import { useTranslation } from '@/i18n';
+import { describeError } from '@/lib/errors';
 import { useNow } from '@/lib/useNow';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -14,6 +16,7 @@ import { CalendarDays, CalendarPlus } from '@/ui/icons';
 type Tab = 'upcoming' | 'going' | 'past';
 
 export default function Events() {
+  const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { c } = useTheme();
@@ -34,7 +37,7 @@ export default function Events() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <Header back title="Events" right={<Button title="Host" icon={CalendarPlus} size="sm" onPress={() => router.push('/events/new')} />} />
+      <Header back title={t("Events")} right={<Button title={t("Host")} icon={CalendarPlus} size="sm" onPress={() => router.push('/events/new')} />} />
       <FlatList
         data={data}
         keyExtractor={(e) => e.id}
@@ -46,18 +49,18 @@ export default function Events() {
               value={tab}
               onChange={setTab}
               options={[
-                { value: 'upcoming', label: 'Upcoming' },
-                { value: 'going', label: 'Going', badge: upcoming.filter((e) => e.going).length },
-                { value: 'past', label: 'Past' },
+                { value: 'upcoming', label: t("Upcoming") },
+                { value: 'going', label: t("Going"), badge: upcoming.filter((e) => e.going).length },
+                { value: 'past', label: t("Past") },
               ]}
             />
             {tab === 'upcoming' && featured.length > 0 && (
               <View style={{ gap: 10 }}>
-                <Text variant="label" color="textSubtle">FEATURED</Text>
+                <Text variant="label" color="textSubtle">{t("FEATURED")}</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ gap: 12, paddingHorizontal: 16 }}>
                   {featured.map((e) => <EventCard key={e.id} event={e} variant="mini" />)}
                 </ScrollView>
-                <Text variant="label" color="textSubtle" style={{ marginTop: 8 }}>ALL UPCOMING</Text>
+                <Text variant="label" color="textSubtle" style={{ marginTop: 8 }}>{t("ALL UPCOMING")}</Text>
               </View>
             )}
           </View>
@@ -65,12 +68,14 @@ export default function Events() {
         ListEmptyComponent={
           events.isLoading ? (
             <SkeletonList variant="card" count={3} />
+          ) : events.isError ? (
+            <EmptyState icon={CalendarDays} title={t('Events could not be loaded')} message={describeError(events.error)} actionLabel={t('Try again')} onAction={() => { void events.refetch(); }} />
           ) : (
             <EmptyState
               icon={CalendarDays}
-              title={tab === 'going' ? 'No RSVPs yet' : tab === 'past' ? 'No past events' : 'No upcoming events'}
-              message={tab === 'going' ? 'RSVP to a pitch night or meetup and it shows up here.' : 'Host one — founders love small, focused rooms.'}
-              actionLabel={tab === 'going' ? 'Browse upcoming' : 'Host an event'}
+              title={tab === 'going' ? t("No RSVPs yet") : tab === 'past' ? t("No past events") : t("No upcoming events")}
+              message={tab === 'going' ? t("RSVP to a pitch night or meetup and it shows up here.") : t("Host one — founders love small, focused rooms.")}
+              actionLabel={tab === 'going' ? t("Browse upcoming") : t("Host an event")}
               onAction={() => (tab === 'going' ? setTab('upcoming') : router.push('/events/new'))}
             />
           )

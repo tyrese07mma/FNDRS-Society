@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { describeError } from '@/lib/errors';
 import { useRouter, type Href } from 'expo-router';
 import React, { useState } from 'react';
@@ -27,6 +28,7 @@ function days() {
 }
 
 export default function NewEvent() {
+  const { t, locale } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { c } = useTheme();
@@ -42,8 +44,8 @@ export default function NewEvent() {
   const [error, setError] = useState<string | null>(null);
 
   const publish = async () => {
-    if (title.trim().length < 4) return setError('Give your event a title.');
-    if (!online && location.trim().length < 2) return setError('Where is it happening?');
+    if (title.trim().length < 4) return setError(t("Give your event a title."));
+    if (!online && location.trim().length < 2) return setError(t("Where is it happening?"));
     setError(null);
     const [h, m] = time.split(':').map(Number);
     const start = new Date(dates[day]);
@@ -65,19 +67,19 @@ export default function NewEvent() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: c.bg }} behavior={KAV_BEHAVIOR}>
-      <Header modal title="Host an event" />
+      <Header modal title={t("Host an event")} />
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16, gap: 22, paddingBottom: insets.bottom + 40, width: '100%', maxWidth: 680, alignSelf: 'center' }}>
-        <Input label="Title" value={title} onChangeText={setTitle} placeholder="AI Founders Breakfast" maxLength={120} />
+        <Input label={t("Title")} value={title} onChangeText={setTitle} placeholder={t("AI Founders Breakfast")} maxLength={120} />
 
         <View style={{ gap: 10 }}>
-          <Text variant="label" color="textSubtle">FORMAT</Text>
+          <Text variant="label" color="textSubtle">{t("FORMAT")}</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-            {KINDS.map((k) => <Chip key={k} label={k} selected={kind === k} onPress={() => setKind(k)} />)}
+            {KINDS.map((k) => <Chip key={k} label={t(k)} selected={kind === k} onPress={() => setKind(k)} />)}
           </View>
         </View>
 
         <View style={{ gap: 10 }}>
-          <Text variant="label" color="textSubtle">DATE</Text>
+          <Text variant="label" color="textSubtle">{t("DATE")}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}>
             {dates.map((d, i) => {
               const on = i === day;
@@ -87,16 +89,16 @@ export default function NewEvent() {
                   haptics="selection"
                   scaleTo={0.94}
                   onPress={() => setDay(i)}
-                  accessibilityLabel={d.toDateString()}
+                  accessibilityLabel={d.toLocaleDateString(locale, { dateStyle: 'full' })}
                   accessibilityState={{ selected: on }}
                   style={{ width: 58, paddingVertical: 10, alignItems: 'center', gap: 2, borderRadius: radius.md, borderWidth: 1, borderColor: on ? c.action : c.hairline, backgroundColor: on ? c.action : c.card }}
                 >
                   <Text variant="label" tint={on ? c.actionText : c.textSubtle} style={{ fontSize: 10 }}>
-                    {d.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase()}
+                    {d.toLocaleDateString(locale, { weekday: 'short' }).toUpperCase()}
                   </Text>
                   <Text variant="number" tint={on ? c.actionText : c.text} style={{ fontSize: 19 }}>{d.getDate()}</Text>
                   <Text variant="caption" tint={on ? c.actionText : c.textSubtle} style={{ fontSize: 10.5 }}>
-                    {d.toLocaleDateString('en-GB', { month: 'short' })}
+                    {d.toLocaleDateString(locale, { month: 'short' })}
                   </Text>
                 </PressableScale>
               );
@@ -105,7 +107,7 @@ export default function NewEvent() {
         </View>
 
         <View style={{ gap: 10 }}>
-          <Text variant="label" color="textSubtle">START TIME</Text>
+          <Text variant="label" color="textSubtle">{t("START TIME")}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}>
             {TIMES.map((t) => <Chip key={t} label={t} selected={time === t} onPress={() => setTime(t)} />)}
           </ScrollView>
@@ -113,18 +115,18 @@ export default function NewEvent() {
 
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: radius.lg, backgroundColor: c.card, borderWidth: 1, borderColor: c.hairline }}>
           <View style={{ flex: 1 }}>
-            <Text variant="headline">Online event</Text>
-            <Text variant="caption" color="textSubtle">Attendees get the link after they RSVP.</Text>
+            <Text variant="headline">{t("Online event")}</Text>
+            <Text variant="caption" color="textSubtle">{t('Arrange access details with your attendees.')}</Text>
           </View>
-          <Switch value={online} onValueChange={setOnline} accessibilityLabel="Online event" />
+          <Switch value={online} onValueChange={setOnline} accessibilityLabel={t("Online event")} />
         </View>
-        {!online && <Input label="Location" icon={MapPin} value={location} onChangeText={setLocation} placeholder="Factory Görlitzer Park, Berlin" />}
+        {!online && <Input label={t("Location")} icon={MapPin} value={location} onChangeText={setLocation} placeholder="Factory Görlitzer Park, Berlin" />}
 
-        <Input label="Description" value={description} onChangeText={setDescription} multiline maxLength={1200} counter placeholder="Who is it for, what will happen, what should people bring?" />
+        <Input label={t("Description")} value={description} onChangeText={setDescription} multiline maxLength={1200} counter placeholder={t("Who is it for, what will happen, what should people bring?")} />
 
         {!!error && <Text variant="footnote" color="danger">{error}</Text>}
-        <Button title="Publish event" icon={CalendarPlus} size="lg" block loading={create.isPending} onPress={publish} />
-        <Text variant="caption" color="textSubtle" align="center">+20 XP · you are added as the first attendee</Text>
+        <Button title={t("Publish event")} icon={CalendarPlus} size="lg" block loading={create.isPending} onPress={publish} />
+        <Text variant="caption" color="textSubtle" align="center">{t("+20 XP · you are added as the first attendee")}</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
