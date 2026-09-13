@@ -1,5 +1,9 @@
 # Block management and data export
 
+## Writes during account deletion
+
+Migration `202609130001_account_write_guards.sql` extends the existing account-deletion guard to startup, event, opportunity, saved-guide, progress, introduction, profile-view, conversation-read, notification, AI-history and private-profile writes. Requests carrying the deleting member's JWT cannot mutate these rows after the deletion marker is present. Trusted server cleanup without a member JWT can still cascade. PostgreSQL tests cover startup creation before the marker, rejected creation/editing after it, and successful server cleanup. Concurrent in-flight transactions and hosted integration still need separate verification.
+
 ## Blocking
 
 Members can block someone from their profile or chat menu and manage their list in Settings → Blocked members. Blocking removes both directions of follows, reciprocal matches and previous swipes. It prevents new follows, matches, conversations and messages in existing conversations. Existing message history remains available. Unblocking removes only the caller's block and does not restore former relationships. A block in the opposite direction continues to apply.

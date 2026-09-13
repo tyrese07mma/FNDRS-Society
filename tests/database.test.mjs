@@ -193,6 +193,7 @@ test('export database cursor visits every owned row across page boundaries',asyn
 });
 
 test('account cleanup cannot be bypassed and serializes checkout with deletion',async()=>{
+ const startup = await asUser(C, async()=> (await db.query("insert into startups(owner_id,name,tagline) values($1,'Lifecycle test','Created before deletion') returning id",[C])).rows[0].id);
  await db.query("select set_config('request.jwt.claim.sub','',false)");
  await assert.rejects(asUser(C,()=>db.query("select claim_account_operation($1,'delete')",[C])));
  const token=(await db.query("select claim_account_operation($1,'checkout') token",[C])).rows[0].token;
@@ -201,9 +202,15 @@ test('account cleanup cannot be bypassed and serializes checkout with deletion',
  await assert.rejects(db.query("select claim_account_operation($1,'checkout')",[C]),/in progress/);
  await db.query('select release_account_operation($1,$2)',[C,token]);
  const deletion=(await db.query("select claim_account_operation($1,'delete') token",[C])).rows[0].token;
+ await assert.rejects(asUser(C,()=>db.query("insert into startups(owner_id,name,tagline) values($1,'Late startup','Must not be published')",[C])),/deletion/);
+ await assert.rejects(asUser(C,()=>db.query("update startups set tagline='Changed during deletion' where id=$1",[startup])),/deletion/);
+ assert.equal((await db.query('select tagline from startups where id=$1',[startup])).rows[0].tagline,'Created before deletion');
  await assert.rejects(asUser(C,()=>db.query("update profiles set bio='still active' where id=$1",[C])),/deletion/);
  await assert.rejects(asUser(C,()=>db.exec('select delete_my_account()')));
  await db.query('select release_account_operation($1,$2)',[C,deletion]);
  await assert.rejects(db.query("select claim_account_operation($1,'checkout')",[C]),/deletion/);
  assert.ok((await db.query("select claim_account_operation($1,'delete') token",[C])).rows[0].token);
+ // Trusted cleanup still removes the member's related rows after the freeze.
+ await db.query('delete from auth.users where id=$1',[C]);
+ assert.equal((await db.query('select id from startups where id=$1',[startup])).rows.length,0);
 });
