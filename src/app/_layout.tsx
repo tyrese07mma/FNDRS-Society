@@ -19,6 +19,7 @@ import { useSettings } from '@/state/settings';
 import { useTheme } from '@/theme/ThemeProvider';
 import { Button, DialogHost, EmptyState, ToastHost } from '@/ui';
 import { CircleAlert } from '@/ui/icons';
+import LocalPreview from '@/features/preview/LocalPreview';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -64,6 +65,9 @@ function RootNavigator({ fontsReady }: { fontsReady: boolean }) {
   useRealtimeSync(signedIn && onboarded);
 
   if (!appReady) return null;
+
+  // Explicit opt-in for the local web preview. Never exposes authenticated routes.
+  if (__DEV__ && Platform.OS === 'web' && process.env.EXPO_PUBLIC_LOCAL_PREVIEW === 'true' && !BACKEND_CONFIGURED) return <LocalPreview />;
 
   if (!BACKEND_CONFIGURED) return (
     <View style={{ flex: 1, backgroundColor: c.bg, justifyContent: 'center', padding: 24 }}>
