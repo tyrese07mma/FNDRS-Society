@@ -44,3 +44,7 @@ example
 # generated native folders
 /ios
 /android
+
+# Generated one-time database installation bundle
+/backend-install/
+/supabase/.temp/
