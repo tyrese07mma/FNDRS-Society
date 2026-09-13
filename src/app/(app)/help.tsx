@@ -39,7 +39,7 @@ const FAQ: { section: string; items: [string, string][] }[] = [
     section: 'Privacy & safety',
     items: [
       ['Who can see my location?', 'Only members, and only if “Show my location” is on in Settings → Privacy.'],
-      ['How do I report someone?', 'Use the “…” menu on any post, profile or chat and choose Report. Our team reviews every report within 24 hours.'],
+      ['How do I report someone?', 'Use the “…” menu on any post, profile or chat and choose Report. Your report is submitted for review.'],
       ['Can I delete my data?', 'Yes. Settings → Delete account removes your profile, posts, messages and matches permanently.'],
     ],
   },

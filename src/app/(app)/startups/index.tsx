@@ -48,7 +48,7 @@ export default function Startups() {
             <EmptyState
               icon={Rocket}
               title={sort === 'mine' ? 'You haven’t launched yet' : 'No startups yet'}
-              message="Showcases get priority distribution to investors and operators in their first 48 hours."
+              message="Show the community what you are building and who you want to meet."
               actionLabel="Launch your startup"
               onAction={() => router.push('/startups/new')}
             />

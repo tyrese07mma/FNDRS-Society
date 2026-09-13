@@ -149,7 +149,7 @@ export default function Mentors() {
               </View>
             </View>
             <Input label="What do you want to cover? (optional)" value={note} onChangeText={setNote} multiline maxLength={400} placeholder="Context helps your mentor prepare." />
-            <Text variant="caption" color="textSubtle">You can cancel free of charge up to 24 hours before the session.</Text>
+            <Text variant="caption" color="textSubtle">You can cancel this booking from My bookings.</Text>
           </View>
         )}
       </Sheet>

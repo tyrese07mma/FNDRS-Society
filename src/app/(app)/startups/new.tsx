@@ -92,7 +92,7 @@ export default function NewStartup() {
 
         {!!error && <Text variant="footnote" color="danger">{error}</Text>}
         <Button title="Launch startup" icon={Rocket} variant="accent" size="lg" block loading={create.isPending} onPress={launch} />
-        <Text variant="caption" color="textSubtle" align="center">+50 XP · featured to investors for 48 hours</Text>
+        <Text variant="caption" color="textSubtle" align="center">Your startup will appear in the community directory.</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
