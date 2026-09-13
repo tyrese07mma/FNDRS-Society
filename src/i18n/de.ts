@@ -1,5 +1,7 @@
 /** Explicit interface copy only. User-generated content never passes through this map. */
 export const de: Record<string,string> = {
+ 'This link is invalid or has expired.':'Dieser Link ist ungültig oder abgelaufen.',
+ 'Verifying your account…':'Dein Konto wird überprüft …',
  'Events could not be loaded':'Events konnten nicht geladen werden',
  'Profile':'Profil',
  'Local design preview · no live accounts or activity':'Designvorschau · noch keine echten Konten oder Aktivitäten',

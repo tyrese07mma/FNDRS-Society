@@ -4,10 +4,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Platform, View } from 'react-native';
 import { sb } from '@/data/supabase/client';
 import { authCallbackParams } from '@/lib/auth-callback';
+import { useTranslation } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
 import { Button, Text } from '@/ui';
 
 export default function AuthCallback() {
+  const { t } = useTranslation();
   const router = useRouter();
   const url = Linking.useLinkingURL();
   const started = useRef(false);
@@ -28,10 +30,14 @@ export default function AuthCallback() {
       } else throw new Error('Missing auth credentials');
       if (Platform.OS === 'web') window.history.replaceState({}, '', '/auth-callback');
       router.replace(params.recovery ? '/reset-password' : '/');
-    })().catch(() => setFailed(true));
+    })().catch(() => {
+      // Expired or rejected credentials should not remain in the address bar either.
+      if (Platform.OS === 'web') window.history.replaceState({}, '', '/auth-callback');
+      setFailed(true);
+    });
   }, [url, router]);
   return <View style={{ flex: 1, backgroundColor: c.bg, padding: 24, justifyContent: 'center', gap: 16 }}>
-    <Text variant="title2">{failed ? 'This link is invalid or has expired.' : 'Verifying your account…'}</Text>
-    {failed && <Button title="Back to sign in" onPress={() => router.replace('/sign-in')} />}
+    <Text variant="title2">{failed ? t('This link is invalid or has expired.') : t('Verifying your account…')}</Text>
+    {failed && <Button title={t('Back to sign in')} onPress={() => router.replace('/sign-in')} />}
   </View>;
 }
