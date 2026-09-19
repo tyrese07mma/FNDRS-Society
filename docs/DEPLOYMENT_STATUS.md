@@ -1,5 +1,9 @@
 # Supabase deployment — 13 September 2026
 
+## AI update — 19 September 2026
+
+The owner resumed AI setup. The hosted `copilot` function is now deployed. It requires an explicit `AI_MODEL`, rather than guessing a model ID, and authenticates requests before checking provider availability. Secret-name inspection found neither `ANTHROPIC_API_KEY` nor `AI_MODEL`; the owner has been asked to configure both directly in Supabase. No provider call or successful generated answer has been verified. All 32 local tests pass; they do not substitute for the missing authenticated provider integration test.
+
 Project: `echedxohsntgeijbxmsc` (FNDRS-Society).
 
 The owner authorized the local CLI connection `FNDRS-local-deployment`. Supabase CLI 2.117.0 linked the project successfully. A dry run listed ten pending migrations. `db push` applied all ten successfully; `migration list --linked` subsequently confirmed matching local and remote versions, from `202609110001` through `202609130001`.

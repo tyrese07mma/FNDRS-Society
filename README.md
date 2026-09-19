@@ -16,7 +16,7 @@ Die Dateien unter `supabase/migrations/` bilden gemeinsam das Datenbankschema. S
 
 Edge Functions liegen unter `supabase/functions/`. Stripe-Webhook und Browser-Rückleitung prüfen kein Supabase-JWT; der Webhook prüft stattdessen die Stripe-Signatur. Die anderen Funktionen authentifizieren den Nutzer. Für Auth müssen die tatsächlich verwendeten Web-URLs und `fndrs://auth-callback` als Rückleitungen konfiguriert sein. SMTP, E-Mail-Bestätigung und Passwortwiederherstellung müssen am echten Projekt getestet werden.
 
-KI benötigt zusätzlich `ANTHROPIC_API_KEY` und optional `AI_MODEL`. Stripe benötigt `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `APP_URL` und die in `.env.example` genannten Price-IDs. Test- und Live-Schlüssel dürfen nicht vermischt werden. Keine dieser externen Konfigurationen wurde durch das lokale Testsystem nachgewiesen.
+KI benötigt zusätzlich `ANTHROPIC_API_KEY` und `AI_MODEL` als Supabase-Secrets. Die Modell-ID muss für das verwendete Anthropic-Konto verfügbar sein; ohne explizite Modellkonfiguration bleibt Copilot nicht verfügbar. Stripe benötigt `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `APP_URL` und die in `.env.example` genannten Price-IDs. Test- und Live-Schlüssel dürfen nicht vermischt werden. Keine dieser externen Konfigurationen wurde durch das lokale Testsystem nachgewiesen.
 
 ## Prüfungen
 

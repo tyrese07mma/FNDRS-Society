@@ -16,17 +16,18 @@ Deno.serve(async(req)=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers:cors});
  if(req.method!=='POST')return json('Method not allowed',405);
  const apiKey=Deno.env.get('ANTHROPIC_API_KEY');
+ const model=Deno.env.get('AI_MODEL')?.trim();
  const url=Deno.env.get('SUPABASE_URL'); const anon=Deno.env.get('SUPABASE_ANON_KEY'); const service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
- if(!apiKey||!url||!anon||!service)return json('Copilot is not available yet. Please try again later.',503);
+ if(!url||!anon||!service)return json('Copilot is not available yet. Please try again later.',503);
  const userDb=createClient(url,anon,{global:{headers:{Authorization:req.headers.get('Authorization')??''}},auth:{persistSession:false}});
  const {data:{user},error:authError}=await userDb.auth.getUser();
  if(authError||!user)return json('AUTH: Please sign in again.',401);
+ if(!apiKey||!model)return json('Copilot is not available yet. Please try again later.',503);
  let prompt:unknown;let language='English';
  try { const raw=await req.text(); if(raw.length>20000)return json('VALIDATION: Request too large.',413); const body=JSON.parse(raw);prompt=body.prompt;language=body.language==='de'?'German':'English'; }
  catch{return json('VALIDATION: Invalid request.',400);}
  if(typeof prompt!=='string'||!prompt.trim()||prompt.length>4000)return json('VALIDATION: Use between 1 and 4,000 characters.',400);
  const db=createClient(url,service,{auth:{persistSession:false}});
- const model=Deno.env.get('AI_MODEL')??'claude-opus-5';
  const {data:reservation,error:quotaError}=await db.rpc('begin_ai_request',{p_user:user.id,p_model:model});
  if(quotaError)return json(quotaError.message.includes('CONSENT_REQUIRED')?'Please allow the use of your profile for Copilot first.':'Your Copilot limit has been reached, or a request is still running.',429);
  const requestId=String(reservation.id);
