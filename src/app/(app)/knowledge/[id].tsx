@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { describeError } from '@/lib/errors';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -12,6 +13,7 @@ import { Badge, Button, Card, EmptyState, Header, IconButton, Markdown, Skeleton
 import { Bookmark, Bot, CircleAlert, Share2 } from '@/ui/icons';
 
 export default function GuideReader() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -21,13 +23,13 @@ export default function GuideReader() {
   const [progress, setProgress] = useState(0);
   const g = guide.data;
 
-  const share = () => g && shareText(`${g.title} — FNDRS Knowledge Hub`, appLink(`/knowledge/${g.id}`));
+  const share = () => g && shareText(`${g.title} — FNDRS ${t('Knowledge Hub')}`, appLink(`/knowledge/${g.id}`));
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <Header
         back
-        title={g ? `${g.read_minutes} min read` : ''}
+        title={g ? t('{{minutes}} min read', { minutes: g.read_minutes }) : ''}
         right={
           g && (
             <>
@@ -35,9 +37,9 @@ export default function GuideReader() {
                 icon={Bookmark}
                 fill={g.saved ? c.text : 'transparent'}
                 onPress={() => save.mutate({ id: g.id, saved: !g.saved })}
-                accessibilityLabel={g.saved ? 'Remove from saved' : 'Save guide'}
+                accessibilityLabel={g.saved ? t('Remove from saved') : t('Save guide')}
               />
-              <IconButton icon={Share2} onPress={share} accessibilityLabel="Share guide" />
+              <IconButton icon={Share2} onPress={share} accessibilityLabel={t("Share guide")} />
             </>
           )
         }
@@ -49,7 +51,7 @@ export default function GuideReader() {
         guide.isLoading ? (
           <View style={{ padding: 16 }}><SkeletonList variant="post" count={2} /></View>
         ) : (
-          <EmptyState icon={CircleAlert} title="Guide not found" message={describeError(guide.error)} />
+          <EmptyState icon={CircleAlert} title={guide.isError ? t('Guide could not be loaded') : t('Guide not found')} message={guide.isError ? describeError(guide.error) : undefined} actionLabel={guide.isError ? t('Try again') : undefined} onAction={() => { void guide.refetch(); }} />
         )
       ) : (
         <ScrollView
@@ -62,7 +64,7 @@ export default function GuideReader() {
         >
           <View style={{ flexDirection: 'row', gap: 6 }}>
             <Badge tone="accent">{g.category}</Badge>
-            <Badge>{g.kind}</Badge>
+            <Badge>{t(g.kind)}</Badge>
           </View>
           <Text variant="largeTitle">{g.title}</Text>
           <Text variant="body" color="textMuted" style={{ fontSize: 17, lineHeight: 26 }}>{g.summary}</Text>
@@ -70,17 +72,17 @@ export default function GuideReader() {
           <View style={{ height: 1, backgroundColor: c.hairline }} />
           <Markdown source={g.body} />
           <Card variant="tint" style={{ gap: 12, marginTop: 12 }}>
-            <Text variant="headline">Put it to work</Text>
-            <Text variant="footnote" color="textMuted">Copilot knows your profile and can turn this into a plan for your startup.</Text>
+            <Text variant="headline">{t('Put it to work')}</Text>
+            <Text variant="footnote" color="textMuted">{t('Save this guide to return to it while working on your startup.')}</Text>
             <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
               <Button
-                title="Ask Copilot"
+                title={t("Ask Copilot")}
                 icon={Bot}
                 size="sm"
-                onPress={() => router.push({ pathname: '/copilot', params: { prompt: `Help me apply “${g.title}” to my startup this month.` } })}
+                onPress={() => router.push({ pathname: '/copilot', params: { prompt: t('Help me apply “{{title}}” to my startup this month.', { title: g.title }) } })}
               />
-              <Button title={g.saved ? 'Saved' : 'Save'} icon={Bookmark} size="sm" variant="secondary" onPress={() => save.mutate({ id: g.id, saved: !g.saved })} />
-              <Button title="Share" icon={Share2} size="sm" variant="ghost" onPress={share} />
+              <Button title={g.saved ? t('Saved') : t('Save')} icon={Bookmark} size="sm" variant="secondary" onPress={() => save.mutate({ id: g.id, saved: !g.saved })} />
+              <Button title={t("Share")} icon={Share2} size="sm" variant="ghost" onPress={share} />
             </View>
           </Card>
         </ScrollView>

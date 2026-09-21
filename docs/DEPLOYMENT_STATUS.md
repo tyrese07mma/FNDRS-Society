@@ -1,5 +1,9 @@
 # Supabase deployment — 13 September 2026
 
+## Owner preference — 21 September 2026
+
+Paid AI setup remains deferred at the owner’s request. The function exists, but no provider credentials or paid usage have been configured by this continuation. The historical setup request below is not a current requirement for the owner.
+
 ## AI update — 19 September 2026
 
 The owner resumed AI setup. The hosted `copilot` function is now deployed. It requires an explicit `AI_MODEL`, rather than guessing a model ID, and authenticates requests before checking provider availability. Secret-name inspection found neither `ANTHROPIC_API_KEY` nor `AI_MODEL`; the owner has been asked to configure both directly in Supabase. No provider call or successful generated answer has been verified. All 32 local tests pass; they do not substitute for the missing authenticated provider integration test.

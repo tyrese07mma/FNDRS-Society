@@ -1,6 +1,14 @@
-# Arbeitsstand – 13. September 2026
+# Arbeitsstand – 21. September 2026
 
 Kein Release-Nachweis. Diese Datei dokumentiert den Zwischenstand und muss bei weiteren Änderungen aktualisiert werden.
+
+## Fortschritt am 21. September
+
+- Wissensbereich, Artikelansicht und Merkliste um DE/EN-Oberflächentexte ergänzt; redaktionelle Inhalte bleiben in ihrer Originalsprache.
+- Fehlgeschlagene Erstabrufe zeigen einen Fehler mit Wiederholungsmöglichkeit statt einer irreführenden leeren Liste.
+- Unbelegtes Copilot-Verfügbarkeitsversprechen im Artikel durch einen Hinweis zur Merkliste ersetzt.
+- Supabase: zehn Migrationen sowie delete-account und copilot bereitgestellt; siehe DEPLOYMENT_STATUS.md. Kostenpflichtige KI bleibt auf Wunsch des Eigentümers zurückgestellt.
+- Auth-Rückleitungen, SMTP und vollständige Tests mit echten Konten bleiben offen.
 
 ## Implementiert und lokal geprüft
 
@@ -39,5 +47,7 @@ Kein Release-Nachweis. Diese Datei dokumentiert den Zwischenstand und muss bei w
 
 ## Externe Voraussetzungen
 
-Ein vom Eigentümer zugeordnetes Supabase-Projekt mit sicher hinterlegten Secrets, Anthropic-Zugang, Stripe-Testprodukte und Webhook, Domain/SMTP sowie gegebenenfalls Apple-/Google-Entwicklerkonten. Es sind noch keine erfolgreichen Live-Tests gegen diese Dienste dokumentiert.
+Supabase ist zugeordnet und das Datenbankschema bereitgestellt. Offen sind Domain/SMTP sowie gegebenenfalls Apple-/Google-Entwicklerkonten. Anthropic und Stripe bleiben zurückgestellt. Erfolgreiche vollständige Abläufe mit echten Konten sind noch nicht nachgewiesen.
 
+
+Prüfung am 21. September: TypeScript, ESLint und alle 32 lokalen Tests bestanden. Die drei geänderten Ansichten wurden in diesem Durchlauf nicht visuell mit einem angemeldeten Konto geprüft.
