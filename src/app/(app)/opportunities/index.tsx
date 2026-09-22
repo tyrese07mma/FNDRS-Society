@@ -1,3 +1,5 @@
+import { describeError } from '@/lib/errors';
+import { useTranslation } from '@/i18n';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, RefreshControl, ScrollView, View } from 'react-native';
@@ -29,9 +31,10 @@ function MatchPill({ value }: { value: number }) {
 }
 
 function OpportunityCard({ o, onPress }: { o: Opportunity; onPress: () => void }) {
+  const { t } = useTranslation();
   const { c } = useTheme();
   return (
-    <Card onPress={onPress} style={{ gap: 12 }} accessibilityLabel={`${o.title} at ${o.org}`}>
+    <Card onPress={onPress} style={{ gap: 12 }} accessibilityLabel={t('{{title}} at {{org}}', { title: o.title, org: o.org })}>
       <View style={{ flexDirection: 'row', gap: 12 }}>
         <Monogram label={o.org} hue={hashHue(o.org)} size={46} />
         <View style={{ flex: 1, minWidth: 0, gap: 3 }}>
@@ -47,22 +50,23 @@ function OpportunityCard({ o, onPress }: { o: Opportunity; onPress: () => void }
       </View>
       <Text variant="footnote" color="textMuted" numberOfLines={2}>{o.description}</Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-        <Badge tone="info">{OPP_TYPE_LABEL[o.type]}</Badge>
+        <Badge tone="info">{t(OPP_TYPE_LABEL[o.type])}</Badge>
         {o.remote && <Badge>Remote</Badge>}
-        {!!o.equity && <Badge tone="success">Equity {o.equity}</Badge>}
+        {!!o.equity && <Badge tone="success">{t('Equity {{amount}}', { amount: o.equity })}</Badge>}
         {!!o.comp && <Badge tone="accent">{o.comp}</Badge>}
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <Text variant="mono" color="textFaint" style={{ flex: 1 }}>
-          {timeAgo(o.created_at)} · {compact(o.applicants)} applicants
+          {timeAgo(o.created_at)} · {t('{{count}} applicants', { count: compact(o.applicants) })}
         </Text>
-        {o.applied && <Badge tone="success" icon={Check}>Applied</Badge>}
+        {o.applied && <Badge tone="success" icon={Check}>{t("Applied")}</Badge>}
       </View>
     </Card>
   );
 }
 
 export default function Opportunities() {
+  const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { c } = useTheme();
@@ -89,7 +93,7 @@ export default function Opportunities() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <Header back title="Opportunities" right={<Button title="Post" icon={Plus} size="sm" onPress={() => router.push('/opportunities/new')} />} />
+      <Header back title={t("Opportunities")} right={<Button title="Post" icon={Plus} size="sm" onPress={() => router.push('/opportunities/new')} />} />
       <FlatList
         data={list.data ?? []}
         keyExtractor={(o) => o.id}
@@ -105,10 +109,10 @@ export default function Opportunities() {
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         ListHeaderComponent={
           <View style={{ gap: 14, paddingBottom: 14 }}>
-            <Text color="textMuted">Co-founder spots, founding roles, pilots and funding — ranked by fit with your profile.</Text>
+            <Text color="textMuted">{t("Co-founder spots, founding roles, pilots and funding — ranked by fit with your profile.")}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}>
               {FILTERS.map((f) => (
-                <Chip key={f} label={f === 'all' ? 'All' : OPP_TYPE_LABEL[f]} selected={filter === f} onPress={() => setFilter(f)} />
+                <Chip key={f} label={f === 'all' ? t("All") : t(OPP_TYPE_LABEL[f])} selected={filter === f} onPress={() => setFilter(f)} />
               ))}
             </ScrollView>
           </View>
@@ -116,8 +120,10 @@ export default function Opportunities() {
         ListEmptyComponent={
           list.isLoading ? (
             <SkeletonList variant="card" count={3} />
+          ) : list.isError ? (
+            <EmptyState icon={Briefcase} title={t('Opportunities could not be loaded')} message={describeError(list.error)} actionLabel={t('Try again')} onAction={() => { void list.refetch(); }} />
           ) : (
-            <EmptyState icon={Briefcase} title="Nothing here yet" message="Be the first to post one — founders see new listings in their matches." actionLabel="Post an opportunity" onAction={() => router.push('/opportunities/new')} />
+            <EmptyState icon={Briefcase} title={t("Nothing here yet")} message={t("Be the first to post one — founders see new listings in their matches.")} actionLabel={t("Post an opportunity")} onAction={() => router.push('/opportunities/new')} />
           )
         }
         refreshControl={
@@ -142,11 +148,11 @@ export default function Opportunities() {
         footer={
           current &&
           (mine ? (
-            <Button title={`Your listing · ${compact(current.applicants)} applicants`} variant="secondary" block disabled />
+            <Button title={t('Your listing · {{count}} applicants', { count: compact(current.applicants) })} variant="secondary" block disabled />
           ) : current.applied ? (
-            <Button title="Application sent" icon={Check} variant="secondary" block disabled />
+            <Button title={t("Application sent")} icon={Check} variant="secondary" block disabled />
           ) : (
-            <Button title="Apply" icon={Send} size="lg" block loading={apply.isPending} onPress={submit} />
+            <Button title={t("Apply")} icon={Send} size="lg" block loading={apply.isPending} onPress={submit} />
           ))
         }
       >
@@ -154,8 +160,8 @@ export default function Opportunities() {
           <View style={{ gap: 16 }}>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
               <MatchPill value={current.match} />
-              <Badge tone="info">{OPP_TYPE_LABEL[current.type]}</Badge>
-              {!!current.equity && <Badge tone="success">Equity {current.equity}</Badge>}
+              <Badge tone="info">{t(OPP_TYPE_LABEL[current.type])}</Badge>
+              {!!current.equity && <Badge tone="success">{t('Equity {{amount}}', { amount: current.equity })}</Badge>}
               {!!current.comp && <Badge tone="accent">{current.comp}</Badge>}
             </View>
             <Text color="textMuted" style={{ lineHeight: 23 }}>{current.description}</Text>
@@ -165,11 +171,11 @@ export default function Opportunities() {
               </View>
             )}
             <View style={{ gap: 4 }}>
-              <Text variant="label" color="textSubtle">POSTED BY</Text>
+              <Text variant="label" color="textSubtle">{t("POSTED BY")}</Text>
               <PersonRow person={current.poster} onPress={() => { setSelected(null); router.push({ pathname: '/user/[id]', params: { id: current.poster.id } }); }} />
             </View>
             {!mine && !current.applied && (
-              <Input label="Note to the poster (optional)" value={note} onChangeText={setNote} multiline maxLength={500} counter placeholder="Why you, in two or three sentences. Link your work if you can." />
+              <Input label={t("Note to the poster (optional)")} value={note} onChangeText={setNote} multiline maxLength={500} counter placeholder={t("Why you, in two or three sentences. Link your work if you can.")} />
             )}
           </View>
         )}

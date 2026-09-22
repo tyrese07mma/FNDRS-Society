@@ -1,3 +1,5 @@
+import { describeError } from '@/lib/errors';
+import { useTranslation } from '@/i18n';
 import { useRouter, type Href } from 'expo-router';
 import React, { useState } from 'react';
 import { Platform, RefreshControl, ScrollView, TextInput, View } from 'react-native';
@@ -13,6 +15,7 @@ import { Badge, Button, Card, EmptyState, GradientCover, Header, Section, Skelet
 import { Search, Sparkles, UsersRound } from '@/ui/icons';
 
 export default function Communities() {
+  const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { c } = useTheme();
@@ -29,7 +32,7 @@ export default function Communities() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <Header back title="Spaces" />
+      <Header back title={t("Spaces")} />
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ padding: 16, gap: 24, paddingBottom: insets.bottom + 40, width: '100%', maxWidth: CONTENT_MAX, alignSelf: 'center' }}
@@ -50,20 +53,21 @@ export default function Communities() {
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Search spaces"
+            placeholder={t("Search spaces")}
             placeholderTextColor={c.textFaint}
-            accessibilityLabel="Search spaces"
+            accessibilityLabel={t("Search spaces")}
             style={[{ flex: 1, color: c.text, fontFamily: font.sans, fontSize: 15 }, Platform.OS === 'web' ? ({ outlineWidth: 0 } as object) : null]}
           />
         </View>
 
         {list.isLoading && <SkeletonList variant="card" count={3} />}
+        {list.isError && <EmptyState icon={UsersRound} title={t("Spaces could not be loaded")} message={describeError(list.error)} actionLabel={t("Try again")} onAction={() => void list.refetch()} />}
 
         {featured && (
           <Card padded={false} onPress={() => router.push(`/communities/${featured.id}` as Href)} accessibilityLabel={featured.name}>
             <GradientCover hue={featured.hue} height={110}>
               <View style={{ position: 'absolute', left: 16, top: 14 }}>
-                <Badge tone="accent" icon={Sparkles}>Featured space</Badge>
+                <Badge tone="accent" icon={Sparkles}>{t("Featured space")}</Badge>
               </View>
             </GradientCover>
             <View style={{ padding: 16, gap: 8 }}>
@@ -71,11 +75,12 @@ export default function Communities() {
               <Text variant="callout" color="textMuted" numberOfLines={3}>{featured.description}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 6 }}>
                 <Text variant="mono" color="textSubtle" style={{ flex: 1 }}>
-                  {compact(featured.member_count)} members · {compact(featured.online_count)} online
+                  {t('{{count}} members', { count: compact(featured.member_count) })} · {t('{{count}} online', { count: compact(featured.online_count) })}
                 </Text>
                 <Button
-                  title={featured.joined ? 'Joined' : 'Join space'}
+                  title={featured.joined ? t("Joined") : t("Join space")}
                   size="sm"
+                  loading={join.isPending}
                   variant={featured.joined ? 'outline' : 'primary'}
                   onPress={() => join.mutate({ id: featured.id, joined: !featured.joined })}
                 />
@@ -85,18 +90,18 @@ export default function Communities() {
         )}
 
         {joined.length > 0 && (
-          <Section title="Your spaces">
+          <Section title={t("Your spaces")}>
             <View style={{ gap: 10 }}>{joined.map((x) => <CommunityRow key={x.id} community={x} />)}</View>
           </Section>
         )}
 
         {others.length > 0 && (
-          <Section title={q ? 'Results' : 'Discover spaces'}>
+          <Section title={q ? t("Results") : t("Discover spaces")}>
             <View style={{ gap: 10 }}>{others.map((x) => <CommunityRow key={x.id} community={x} />)}</View>
           </Section>
         )}
 
-        {!list.isLoading && all.length === 0 && <EmptyState icon={UsersRound} title="No spaces found" message="Try a different search." />}
+        {!list.isLoading && !list.isError && all.length === 0 && <EmptyState icon={UsersRound} title={t("No spaces found")} message={t("Try a different search.")} />}
       </ScrollView>
     </View>
   );

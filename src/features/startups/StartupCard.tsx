@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { useRouter, type Href } from 'expo-router';
 import React from 'react';
 import { Pressable, View } from 'react-native';
@@ -11,6 +12,7 @@ import { Badge, Card, GradientCover, Monogram, Text } from '@/ui';
 import { ArrowUp, Flame, Globe, Users } from '@/ui/icons';
 
 export function UpvoteButton({ startup }: { startup: Startup }) {
+  const { t } = useTranslation();
   const { c } = useTheme();
   const upvote = useUpvote();
   return (
@@ -18,7 +20,7 @@ export function UpvoteButton({ startup }: { startup: Startup }) {
       onPress={() => upvote.mutate({ id: startup.id, up: !startup.upvoted })}
       hitSlop={6}
       accessibilityRole="button"
-      accessibilityLabel={`${startup.upvoted ? 'Remove upvote' : 'Upvote'} ${startup.name}`}
+      accessibilityLabel={`${startup.upvoted ? t("Remove upvote") : t("Upvote")} ${startup.name}`}
       accessibilityState={{ selected: startup.upvoted }}
       style={{
         alignItems: 'center',
@@ -41,6 +43,7 @@ export function UpvoteButton({ startup }: { startup: Startup }) {
 }
 
 export function StartupCard({ startup, variant = 'full' }: { startup: Startup; variant?: 'full' | 'mini' }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const { c } = useTheme();
   const open = () => router.push(`/startups/${startup.id}` as Href);
@@ -51,7 +54,7 @@ export function StartupCard({ startup, variant = 'full' }: { startup: Startup; v
         <GradientCover hue={startup.hue} height={64}>
           {startup.trending && (
             <View style={{ position: 'absolute', top: 10, right: 10 }}>
-              <Badge tone="accent" icon={Flame}>Trending</Badge>
+              <Badge tone="accent" icon={Flame}>{t("Trending")}</Badge>
             </View>
           )}
         </GradientCover>
@@ -67,7 +70,7 @@ export function StartupCard({ startup, variant = 'full' }: { startup: Startup; v
             <ArrowUp size={13} color={startup.upvoted ? c.accentText : c.textSubtle} />
             <Text variant="mono" color="textSubtle">{compact(startup.upvotes)}</Text>
             <Text variant="mono" color="textFaint">·</Text>
-            <Text variant="mono" color="textSubtle" numberOfLines={1}>{startup.industry}</Text>
+            <Text variant="mono" color="textSubtle" numberOfLines={1}>{t(startup.industry)}</Text>
           </View>
         </View>
       </Card>
@@ -79,7 +82,7 @@ export function StartupCard({ startup, variant = 'full' }: { startup: Startup; v
       <GradientCover hue={startup.hue} height={86}>
         {startup.trending && (
           <View style={{ position: 'absolute', top: 12, left: 12 }}>
-            <Badge tone="accent" icon={Flame}>Trending</Badge>
+            <Badge tone="accent" icon={Flame}>{t("Trending")}</Badge>
           </View>
         )}
       </GradientCover>
@@ -94,13 +97,13 @@ export function StartupCard({ startup, variant = 'full' }: { startup: Startup; v
         </View>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
           <Badge>{startup.industry}</Badge>
-          <Badge>{STAGE_LABEL[startup.stage]}</Badge>
-          {!!startup.raised && <Badge tone="success">Raised {startup.raised}</Badge>}
+          <Badge>{t(STAGE_LABEL[startup.stage])}</Badge>
+          {!!startup.raised && <Badge tone="success">{t('Raised {{amount}}', { amount: startup.raised })}</Badge>}
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingTop: 10, borderTopWidth: 1, borderTopColor: c.hairline }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <Users size={13} color={c.textSubtle} />
-            <Text variant="caption" color="textSubtle">{startup.team_size} on the team</Text>
+            <Text variant="caption" color="textSubtle">{t('{{count}} on the team', { count: startup.team_size })}</Text>
           </View>
           {!!startup.website && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, flex: 1 }}>

@@ -7,10 +7,12 @@ import { authCallbackParams } from '@/lib/auth-callback';
 import { useTranslation } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
 import { Button, Text } from '@/ui';
+import { useAuth } from '@/providers/AuthProvider';
 
 export default function AuthCallback() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { status } = useAuth();
   const url = Linking.useLinkingURL();
   const started = useRef(false);
   const [failed, setFailed] = useState(false);
@@ -38,6 +40,6 @@ export default function AuthCallback() {
   }, [url, router]);
   return <View style={{ flex: 1, backgroundColor: c.bg, padding: 24, justifyContent: 'center', gap: 16 }}>
     <Text variant="title2">{failed ? t('This link is invalid or has expired.') : t('Verifying your account…')}</Text>
-    {failed && <Button title={t('Back to sign in')} onPress={() => router.replace('/sign-in')} />}
+    {failed && <Button title={status === 'signedIn' ? t('Back to the app') : t('Back to sign in')} onPress={() => router.replace(status === 'signedIn' ? '/' : '/sign-in')} />}
   </View>;
 }

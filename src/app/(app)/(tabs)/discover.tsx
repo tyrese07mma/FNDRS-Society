@@ -1,3 +1,4 @@
+import { AI_ENABLED, BILLING_ENABLED } from '@/lib/env';
 import { useTranslation } from '@/i18n';
 import { useNow } from '@/lib/useNow';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -100,7 +101,7 @@ export default function Discover() {
               </LinearGradient>
               <View style={{ flex: 1 }}>
                 <Text variant="headline">FNDRS Pro</Text>
-                <Text variant="caption" color="textMuted">{t("Unlimited matches · warm investor intros · analytics")}</Text>
+                <Text variant="caption" color="textMuted">{BILLING_ENABLED ? t("Unlimited matches · warm investor intros · analytics") : t("Paid plans are not available yet")}</Text>
               </View>
               <ChevronRight size={18} color={c.accentText} />
             </LinearGradient>
@@ -140,7 +141,7 @@ export default function Discover() {
                 <Text variant="headline">FNDRS Copilot</Text>
                 <Badge tone="accent">AI</Badge>
               </View>
-              <Text variant="caption" color="textSubtle">{t("Pitch reviews, intro drafts and hiring plans — grounded in your profile.")}</Text>
+              <Text variant="caption" color="textSubtle">{AI_ENABLED ? t("Pitch reviews, intro drafts and hiring plans — grounded in your profile.") : t("Copilot is not enabled yet")}</Text>
             </View>
             <ChevronRight size={18} color={c.textFaint} />
           </View>

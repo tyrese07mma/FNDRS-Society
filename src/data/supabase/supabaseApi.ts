@@ -248,7 +248,7 @@ export const supabaseApi: Api = {
   },
 
   // feed
-  listFeed: (scope, before) => rpc<T.Post[]>('feed_page', { p_scope: scope, p_before: before?.created_at, p_before_id: before?.id, p_limit: 30 }),
+  listFeed: (scope, before) => rpc<T.Post[]>('feed_page_ranked', { p_scope: scope, p_before: before?.created_at, p_before_id: before?.id, p_before_rank: before?.feed_rank, p_limit: 30 }),
   listUserPosts: (userId) => rpc<T.Post[]>('get_posts', { p_scope: 'user', p_target: userId }),
   listCommunityPosts: (communityId) => rpc<T.Post[]>('get_posts', { p_scope: 'community', p_target: communityId }),
   getPost: (id) => first<T.Post>('get_posts', { p_scope: 'post', p_target: id }, 'This post was deleted.'),
@@ -539,10 +539,10 @@ export const supabaseApi: Api = {
   // billing
   async startCheckout(tier, cycle) {
     const res = await invoke<{ url: string }>('stripe-checkout', { tier, cycle, return_url: appUrl('/premium') });
-    return { url: res.url, activated: false };
+    return { url: res.url };
   },
   async manageSubscription() {
     const res = await invoke<{ url: string }>('stripe-portal', { return_url: appUrl('/settings') });
-    return { url: res.url, canceled: false };
+    return { url: res.url };
   },
 };

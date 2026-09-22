@@ -97,7 +97,7 @@ export interface Api {
   search(query: string): Promise<SearchResults>;
 
   // feed
-  listFeed(scope: FeedScope, before?: { created_at: string; id: string }): Promise<Post[]>;
+  listFeed(scope: FeedScope, before?: { created_at: string; id: string; feed_rank?: number }): Promise<Post[]>;
   listUserPosts(userId: string): Promise<Post[]>;
   listCommunityPosts(communityId: string): Promise<Post[]>;
   getPost(id: string): Promise<Post>;
@@ -184,8 +184,8 @@ export interface Api {
   resetCopilot(): Promise<void>;
 
   // billing
-  startCheckout(tier: Exclude<SubTier, 'free'>, cycle: 'month' | 'year'): Promise<{ url: string | null; activated: boolean }>;
-  manageSubscription(): Promise<{ url: string | null; canceled: boolean }>;
+  startCheckout(tier: Exclude<SubTier, 'free'>, cycle: 'month' | 'year'): Promise<{ url: string }>;
+  manageSubscription(): Promise<{ url: string }>;
 
 
 }

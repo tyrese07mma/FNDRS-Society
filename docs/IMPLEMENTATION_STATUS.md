@@ -1,4 +1,4 @@
-# Arbeitsstand – 21. September 2026
+# Arbeitsstand – 22. September 2026
 
 Kein Release-Nachweis. Diese Datei dokumentiert den Zwischenstand und muss bei weiteren Änderungen aktualisiert werden.
 
@@ -42,7 +42,7 @@ Kein Release-Nachweis. Diese Datei dokumentiert den Zwischenstand und muss bei w
 - Account-Wechsel bei laufenden mehrstufigen Mutationen im vollständigen Integrationstest prüfen.
 - Native Käufe/App-Store-Anforderungen und Plattform-Icons abschließen.
 - Vollständiger visueller Durchlauf aller Screens und Zustände, Web-/iOS-/Android-Integrationstests, finaler Build und Abhängigkeitsprüfung.
-- Aktuelle Trending-Paginierung nach Zeit prüfen und gewünschte Rangfolge wiederherstellen.
+- Trending-Rangfolge mit gleichzeitig eintreffenden Likes im gehosteten Mehrkonten-Test prüfen.
 - Anleitung für Betrieb, Monitoring, Backups, Wiederherstellung und verbindliche Datenschutz-/Anbieterdaten ergänzen.
 
 ## Externe Voraussetzungen
@@ -51,3 +51,17 @@ Supabase ist zugeordnet und das Datenbankschema bereitgestellt. Offen sind Domai
 
 
 Prüfung am 21. September: TypeScript, ESLint und alle 32 lokalen Tests bestanden. Die drei geänderten Ansichten wurden in diesem Durchlauf nicht visuell mit einem angemeldeten Konto geprüft.
+
+## Fortschritt am 22. September 2026
+
+- Trending-Feed mit Like-Rangfolge und zusammengesetztem Cursor implementiert und gegen private Beiträge sowie Gleichstände getestet. Migration 202609210001_ranked_feed.sql am 21. September bereitgestellt (insgesamt elf Migrationen). Sich während des Blätterns ändernde Like-Zahlen können die Live-Rangfolge verändern.
+- KI und kostenpflichtige Pläne standardmäßig deaktiviert. Die Oberfläche erklärt ihre Nichtverfügbarkeit. Zahlungs-Rückleitungen behaupten keine Freischaltung, bevor der Backend-Status sie bestätigt. Native Zahlungsangebote bleiben deaktiviert.
+- Startup-, Angebots- und Community-Oberflächen sowie Benachrichtigungsnavigation um DE/EN-Texte ergänzt. Nutzerinhalte und serverseitige Benachrichtigungstexte sind nicht automatisch übersetzt.
+- Ladefehler der Listen und Community-Beiträge mit Wiederholungsmöglichkeit ergänzt; Beitrittsschaltflächen zeigen laufende Vorgänge an.
+- Fehlgeschlagene Auth-Rückleitung führt angemeldete Personen zurück zur App.
+- release:check / build:release verhindern Freigabe mit fehlenden öffentlichen Pflichtangaben, Vorschau-Konfiguration oder öffentlich benannten Server-Secrets. Dies prüft Konfiguration, keine rechtliche Freigabe oder Erreichbarkeit der Seiten.
+- TypeScript, ESLint und 34 lokale Tests bestanden. Export für Web/Android/iOS einschließlich der Community-Änderungen am 22. September erfolgreich. Keine signierten Store-Builds.
+- npm audit vom 21. September: 15 moderate Meldungen, keine hohen/kritischen. Verbleibende transitive decode-uri-component-/uuid-Meldungen nicht durch riskante Paket-Downgrades kaschiert.
+- Release weiterhin gesperrt: produktive Domain, Support-Adresse und veröffentlichte Nutzungsbedingungen/Datenschutz/Impressum fehlen. Community-Richtlinien sind ebenfalls noch ein Entwurf. Auth-Redirect-Freigabe, SMTP, Zwei-Konten-/Gerätetests, Push und Store-Vorbereitung bleiben offen.
+
+Die älteren Prüfangaben oben sind historische Zwischenstände. Dieser Abschnitt ersetzt deren Test- und Migrationszahlen; die übrigen offenen Aufgaben bleiben bestehen.

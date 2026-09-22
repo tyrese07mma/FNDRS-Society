@@ -1,3 +1,5 @@
+import { describeError } from '@/lib/errors';
+import { useTranslation } from '@/i18n';
 import { useRouter, type Href } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { RefreshControl, SectionList, View } from 'react-native';
@@ -70,6 +72,7 @@ function Row({ n, fresh }: { n: AppNotification; fresh: boolean }) {
 }
 
 export default function Notifications() {
+  const { t } = useTranslation();
   const { c } = useTheme();
   const router = useRouter();
   const list = useNotifications();
@@ -89,8 +92,8 @@ export default function Notifications() {
   const items = list.data ?? [];
   const isFresh = (n: AppNotification) => freshIds?.has(n.id) ?? !n.read;
   const sections = [
-    { title: 'NEW', data: items.filter(isFresh) },
-    { title: 'EARLIER', data: items.filter((n) => !isFresh(n)) },
+    { title: t("NEW"), data: items.filter(isFresh) },
+    { title: t("EARLIER"), data: items.filter((n) => !isFresh(n)) },
   ].filter((s) => s.data.length);
 
   const refresh = async () => {
@@ -103,8 +106,8 @@ export default function Notifications() {
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <Header
         back
-        title="Notifications"
-        right={items.some((n) => !n.read) ? <Button title="Mark all read" size="sm" variant="ghost" onPress={() => markRead.mutate()} /> : undefined}
+        title={t("Notifications")}
+        right={items.some((n) => !n.read) ? <Button title={t("Mark all read")} size="sm" variant="ghost" onPress={() => markRead.mutate()} /> : undefined}
       />
       <SectionList
         sections={sections}
@@ -119,8 +122,10 @@ export default function Notifications() {
         ListEmptyComponent={
           list.isLoading ? (
             <SkeletonList count={7} />
+          ) : list.isError ? (
+            <EmptyState icon={Bell} title={t("Notifications could not be loaded")} message={describeError(list.error)} actionLabel={t("Try again")} onAction={() => void list.refetch()} />
           ) : (
-            <EmptyState icon={Bell} title="No notifications yet" message="Matches, replies and event reminders will show up here." actionLabel="Find founders" onAction={() => router.push('/match')} />
+            <EmptyState icon={Bell} title={t("No notifications yet")} message={t("Matches and replies will show up here.")} actionLabel={t("Find founders")} onAction={() => router.push('/match')} />
           )
         }
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={c.textSubtle} />}

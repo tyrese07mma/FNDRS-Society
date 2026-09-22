@@ -25,3 +25,9 @@ Read-only live checks:
 Dashboard review found the Auth Site URL still set to `http://localhost:3000`, with no redirect allowlist entries. Updating these to the app on port 8090 and its native callback is awaiting owner confirmation. Email templates use Supabase's built-in delivery service; custom production SMTP is not configured. These are concrete blockers for production email authentication, not verified working journeys.
 
 Use versioned CLI migrations for future database updates; do not replay the initial schema or reset the remote database. The temporary offline SQL installation bundle was not executed and is no longer needed.
+
+## Deployment update — 21 September 2026
+
+Migration `202609210001_ranked_feed.sql` was applied successfully after a dry run showed exactly that pending migration. Eleven migrations are now recorded as deployed. The new authenticated feed RPC orders trending posts by likes and uses rank/time/ID pagination while enforcing post visibility. Old clients retain the previous RPC. Local SQL tests cover ranking, ties, private-post exclusion and anonymous access; they are not a hosted two-account integration test.
+
+The app defaults AI and billing availability to false. No paid provider credentials or products were enabled. Public release configuration remains incomplete; see IMPLEMENTATION_STATUS.md.

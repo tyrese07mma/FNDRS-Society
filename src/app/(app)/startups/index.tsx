@@ -1,3 +1,5 @@
+import { describeError } from '@/lib/errors';
+import { useTranslation } from '@/i18n';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, RefreshControl, View } from 'react-native';
@@ -12,6 +14,7 @@ import { Button, EmptyState, Header, SegmentedControl, SkeletonList, Text } from
 import { Rocket } from '@/ui/icons';
 
 export default function Startups() {
+  const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { c } = useTheme();
@@ -21,7 +24,7 @@ export default function Startups() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <Header back title="Startups" right={<Button title="Launch" icon={Rocket} size="sm" onPress={() => router.push('/startups/new')} />} />
+      <Header back title={t("Startups")} right={<Button title={t("Launch")} icon={Rocket} size="sm" onPress={() => router.push('/startups/new')} />} />
       <FlatList
         data={list.data ?? []}
         keyExtractor={(s) => s.id}
@@ -29,14 +32,14 @@ export default function Startups() {
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         ListHeaderComponent={
           <View style={{ gap: 14, paddingBottom: 14 }}>
-            <Text color="textMuted">What the network is shipping. Upvote the ones you would use, back or join.</Text>
+            <Text color="textMuted">{t("What the network is shipping. Upvote the ones you would use, back or join.")}</Text>
             <SegmentedControl<StartupSort>
               value={sort}
               onChange={setSort}
               options={[
-                { value: 'trending', label: 'Trending' },
-                { value: 'new', label: 'New' },
-                { value: 'mine', label: 'Mine' },
+                { value: 'trending', label: t("Trending") },
+                { value: 'new', label: t("New") },
+                { value: 'mine', label: t("Mine") },
               ]}
             />
           </View>
@@ -44,12 +47,14 @@ export default function Startups() {
         ListEmptyComponent={
           list.isLoading ? (
             <SkeletonList variant="card" count={3} />
+          ) : list.isError ? (
+            <EmptyState icon={Rocket} title={t('Startups could not be loaded')} message={describeError(list.error)} actionLabel={t('Try again')} onAction={() => { void list.refetch(); }} />
           ) : (
             <EmptyState
               icon={Rocket}
-              title={sort === 'mine' ? 'You haven’t launched yet' : 'No startups yet'}
-              message="Show the community what you are building and who you want to meet."
-              actionLabel="Launch your startup"
+              title={sort === 'mine' ? t("You haven’t launched yet") : t("No startups yet")}
+              message={t("Show the community what you are building and who you want to meet.")}
+              actionLabel={t("Launch your startup")}
               onAction={() => router.push('/startups/new')}
             />
           )

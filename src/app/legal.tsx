@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
+import * as Linking from 'expo-linking';
+import { LEGAL_URLS } from '@/lib/env';
+import { useTranslation } from '@/i18n';
+import { toast } from '@/state/toast';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/theme/ThemeProvider';
-import { Header, Markdown, SegmentedControl, Text } from '@/ui';
+import { Button, Card, Header, Markdown, SegmentedControl, Text } from '@/ui';
 
 const DOCS = {
   terms: `## Terms of Service
@@ -67,28 +71,41 @@ FNDRS works because members are generous and direct.
 type Doc = keyof typeof DOCS;
 
 export default function Legal() {
+  const { t } = useTranslation();
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const [doc, setDoc] = useState<Doc>('terms');
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <Header modal title="Legal" />
+      <Header modal title={t('Legal')} />
       <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
         <SegmentedControl<Doc>
           value={doc}
           onChange={setDoc}
           options={[
-            { value: 'terms', label: 'Terms' },
-            { value: 'privacy', label: 'Privacy' },
-            { value: 'guidelines', label: 'Guidelines' },
+            { value: 'terms', label: t('Terms') },
+            { value: 'privacy', label: t('Privacy') },
+            { value: 'guidelines', label: t('Guidelines') },
           ]}
         />
       </View>
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 40, maxWidth: 720, width: '100%', alignSelf: 'center' }}>
-        <Markdown source={DOCS[doc]} />
-        <Text variant="caption" color="textFaint" style={{ marginTop: 32 }}>
-          These documents are a starting template. Have them reviewed by counsel before launch.
-        </Text>
+        {doc !== 'guidelines' && LEGAL_URLS[doc] ? (
+          <Button title={doc === 'terms' ? t('Open terms of service') : t('Open privacy policy')} onPress={() => {
+            void Linking.openURL(LEGAL_URLS[doc]!).catch(() => toast.error(t('The page could not be opened.')));
+          }} />
+        ) : (
+          <>
+            <Card variant="tint" style={{ marginBottom: 20, gap: 8 }}>
+              <Text variant="headline">{t('Draft — not approved for publication')}</Text>
+              <Text>{t('The operator must provide reviewed legal documents before launch. The text below is a working template.')}</Text>
+            </Card>
+            <Markdown source={DOCS[doc]} />
+          </>
+        )}
+        {LEGAL_URLS.imprint && <Button title={t('Open imprint')} variant="ghost" style={{ marginTop: 16 }} onPress={() => {
+          void Linking.openURL(LEGAL_URLS.imprint!).catch(() => toast.error(t('The page could not be opened.')));
+        }} />}
       </ScrollView>
     </View>
   );

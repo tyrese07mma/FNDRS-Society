@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { describeError } from '@/lib/errors';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
@@ -26,6 +27,7 @@ function Stat({ value, label }: { value: string; label: string }) {
 }
 
 export default function StartupDetail() {
+  const { t, locale } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -41,7 +43,7 @@ export default function StartupDetail() {
         {startup.isLoading ? (
           <View style={{ padding: 16 }}><SkeletonList variant="card" count={2} /></View>
         ) : (
-          <EmptyState icon={CircleAlert} title="Startup not found" message={describeError(startup.error)} />
+          <EmptyState icon={CircleAlert} title={t("Startup not found")} message={describeError(startup.error)} />
         )}
       </View>
     );
@@ -73,30 +75,30 @@ export default function StartupDetail() {
             <Text variant="largeTitle">{s.name}</Text>
             <Text variant="body" color="textMuted" style={{ fontSize: 16.5, lineHeight: 24 }}>{s.tagline}</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
-              {s.trending && <Badge tone="accent" icon={Flame}>Trending</Badge>}
-              <Badge>{s.industry}</Badge>
-              <Badge>{STAGE_LABEL[s.stage]}</Badge>
-              {!!s.raised && <Badge tone="success">Raised {s.raised}</Badge>}
+              {s.trending && <Badge tone="accent" icon={Flame}>{t("Trending")}</Badge>}
+              <Badge>{t(s.industry)}</Badge>
+              <Badge>{t(STAGE_LABEL[s.stage])}</Badge>
+              {!!s.raised && <Badge tone="success">{t('Raised {{amount}}', { amount: s.raised })}</Badge>}
             </View>
           </View>
 
           <View style={{ flexDirection: 'row', paddingVertical: 14, borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.hairline }}>
-            <Stat value={compact(s.upvotes)} label="Upvotes" />
-            <Stat value={String(s.team_size)} label="Team" />
-            <Stat value={s.raised ?? '—'} label="Raised" />
-            <Stat value={new Date(s.created_at).toLocaleDateString('en-GB', { month: 'short', year: '2-digit' })} label="Listed" />
+            <Stat value={compact(s.upvotes)} label={t("Upvotes")} />
+            <Stat value={String(s.team_size)} label={t("Team")} />
+            <Stat value={s.raised ?? '—'} label={t("Raised")} />
+            <Stat value={new Date(s.created_at).toLocaleDateString(locale, { month: 'short', year: '2-digit' })} label={t("Listed")} />
           </View>
 
           <View style={{ flexDirection: 'row', gap: 10 }}>
             {!!s.website && (
               <Button title={prettyUrl(s.website)} icon={Globe} variant="secondary" style={{ flex: 1 }} onPress={() => WebBrowser.openBrowserAsync(ensureUrl(s.website!))} />
             )}
-            <Button title="Share" icon={Share2} variant="secondary" style={{ flex: s.website ? undefined : 1 }} onPress={() => shareText(`${s.name} — ${s.tagline}`, appLink(`/startups/${s.id}`))} />
+            <Button title={t("Share")} icon={Share2} variant="secondary" style={{ flex: s.website ? undefined : 1 }} onPress={() => shareText(`${s.name} — ${s.tagline}`, appLink(`/startups/${s.id}`))} />
           </View>
 
           {!!s.description && (
             <View style={{ gap: 8 }}>
-              <Text variant="label" color="textSubtle">ABOUT</Text>
+              <Text variant="label" color="textSubtle">{t("ABOUT")}</Text>
               <Text color="textMuted" style={{ lineHeight: 24 }}>{s.description}</Text>
             </View>
           )}
@@ -105,20 +107,20 @@ export default function StartupDetail() {
             <Card variant="accent" style={{ gap: 12 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Handshake size={18} color={c.accentText} />
-                <Text variant="headline">{mine ? 'You are looking for' : `${s.name} is looking for`}</Text>
+                <Text variant="headline">{mine ? t("You are looking for") : t('{{name}} is looking for', { name: s.name })}</Text>
               </View>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-                {s.looking_for.map((l) => <Chip key={l} label={l} size="sm" static />)}
+                {s.looking_for.map((l) => <Chip key={l} label={t(l)} size="sm" static />)}
               </View>
-              {!mine && <Button title="Offer to help" icon={MessageCircle} size="sm" style={{ alignSelf: 'flex-start' }} loading={open.isPending} onPress={message} />}
+              {!mine && <Button title={t("Offer to help")} icon={MessageCircle} size="sm" style={{ alignSelf: 'flex-start' }} loading={open.isPending} onPress={message} />}
             </Card>
           )}
 
           <View style={{ gap: 6 }}>
-            <Text variant="label" color="textSubtle">FOUNDER</Text>
+            <Text variant="label" color="textSubtle">{t("FOUNDER")}</Text>
             <PersonRow
               person={s.owner}
-              right={mine ? <Badge tone="accent">You</Badge> : <IconButton icon={MessageCircle} variant="outline" size={38} onPress={message} accessibilityLabel={`Message ${s.owner.full_name}`} />}
+              right={mine ? <Badge tone="accent">{t("You")}</Badge> : <IconButton icon={MessageCircle} variant="outline" size={38} onPress={message} accessibilityLabel={t('Message {{name}}', { name: s.owner.full_name })} />}
             />
           </View>
 
@@ -126,14 +128,13 @@ export default function StartupDetail() {
             <Card variant="tint" style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
               <Sparkles size={18} color={c.accentText} />
               <Text variant="footnote" color="textMuted" style={{ flex: 1 }}>
-                Your showcase is visible to investors and operators across FNDRS. Post updates in the feed to keep it trending.
-              </Text>
+                {t("Your showcase is visible to investors and operators across FNDRS. Post updates in the feed to keep it trending.")}</Text>
             </Card>
           )}
         </View>
       </ScrollView>
       <View style={{ position: 'absolute', top: insets.top + 6, left: 16 }}>
-        <IconButton icon={ChevronLeft} variant="glass" iconSize={22} onPress={() => (router.canGoBack() ? router.back() : router.replace('/startups'))} accessibilityLabel="Back" />
+        <IconButton icon={ChevronLeft} variant="glass" iconSize={22} onPress={() => (router.canGoBack() ? router.back() : router.replace('/startups'))} accessibilityLabel={t("Back")} />
       </View>
     </View>
   );

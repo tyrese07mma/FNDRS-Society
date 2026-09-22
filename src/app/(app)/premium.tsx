@@ -1,9 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { BILLING_ENABLED } from '@/lib/env';
+import { UnavailableFeature } from '@/features/availability/UnavailableFeature';
+import { translateNow } from '@/i18n';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Platform, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { qk, useCheckout, useManageSubscription } from '@/data/queries';
@@ -52,7 +55,11 @@ function CellView({ v }: { v: Cell }) {
 }
 
 export default function Premium() {
-  const router = useRouter();
+  // Native digital purchases require their own store billing integration.
+  return BILLING_ENABLED && Platform.OS === 'web' ? <PremiumPlans /> : <UnavailableFeature feature="billing" />;
+}
+
+function PremiumPlans() {
   const qc = useQueryClient();
   const insets = useSafeAreaInsets();
   const { c } = useTheme();
@@ -68,7 +75,7 @@ export default function Premium() {
 
   useEffect(() => {
     if (params.status === 'success') {
-      toast.accent('Welcome to Pro ✨', 'Your 7-day trial has started.');
+      toast.show(translateNow('Payment status is being checked'), translateNow('Your plan updates after the payment provider confirms it.'));
       qc.invalidateQueries({ queryKey: qk.subscription });
     } else if (params.status === 'cancel') {
       toast.show('Checkout cancelled');
@@ -81,9 +88,6 @@ export default function Premium() {
       if (res.url) {
         await WebBrowser.openAuthSessionAsync(res.url, appLink('/premium'));
         qc.invalidateQueries({ queryKey: qk.subscription });
-      } else if (res.activated) {
-        toast.accent('Welcome to FNDRS Pro ✨', 'Demo: your 7-day trial is active.');
-        router.back();
       }
     } catch {
       // toast via mutation cache
@@ -94,7 +98,6 @@ export default function Premium() {
     try {
       const res = await manage.mutateAsync();
       if (res.url) await WebBrowser.openBrowserAsync(res.url);
-      else if (res.canceled) toast.show('Subscription cancelled', 'Demo: you are back on the free plan.');
     } catch {
       // toast via mutation cache
     }

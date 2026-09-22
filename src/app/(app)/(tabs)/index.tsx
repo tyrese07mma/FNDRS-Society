@@ -1,3 +1,4 @@
+import { AI_ENABLED } from '@/lib/env';
 import { useTranslation } from '@/i18n';
 import { useNow } from '@/lib/useNow';
 import { useRouter, type Href } from 'expo-router';
@@ -117,13 +118,13 @@ function TodayRail() {
           <ProgressBar value={strength.pct} height={5} />
         </RailCard>
       )}
-      <RailCard icon={Bot} eyebrow={t("COPILOT")} title={t("Draft an investor email in seconds")} subtitle={t("Grounded in your profile")} onPress={() => router.push('/copilot')} />
+      <RailCard icon={Bot} eyebrow={t("COPILOT")} title={t("Draft an investor email in seconds")} subtitle={AI_ENABLED ? t("Grounded in your profile") : t("Copilot is not enabled yet")} onPress={() => router.push('/copilot')} />
     </ScrollView>
   );
 }
 
 export default function Home() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const router = useRouter();
   const { c } = useTheme();
   const { profile } = useAuth();
@@ -146,7 +147,7 @@ export default function Home() {
           {greeting()}, {firstName(profile?.full_name)}
         </Text>
         <Text variant="footnote" color="textSubtle">
-          {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+          {new Date().toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })}
         </Text>
       </View>
 

@@ -192,6 +192,30 @@ test('export database cursor visits every owned row across page boundaries',asyn
  });
 });
 
+test('trending feed orders by likes and paginates ties without exposing private posts',async()=>{
+ const D='44444444-4444-4444-8444-444444444444';
+ await db.query("insert into auth.users(id,email,raw_user_meta_data) values($1,'rank-test@local.test','{}')",[D]);
+ await db.query("select set_config('request.jwt.claim.sub',$1,false)",[D]);
+ const ids=[];
+ for(const [likes,age] of [[31,3],[30,1],[30,1],[29,2]]) {
+   const row=(await db.query("insert into posts(author_id,body,like_count,created_at) values($1,'Ranking fixture',$2,now()-$3*interval '1 hour') returning id",[D,likes,age])).rows[0];ids.push(row.id);
+ }
+ const privateCommunity=(await db.query("insert into communities(slug,name,is_private) values('rank-private','Private rank fixture',true) returning id")).rows[0].id;
+ await db.query("insert into posts(author_id,body,like_count,community_id) values($1,'Private ranked post',1000,$2)",[D,privateCommunity]);
+ await asUser(A,async()=>{
+   const first=(await db.query("select feed_page_ranked('trending',null,null,null,2) data")).rows[0].data;
+   assert.deepEqual(first.map(p=>p.feed_rank),[31,30]);
+   const cursor=first.at(-1);
+   const second=(await db.query("select feed_page_ranked('trending',$1,$2,$3,2) data",[cursor.created_at,cursor.id,cursor.feed_rank])).rows[0].data;
+   assert.deepEqual(second.map(p=>p.feed_rank),[30,29]);
+   assert.deepEqual([...first,...second].map(p=>p.id).sort(),ids.sort());
+   assert.deepEqual((await db.query("select feed_page_ranked('invalid') data")).rows[0].data,[]);
+ });
+ await db.query("select set_config('request.jwt.claim.sub','',false)");
+ await db.exec('set role anon');
+ try { await assert.rejects(db.query("select feed_page_ranked()")); } finally { await db.exec('reset role'); }
+});
+
 test('account cleanup cannot be bypassed and serializes checkout with deletion',async()=>{
  const startup = await asUser(C, async()=> (await db.query("insert into startups(owner_id,name,tagline) values($1,'Lifecycle test','Created before deletion') returning id",[C])).rows[0].id);
  await db.query("select set_config('request.jwt.claim.sub','',false)");

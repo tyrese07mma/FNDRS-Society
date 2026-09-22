@@ -1,4 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
+import { AI_ENABLED } from '@/lib/env';
+import { UnavailableFeature } from '@/features/availability/UnavailableFeature';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, Pressable, TextInput, View } from 'react-native';
@@ -36,6 +38,10 @@ function BotAvatar() {
 }
 
 export default function Copilot() {
+  return AI_ENABLED ? <CopilotConversation /> : <UnavailableFeature feature="ai" />;
+}
+
+function CopilotConversation() {
   const params = useLocalSearchParams<{ prompt?: string }>();
   const insets = useSafeAreaInsets();
   const { c } = useTheme();

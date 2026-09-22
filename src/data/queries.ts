@@ -727,17 +727,8 @@ export function useResetCopilot() {
 
 // ---------------------------------------------------------------- billing
 export function useCheckout() {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ tier, cycle }: { tier: Exclude<T.SubTier, 'free'>; cycle: 'month' | 'year' }) => api.startCheckout(tier, cycle),
-    onSuccess: (res) => {
-      if (res.activated) {
-        haptic.success();
-        qc.invalidateQueries({ queryKey: qk.subscription });
-        qc.invalidateQueries({ queryKey: qk.swipesLeft });
-        qc.invalidateQueries({ queryKey: qk.notifications });
-      }
-    },
   });
 }
 

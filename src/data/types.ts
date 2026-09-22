@@ -89,6 +89,8 @@ export interface Post {
   tags: string[];
   poll: { options: PollOption[]; ends_at: string | null } | null;
   like_count: number;
+  /** Rank at page fetch time, unaffected by optimistic likes. */
+  feed_rank?: number;
   comment_count: number;
   liked: boolean;
   saved: boolean;

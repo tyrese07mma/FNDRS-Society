@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n';
 import { useRouter, type Href } from 'expo-router';
 import React from 'react';
 import { View } from 'react-native';
@@ -10,6 +11,7 @@ import { Button, Card, Monogram, Text } from '@/ui';
 import { Lock } from '@/ui/icons';
 
 export function CommunityRow({ community }: { community: Community }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const { c } = useTheme();
   const join = useJoinCommunity();
@@ -26,18 +28,19 @@ export function CommunityRow({ community }: { community: Community }) {
           {community.is_private && <Lock size={13} color={c.textSubtle} />}
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
-          <Text variant="caption" color="textSubtle">{compact(community.member_count)} members</Text>
+          <Text variant="caption" color="textSubtle">{t('{{count}} members', { count: compact(community.member_count) })}</Text>
           {community.online_count > 0 && (
             <>
               <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: c.success }} />
-              <Text variant="caption" color="textSubtle">{compact(community.online_count)} online</Text>
+              <Text variant="caption" color="textSubtle">{t('{{count}} online', { count: compact(community.online_count) })}</Text>
             </>
           )}
         </View>
       </View>
       <Button
-        title={community.joined ? 'Joined' : 'Join'}
+        title={community.joined ? t("Joined") : t("Join")}
         size="sm"
+        loading={join.isPending}
         variant={community.joined ? 'outline' : 'primary'}
         onPress={() => join.mutate({ id: community.id, joined: !community.joined })}
       />
