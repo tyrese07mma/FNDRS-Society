@@ -1,3 +1,5 @@
+import { useTranslation } from '@/i18n';
+import { toast } from '@/state/toast';
 import * as Linking from 'expo-linking';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
@@ -13,36 +15,65 @@ import { ChevronDown, LifeBuoy } from '@/ui/icons';
 
 const FAQ: { section: string; items: [string, string][] }[] = [
   {
-    section: 'Getting started',
-    items: [
-      ['What is FNDRS Society?', 'A private network where founders meet co-founders, investors, mentors and operators — matched on what they are actually building.'],
-      ['How do I get better matches?', 'Complete your profile: industries, skills and especially “Looking for”. Smart Match weighs those most. A photo and a clear headline help people say yes.'],
-      ['What is XP for?', 'XP tracks how active you are. Levels unlock visibility boosts and show up on the leaderboard. You earn it by posting, joining spaces, RSVPing and completing weekly challenges.'],
-    ],
+    "section": "Getting started",
+    "items": [
+      [
+        "What is FNDRS Society?",
+        "A network for people building startups to meet co-founders and experienced entrepreneurs."
+      ],
+      [
+        "How do I get better matches?",
+        "Complete your skills, industries and what you are looking for. Use the match filters and check the reasons on each profile."
+      ],
+      [
+        "What is XP for?",
+        "XP records eligible activity and contributes to your level. It does not guarantee more matches or introductions."
+      ]
+    ]
   },
   {
-    section: 'Smart Match & messaging',
-    items: [
-      ['How does Smart Match score people?', 'We compare shared industries, whether their skills cover what you are looking for (and vice versa), stage, city and whether they are open to co-founding. The reasons are shown on every card.'],
-      ['What happens when I connect?', 'If they connected with you too, it is a match and a chat opens instantly. Otherwise they will see you in their deck.'],
-      ['Can I limit who messages me?', 'Yes — Settings → Privacy → “Who can message me” → Matches only.'],
-    ],
+    "section": "Smart Match & messaging",
+    "items": [
+      [
+        "What happens when I connect?",
+        "Mutual interest creates a match. You can then open a conversation with that person."
+      ],
+      [
+        "Can I limit who messages me?",
+        "In Settings, open Privacy and choose Matches only under Who can message me. You can also block members."
+      ]
+    ]
   },
   {
-    section: 'Pro & billing',
-    items: [
-      ['What does Pro include?', 'Unlimited swipes, warm investor intros, who viewed your profile, 30-day analytics and a boost in search and matching.'],
-      ['How do I cancel?', 'Settings → Subscription → Manage subscription. You keep access until the end of the period.'],
-    ],
+    "section": "Optional features",
+    "items": [
+      [
+        "Is Copilot available?",
+        "Copilot is currently disabled for this launch. You can still work on your profile, share ideas and connect with founders."
+      ],
+      [
+        "Can I buy a subscription?",
+        "Paid subscriptions are currently unavailable. The app does not start a payment while billing is disabled."
+      ]
+    ]
   },
   {
-    section: 'Privacy & safety',
-    items: [
-      ['Who can see my location?', 'Only members, and only if “Show my location” is on in Settings → Privacy.'],
-      ['How do I report someone?', 'Use the “…” menu on any post, profile or chat and choose Report. Your report is submitted for review.'],
-      ['Can I delete my data?', 'Yes. Settings → Delete account removes your profile, posts, messages and matches permanently.'],
-    ],
-  },
+    "section": "Privacy & safety",
+    "items": [
+      [
+        "Who can see my location?",
+        "You can hide your location in Settings under Privacy. You can also turn off discovery in Smart Match."
+      ],
+      [
+        "How do I report someone?",
+        "Open the menu on a post or profile and select Report. You can block a member separately."
+      ],
+      [
+        "Can I delete my data?",
+        "Settings provides a data export and account deletion. Read the confirmation carefully before permanently deleting your account."
+      ]
+    ]
+  }
 ];
 
 function Item({ q, a }: { q: string; a: string }) {
@@ -66,19 +97,20 @@ function Item({ q, a }: { q: string; a: string }) {
 }
 
 export default function Help() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { c } = useTheme();
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <Header back title="Help center" />
+      <Header back title={t("Help center")} />
       <ScrollView contentContainerStyle={{ padding: 16, gap: 22, paddingBottom: insets.bottom + 40, width: '100%', maxWidth: CONTENT_MAX, alignSelf: 'center' }}>
         {FAQ.map((s) => (
           <View key={s.section} style={{ gap: 6 }}>
-            <Text variant="label" color="textSubtle">{s.section.toUpperCase()}</Text>
+            <Text variant="label" color="textSubtle">{t(s.section).toUpperCase()}</Text>
             <View style={{ paddingHorizontal: 16, borderRadius: radius.lg, backgroundColor: c.card, borderWidth: 1, borderColor: c.hairline }}>
               {s.items.map(([q, a], i) => (
                 <View key={q} style={{ borderBottomWidth: i === s.items.length - 1 ? 0 : 1, borderBottomColor: c.hairline }}>
-                  <Item q={q} a={a} />
+                  <Item q={t(q)} a={t(a)} />
                 </View>
               ))}
             </View>
@@ -86,9 +118,9 @@ export default function Help() {
         ))}
         <Card variant="accent" style={{ gap: 10, alignItems: 'flex-start' }}>
           <LifeBuoy size={22} color={c.accentText} />
-          <Text variant="headline">Still stuck?</Text>
-          <Text variant="footnote" color="textMuted">Write to us — a real person answers within one working day.</Text>
-          <Button title={`Email ${SUPPORT_EMAIL}`} size="sm" onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}`)} />
+          <Text variant="headline">{t("Still stuck?")}</Text>
+          <Text variant="footnote" color="textMuted">{SUPPORT_EMAIL ? t("Contact our support team by email.") : t("Support contact is not configured yet.")}</Text>
+          {SUPPORT_EMAIL && <Button title={t("Email {{address}}", { address: SUPPORT_EMAIL })} size="sm" onPress={() => { void Linking.openURL(`mailto:${SUPPORT_EMAIL}`).catch(() => toast.error(t("Email could not be opened."))); }} />}
         </Card>
       </ScrollView>
     </View>

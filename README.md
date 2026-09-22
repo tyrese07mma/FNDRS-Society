@@ -31,3 +31,7 @@ deno check --config supabase/functions/deno.json supabase/functions/*/index.ts
 Die Datenbanktests verwenden PostgreSQL über PGlite und prüfen Migrationen, RLS und Geschäftsregeln. Supabase Auth, Storage, Realtime sowie Stripe und Anthropic laufen dabei nicht als echte Dienste. Ein Expo-Export ersetzt keinen signierten iOS-/Android-Build und keine Store-Prüfung.
 
 GitHub Actions führt statische Prüfungen, Tests, Expo-Export und Deno-Prüfung aus. Änderungen werden auf `production-ready-v3` vorbereitet.
+
+## Veröffentlichung
+
+Der manuelle [Release-Ablauf](docs/RELEASE_RUNBOOK.md) unterscheidet lokale Export-Prüfungen von einem Produktionsartefakt. `npm run build:release` verlangt die Betreiberkonfiguration einschließlich Rechtstext-Links. Der GitHub-Workflow `release-candidate.yml` erstellt nach Prüfungen ein Artefakt, veröffentlicht aber nichts automatisch. KI und Zahlungen bleiben für diesen Kandidaten deaktiviert.

@@ -65,3 +65,14 @@ Prüfung am 21. September: TypeScript, ESLint und alle 32 lokalen Tests bestande
 - Release weiterhin gesperrt: produktive Domain, Support-Adresse und veröffentlichte Nutzungsbedingungen/Datenschutz/Impressum fehlen. Community-Richtlinien sind ebenfalls noch ein Entwurf. Auth-Redirect-Freigabe, SMTP, Zwei-Konten-/Gerätetests, Push und Store-Vorbereitung bleiben offen.
 
 Die älteren Prüfangaben oben sind historische Zwischenstände. Dieser Abschnitt ersetzt deren Test- und Migrationszahlen; die übrigen offenen Aufgaben bleiben bestehen.
+
+## Weitere Release-Arbeiten am 22. September
+
+- Hilfe auf DE/EN umgestellt und auf die tatsächlich verfügbaren Funktionen beschränkt. Unbelegte Pro-Vorteile, XP-Sichtbarkeitsversprechen und garantierte Support-Antwortzeiten entfernt.
+- Support-Adresse wird nur aus der Konfiguration übernommen; ohne bestätigten Kontakt gibt es keinen Link an einen erfundenen Empfänger. Fehler beim Öffnen des E-Mail-Programms werden angezeigt.
+- Ereignis-Erinnerungen und Digest erscheinen ausdrücklich als noch nicht verfügbar. Ihre funktionslosen Schalter wurden entfernt; dies implementiert noch keine Zustellung. Aktive In-App-Kategorien bleiben einstellbar.
+- Rechtstext-Konfiguration um Community-Richtlinien ergänzt; auch diese benötigen vor einem Release eine veröffentlichte Seite.
+- Manueller Workflow `release-candidate.yml` prüft Produktionsvariablen, statische Prüfungen, Tests, Edge Functions und Expo-Export vor dem Artefakt-Upload. Kein automatisches Deployment. YAML lokal geparst; der neue Workflow wurde noch nicht auf GitHub ausgeführt.
+- RELEASE_RUNBOOK.md beschreibt Release, Zwei-Konten-Prüfungen, Betrieb und Wiederherstellung. Die dort aufgeführten externen Tests und Betriebsnachweise sind noch auszuführen.
+- TypeScript, ESLint und alle 34 lokalen Tests erneut bestanden. Release-Konfigurationsprüfung scheitert erwartungsgemäß an sechs noch fehlenden Betreiberangaben.
+- Auch der erneute Expo-Export für Web, Android und iOS war erfolgreich; keine signierten Store-Binaries und kein gehosteter End-to-End-Nachweis.

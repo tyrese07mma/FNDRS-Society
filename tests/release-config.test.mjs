@@ -9,6 +9,7 @@ const valid = {
   EXPO_PUBLIC_TERMS_URL: 'https://fndrs.society/terms',
   EXPO_PUBLIC_PRIVACY_URL: 'https://fndrs.society/privacy',
   EXPO_PUBLIC_IMPRINT_URL: 'https://fndrs.society/imprint',
+  EXPO_PUBLIC_GUIDELINES_URL: 'https://fndrs.society/guidelines',
   EXPO_PUBLIC_SUPPORT_EMAIL: 'support@fndrs.society',
 };
 test('release configuration rejects preview, missing legal pages and leaked server credentials', () => {

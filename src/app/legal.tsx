@@ -90,8 +90,8 @@ export default function Legal() {
         />
       </View>
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 40, maxWidth: 720, width: '100%', alignSelf: 'center' }}>
-        {doc !== 'guidelines' && LEGAL_URLS[doc] ? (
-          <Button title={doc === 'terms' ? t('Open terms of service') : t('Open privacy policy')} onPress={() => {
+        {LEGAL_URLS[doc] ? (
+          <Button title={doc === 'terms' ? t('Open terms of service') : doc === 'privacy' ? t('Open privacy policy') : t('Open community guidelines')} onPress={() => {
             void Linking.openURL(LEGAL_URLS[doc]!).catch(() => toast.error(t('The page could not be opened.')));
           }} />
         ) : (

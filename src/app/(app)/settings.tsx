@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { api } from '@/data';
 import { useUpdateMe } from '@/data/queries';
 import type { DmPolicy } from '@/data/types';
-import { APP_VERSION, SUPPORT_EMAIL } from '@/lib/env';
+import { APP_VERSION, BILLING_ENABLED, SUPPORT_EMAIL } from '@/lib/env';
 import { CONTENT_MAX } from '@/lib/layout';
 import { useAuth } from '@/providers/AuthProvider';
 import { confirm } from '@/state/dialog';
@@ -114,10 +114,10 @@ export default function Settings() {
             <View style={{ flex: 1 }}>
               <Text variant="headline">FNDRS Pro</Text>
               <Text variant="caption" color="textMuted">
-                {isPro ? t('{{status}} · manage your plan', { status: subscription?.status === 'trialing' ? t('Trial active') : t('Active') }) : t("Unlimited matches, intros and analytics")}
+                {isPro ? t('{{status}} · manage your plan', { status: subscription?.status === 'trialing' ? t('Trial active') : t('Active') }) : (BILLING_ENABLED ? t("Subscription") : t("Paid plans are not available yet"))}
               </Text>
             </View>
-            <Badge tone="accent">{isPro ? t("Active") : t("Upgrade")}</Badge>
+            <Badge tone="accent">{isPro ? t("Active") : (BILLING_ENABLED ? t("Upgrade") : t("Not available yet"))}</Badge>
           </LinearGradient>
         </PressableScale>
 
@@ -154,11 +154,11 @@ export default function Settings() {
 
         <Group title={t('LANGUAGE')}><LanguagePicker /></Group>
 
-        <Group title={t("NOTIFICATIONS")} footer={t("Applies to in-app alerts and to push notifications once they are enabled on this device.")}>
+        <Group title={t("NOTIFICATIONS")} footer={t("These preferences apply to in-app notifications. Push delivery is not enabled yet.")}>
           <ListRow icon={Sparkles} title={t("New matches")} right={<Switch value={notif.matches} onValueChange={(v) => setNotif('matches', v)} accessibilityLabel={t("New matches")} />} />
           <ListRow icon={MessageCircle} title={t("Messages")} right={<Switch value={notif.messages} onValueChange={(v) => setNotif('messages', v)} accessibilityLabel={t("Messages")} />} />
-          <ListRow icon={CalendarDays} title={t("Event reminders")} right={<Switch value={notif.events} onValueChange={(v) => setNotif('events', v)} accessibilityLabel={t("Event reminders")} />} />
-          <ListRow icon={Newspaper} title={t("Weekly digest")} subtitle={t("Top posts and new founders, every Monday")} right={<Switch value={notif.digest} onValueChange={(v) => setNotif('digest', v)} accessibilityLabel={t("Weekly digest")} />} last />
+          <ListRow icon={CalendarDays} title={t("Event reminders")} subtitle={t("Not available yet")} />
+          <ListRow icon={Newspaper} title={t("Weekly digest")} subtitle={t("Not available yet")} last />
         </Group>
 
         <Group title={t("PRIVACY")}>
@@ -187,7 +187,7 @@ export default function Settings() {
 
         <Group title={t("SUPPORT")}>
           <ListRow icon={CircleHelp} title={t("Help center")} onPress={() => router.push('/help')} />
-          <ListRow icon={LifeBuoy} title={t("Contact support")} value={SUPPORT_EMAIL} onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}`)} />
+          <ListRow icon={LifeBuoy} title={t("Contact support")} value={SUPPORT_EMAIL || t("Not available yet")} onPress={SUPPORT_EMAIL ? () => { void Linking.openURL(`mailto:${SUPPORT_EMAIL}`).catch(() => toast.error(t("Email could not be opened."))); } : undefined} />
           <ListRow icon={ScrollText} title={t("Terms, privacy & guidelines")} onPress={() => router.push('/legal')} last />
         </Group>
 
@@ -198,7 +198,7 @@ export default function Settings() {
         </Group>
 
         <Text variant="mono" color="textFaint" align="center">
-          FNDRS Society {APP_VERSION} · Live
+          FNDRS Society {APP_VERSION}
         </Text>
       </ScrollView>
     </View>

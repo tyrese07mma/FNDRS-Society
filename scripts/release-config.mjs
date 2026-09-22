@@ -11,7 +11,7 @@ export function releaseConfigErrors(env) {
   }
   https('EXPO_PUBLIC_SUPABASE_URL', true);
   https('EXPO_PUBLIC_WEB_ORIGIN', true);
-  for (const name of ['EXPO_PUBLIC_TERMS_URL', 'EXPO_PUBLIC_PRIVACY_URL', 'EXPO_PUBLIC_IMPRINT_URL']) https(name);
+  for (const name of ['EXPO_PUBLIC_TERMS_URL', 'EXPO_PUBLIC_PRIVACY_URL', 'EXPO_PUBLIC_IMPRINT_URL', 'EXPO_PUBLIC_GUIDELINES_URL']) https(name);
   const key = env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
   let publicKey = key.startsWith('sb_publishable_') && key.length > 20;
   if (key.startsWith('eyJ')) {

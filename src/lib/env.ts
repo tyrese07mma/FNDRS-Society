@@ -16,6 +16,8 @@ export const LEGAL_URLS = {
   terms: httpsPage(process.env.EXPO_PUBLIC_TERMS_URL),
   privacy: httpsPage(process.env.EXPO_PUBLIC_PRIVACY_URL),
   imprint: httpsPage(process.env.EXPO_PUBLIC_IMPRINT_URL),
+  guidelines: httpsPage(process.env.EXPO_PUBLIC_GUIDELINES_URL),
 };
 export const APP_VERSION = Constants.expoConfig?.version ?? '3.0.0';
-export const SUPPORT_EMAIL = process.env.EXPO_PUBLIC_SUPPORT_EMAIL ?? 'support@fndrs.society';
+const supportEmail = process.env.EXPO_PUBLIC_SUPPORT_EMAIL?.trim() ?? '';
+export const SUPPORT_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail) ? supportEmail : '';
