@@ -23,10 +23,10 @@ import LocalPreview from '@/features/preview/LocalPreview';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-// Web only: our inputs draw their own focus state, so drop the browser focus ring.
+// Preserve a visible keyboard focus indicator across web controls.
 if (Platform.OS === 'web' && typeof document !== 'undefined') {
   const style = document.createElement('style');
-  style.textContent = 'input:focus,textarea:focus{outline:none}*{-webkit-tap-highlight-color:transparent}';
+  style.textContent = ':focus-visible{outline:3px solid #648bff!important;outline-offset:3px}*{-webkit-tap-highlight-color:transparent}';
   document.head.appendChild(style);
 }
 

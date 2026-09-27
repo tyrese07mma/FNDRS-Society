@@ -76,3 +76,14 @@ Die älteren Prüfangaben oben sind historische Zwischenstände. Dieser Abschnit
 - RELEASE_RUNBOOK.md beschreibt Release, Zwei-Konten-Prüfungen, Betrieb und Wiederherstellung. Die dort aufgeführten externen Tests und Betriebsnachweise sind noch auszuführen.
 - TypeScript, ESLint und alle 34 lokalen Tests erneut bestanden. Release-Konfigurationsprüfung scheitert erwartungsgemäß an sechs noch fehlenden Betreiberangaben.
 - Auch der erneute Expo-Export für Web, Android und iOS war erfolgreich; keine signierten Store-Binaries und kein gehosteter End-to-End-Nachweis.
+
+## Fortschritt am 26./27. September 2026
+
+- Ergänzter Closed-Beta-Auftrag erfasst: CLOSED_BETA_AUDIT.md enthält Befunde, Priorität und noch fehlende Nachweise. Vorhandenes Design bleibt erhalten.
+- Zwölfte Migration für private Moderationswarteschlange mit Statusverlauf bereitgestellt; Berechtigungen lokal geprüft.
+- Release-Web-Paket mit Kontolöschungsseite, Hosting-Prüfung und Auth-Konfigurationsplan vorbereitet; noch nicht öffentlich bereitgestellt.
+- Decoder-/UUID-Abhängigkeiten kompatibel aktualisiert: frische Installation und Kompatibilitätstests bestanden, npm meldete null bekannte Sicherheitslücken.
+- Analytics, Challenges, Mentoren und Investoren um Übersetzungen/Fehlerzustände ergänzt; erfundene Analytics-Aktivität und unbelegte Inhaltsversprechen entfernt.
+- Profil-/Startup-/Kalenderlinks zentral validiert und Öffnungsfehler abgefangen. Chat-Doppeltippen gesperrt, fehlgeschlagene Entwürfe bleiben erhalten. Serverseitige Versand-Idempotenz weiterhin offen.
+- TypeScript, ESLint und 43 lokale Tests am 27. September bestanden. Erneuter Export des aktuellen Standes für Web, Android und iOS ebenfalls bestanden.
+- Konstruktorfehler und gemeldetes blaues Zahnrad noch nicht eindeutig reproduziert; keine Behauptung einer Behebung.

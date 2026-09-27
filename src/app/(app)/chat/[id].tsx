@@ -36,7 +36,7 @@ export default function Chat() {
   const { c } = useTheme();
   const { userId } = useAuth();
   const convo = useConversation(id);
-  const { messages, loading, error, typing, otherReadAt, send, hasOlder, loadOlder, loadingOlder } = useThread(id, userId);
+  const { messages, loading, error, typing, otherReadAt, send, sending, hasOlder, loadOlder, loadingOlder } = useThread(id, userId);
   const report = useReport();
   const [text, setText] = useState('');
   const [menu, setMenu] = useState(false);
@@ -64,11 +64,12 @@ export default function Chat() {
     rows.push({ type: 'msg', key: m.id, m, mine: m.sender_id === userId, first: !grouped(prev, m), last: !grouped(m, messages[i + 1]) });
   });
 
-  const submit = (body?: string) => {
+  const submit = async (body?: string) => {
     const value = (body ?? text).trim();
-    if (!value) return;
-    if (!body) setText('');
-    void send(value);
+    if (!value || sending) return;
+    const sent = await send(value);
+    // Keep a failed draft, and never erase text typed while a request was pending.
+    if (sent && !body) setText(current => current.trim() === value ? '' : current);
   };
 
   const scrollToEnd = (animated = true) => requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated }));
@@ -214,7 +215,7 @@ export default function Chat() {
         />
         <PressableScale
           onPress={() => submit()}
-          disabled={!text.trim()}
+          disabled={!text.trim() || sending}
           scaleTo={0.88}
           accessibilityLabel={t("Send message")}
           style={{ width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: text.trim() ? c.action : c.tint08 }}

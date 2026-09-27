@@ -31,3 +31,7 @@ Use versioned CLI migrations for future database updates; do not replay the init
 Migration `202609210001_ranked_feed.sql` was applied successfully after a dry run showed exactly that pending migration. Eleven migrations are now recorded as deployed. The new authenticated feed RPC orders trending posts by likes and uses rank/time/ID pagination while enforcing post visibility. Old clients retain the previous RPC. Local SQL tests cover ranking, ties, private-post exclusion and anonymous access; they are not a hosted two-account integration test.
 
 The app defaults AI and billing availability to false. No paid provider credentials or products were enabled. Public release configuration remains incomplete; see IMPLEMENTATION_STATUS.md.
+
+## Deployment update — 26 September 2026
+
+Migration `202609260001_moderation_review_queue.sql` applied after a dry run identified only this pending migration. Twelve migrations are deployed. Operator-only review/queue functions and history are locally tested. This does not implement automatic moderation enforcement or complete a live operator review cycle. AI and payments remain disabled.

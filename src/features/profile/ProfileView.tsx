@@ -1,6 +1,6 @@
 import { useTranslation } from '@/i18n';
 import { useRouter, type Href } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
+import { openWeb } from '@/lib/open-web';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,7 +10,7 @@ import type { Profile, PublicProfile } from '@/data/types';
 import { PostCard } from '@/features/feed/PostCard';
 import { StartupCard } from '@/features/startups/StartupCard';
 import { hashHue } from '@/lib/color';
-import { compact, ensureUrl, prettyUrl, ROLE_LABEL, STAGE_LABEL } from '@/lib/format';
+import { compact, prettyUrl, ROLE_LABEL, STAGE_LABEL } from '@/lib/format';
 import { CONTENT_MAX } from '@/lib/layout';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius } from '@/theme/tokens';
@@ -104,7 +104,7 @@ export function ProfileView({ profile: p, isMe, isPro, actions, topLeft, topRigh
   ];
 
   const links = [
-    p.links?.website && { icon: Globe, label: prettyUrl(p.links.website), url: ensureUrl(p.links.website) },
+    p.links?.website && { icon: Globe, label: prettyUrl(p.links.website), url: p.links.website },
     p.links?.linkedin && {
       icon: Link,
       label: t("LinkedIn"),
@@ -249,7 +249,7 @@ export function ProfileView({ profile: p, isMe, isPro, actions, topLeft, topRigh
                         return (
                           <Pressable
                             key={l.url}
-                            onPress={() => WebBrowser.openBrowserAsync(l.url)}
+                            onPress={() => void openWeb(l.url)}
                             accessibilityRole="link"
                             style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: radius.md, backgroundColor: c.tint04 }}
                           >

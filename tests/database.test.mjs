@@ -216,6 +216,24 @@ test('trending feed orders by likes and paginates ties without exposing private 
  try { await assert.rejects(db.query("select feed_page_ranked()")); } finally { await db.exec('reset role'); }
 });
 
+test('moderation reviews are operator-only, validated and recorded with history', async () => {
+ await asUser(A,async()=>{ await db.query("insert into reports(reporter_id,kind,target_id,reason) values($1,'user',$2,'Review test')",[A,B]); });
+ const reportId=(await db.query("select id from reports where reason='Review test'")).rows[0].id;
+ await assert.rejects(asUser(A,()=>db.query("select review_report($1,'resolved','forged','client')",[reportId])));
+ await assert.rejects(asUser(A,()=>db.exec("select * from moderation_queue()")));
+ await assert.rejects(asUser(A,()=>db.exec("select * from report_reviews")));
+ await assert.rejects(db.query("select review_report($1,'resolved','','operator')",[reportId]));
+ await db.exec('begin; set local role service_role;');
+ try {
+  assert.ok((await db.query("select * from moderation_queue('open',100)")).rows.some(r=>r.report_id===reportId));
+  await db.query("select review_report($1,'reviewing','Investigating','test-operator')",[reportId]);
+  await db.query("select review_report($1,'dismissed','No violation after review','test-operator')",[reportId]);
+  assert.equal((await db.query('select count(*)::int n from report_review_history where report_id=$1',[reportId])).rows[0].n,2);
+  assert.ok(!(await db.query("select * from moderation_queue('open',100)")).rows.some(r=>r.report_id===reportId));
+  await db.exec('commit');
+ } catch(e) { await db.exec('rollback'); throw e; }
+});
+
 test('account cleanup cannot be bypassed and serializes checkout with deletion',async()=>{
  const startup = await asUser(C, async()=> (await db.query("insert into startups(owner_id,name,tagline) values($1,'Lifecycle test','Created before deletion') returning id",[C])).rows[0].id);
  await db.query("select set_config('request.jwt.claim.sub','',false)");

@@ -1,7 +1,7 @@
 import { useTranslation } from '@/i18n';
 import { describeError } from '@/lib/errors';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
+import { openWeb } from '@/lib/open-web';
 import React from 'react';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -122,7 +122,7 @@ export default function EventDetail() {
 
           {!past && (
             <View style={{ flexDirection: 'row', gap: 10 }}>
-              <Button title={t("Add to calendar")} icon={CalendarPlus} variant="secondary" style={{ flex: 1 }} onPress={() => WebBrowser.openBrowserAsync(calendarUrl(e))} />
+              <Button title={t("Add to calendar")} icon={CalendarPlus} variant="secondary" style={{ flex: 1 }} onPress={() => void openWeb(() => calendarUrl(e))} />
               <Button title={t("Share")} icon={Share2} variant="secondary" onPress={() => shareText(`${e.title} — ${fullDate(e.starts_at)}`, appLink(`/events/${e.id}`))} />
             </View>
           )}

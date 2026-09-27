@@ -1,7 +1,7 @@
 import { useTranslation } from '@/i18n';
 import { describeError } from '@/lib/errors';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
+import { openWeb } from '@/lib/open-web';
 import React from 'react';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOpenConversation, useStartup } from '@/data/queries';
 import { PersonRow } from '@/features/people/PersonRow';
 import { UpvoteButton } from '@/features/startups/StartupCard';
-import { compact, ensureUrl, prettyUrl, STAGE_LABEL } from '@/lib/format';
+import { compact, prettyUrl, STAGE_LABEL } from '@/lib/format';
 import { CONTENT_MAX } from '@/lib/layout';
 import { appLink, shareText } from '@/lib/share';
 import { useAuth } from '@/providers/AuthProvider';
@@ -91,7 +91,7 @@ export default function StartupDetail() {
 
           <View style={{ flexDirection: 'row', gap: 10 }}>
             {!!s.website && (
-              <Button title={prettyUrl(s.website)} icon={Globe} variant="secondary" style={{ flex: 1 }} onPress={() => WebBrowser.openBrowserAsync(ensureUrl(s.website!))} />
+              <Button title={prettyUrl(s.website)} icon={Globe} variant="secondary" style={{ flex: 1 }} onPress={() => void openWeb(s.website!)} />
             )}
             <Button title={t("Share")} icon={Share2} variant="secondary" style={{ flex: s.website ? undefined : 1 }} onPress={() => shareText(`${s.name} — ${s.tagline}`, appLink(`/startups/${s.id}`))} />
           </View>

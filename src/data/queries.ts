@@ -385,6 +385,9 @@ export function useThread(conversationId: string, myId: string | null) {
   const key = qk.messages(conversationId);
   const query = useQuery({ queryKey: key, queryFn: () => api.listMessages(conversationId), enabled: !!conversationId });
   const [typing, setTyping] = useState(false);
+  const sendingRef = useRef(false);
+  const [sending, setSending] = useState(false);
+  const sendSequence = useRef(0);
   const olderBusy = useRef(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [oldestReached, setOldestReached] = useState<string | null>(null);
@@ -424,21 +427,31 @@ export function useThread(conversationId: string, myId: string | null) {
 
   const send = async (body: string) => {
     const text = body.trim();
-    if (!text || !myId) return;
-    const tempId = `tmp_${Date.now()}`;
+    if (!text || !myId || sendingRef.current) return false;
+    // A ref closes the double-tap race before React can render the disabled button.
+    sendingRef.current = true;
+    setSending(true);
+    const tempId = `tmp_${Date.now()}_${++sendSequence.current}`;
     const temp: T.Message = { id: tempId, conversation_id: conversationId, sender_id: myId, body: text, created_at: iso(), pending: true };
     qc.setQueryData<T.Message[]>(key, (cur) => [...(cur ?? []), temp]);
     haptic.light();
     try {
+      const session = await api.getSession();
+      if (session?.userId !== myId) throw new Error('You are signed out.');
       const real = await api.sendMessage(conversationId, text);
       qc.setQueryData<T.Message[]>(key, (cur = []) => {
         const withoutTemp = cur.filter((x) => x.id !== tempId);
         return withoutTemp.some((x) => x.id === real.id) ? withoutTemp : [...withoutTemp, real];
       });
       qc.invalidateQueries({ queryKey: qk.conversations });
+      return true;
     } catch (e) {
       qc.setQueryData<T.Message[]>(key, (cur = []) => cur.filter((x) => x.id !== tempId));
       toast.error(translateNow('Message not sent'), describeError(e));
+      return false;
+    } finally {
+      sendingRef.current = false;
+      setSending(false);
     }
   };
 
@@ -450,6 +463,7 @@ export function useThread(conversationId: string, myId: string | null) {
     typing,
     otherReadAt,
     send,
+    sending,
   };
 }
 

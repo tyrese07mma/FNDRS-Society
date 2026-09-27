@@ -1,3 +1,5 @@
+import { useTranslation } from '@/i18n';
+import { describeError } from '@/lib/errors';
 import React, { useState } from 'react';
 import { FlatList, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,6 +15,7 @@ import { Avatar, Button, Card, Chip, EmptyState, Header, Input, Section, Sheet, 
 import { BadgeCheck, CalendarCheck, GraduationCap, Star } from '@/ui/icons';
 
 function MentorCard({ m, onBook }: { m: Mentor; onBook: () => void }) {
+  const { t } = useTranslation();
   const { c } = useTheme();
   return (
     <Card style={{ gap: 12 }}>
@@ -27,24 +30,25 @@ function MentorCard({ m, onBook }: { m: Mentor; onBook: () => void }) {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
             <Star size={12} color={c.accentText} fill={c.accentText} />
             <Text variant="mono" color="text">{m.rating.toFixed(1)}</Text>
-            <Text variant="mono" color="textSubtle">· {m.sessions} sessions</Text>
+            <Text variant="mono" color="textSubtle">· {t('{{count}} sessions', { count: m.sessions })}</Text>
           </View>
         </View>
         <View style={{ alignItems: 'flex-end' }}>
           <Text variant="number" style={{ fontSize: 18 }}>{money(m.rate_cents)}</Text>
-          <Text variant="caption" color="textSubtle">per 30 min</Text>
+          <Text variant="caption" color="textSubtle">{t("per 30 min")}</Text>
         </View>
       </View>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
         {m.tags.map((t) => <Chip key={t} label={t} size="sm" static />)}
       </View>
-      <Button title="Book a session" icon={CalendarCheck} variant="secondary" onPress={onBook} />
+      <Button title={t("Book a session")} icon={CalendarCheck} variant="secondary" onPress={onBook} />
     </Card>
   );
 }
 
 export default function Mentors() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const { c } = useTheme();
   const mentors = useMentors();
   const bookings = useBookings();
@@ -55,6 +59,7 @@ export default function Mentors() {
   const [slot, setSlot] = useState<string | null>(null);
   const [note, setNote] = useState('');
 
+  const translateAll = t('All');
   const tags = ['All', ...Array.from(new Set((mentors.data ?? []).flatMap((m) => m.tags)))];
   const data = (mentors.data ?? []).filter((m) => tag === 'All' || m.tags.includes(tag));
 
@@ -70,7 +75,7 @@ export default function Mentors() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <Header back title="Mentors" />
+      <Header back title={t("Mentors")} />
       <FlatList
         data={data}
         keyExtractor={(m) => m.id}
@@ -87,9 +92,10 @@ export default function Mentors() {
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         ListHeaderComponent={
           <View style={{ gap: 18, paddingBottom: 14 }}>
-            <Text color="textMuted">1:1 sessions with operators who have done it before. Book 30 minutes, bring your hardest question.</Text>
+            <Text color="textMuted">{t("1:1 sessions with operators who have done it before. Book 30 minutes, bring your hardest question.")}</Text>
+            {bookings.isError && <EmptyState compact title={t('Bookings could not be loaded')} message={describeError(bookings.error)} actionLabel={t('Try again')} onAction={() => void bookings.refetch()} />}
             {(bookings.data ?? []).length > 0 && (
-              <Section title="Your sessions">
+              <Section title={t("Your sessions")}>
                 <View style={{ gap: 10 }}>
                   {(bookings.data ?? []).map((b) => (
                     <Card key={b.id} variant="accent" style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -99,11 +105,11 @@ export default function Mentors() {
                         <Text variant="mono" color="accentText">{b.slot}</Text>
                       </View>
                       <Button
-                        title="Cancel"
+                        title={t("Cancel")}
                         size="sm"
                         variant="ghost"
                         onPress={async () => {
-                          if (await confirm({ title: 'Cancel this session?', confirmLabel: 'Cancel session', cancelLabel: 'Keep it', destructive: true })) cancel.mutate(b.id);
+                          if (await confirm({ title: t('Cancel this session?'), confirmLabel: t('Cancel session'), cancelLabel: t('Keep it'), destructive: true })) cancel.mutate(b.id);
                         }}
                       />
                     </Card>
@@ -112,26 +118,27 @@ export default function Mentors() {
               </Section>
             )}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}>
-              {tags.map((t) => <Chip key={t} label={t} selected={tag === t} onPress={() => setTag(t)} />)}
+              {tags.map((t) => <Chip key={t} label={t === 'All' ? translateAll : t} selected={tag === t} onPress={() => setTag(t)} />)}
             </ScrollView>
           </View>
         }
-        ListEmptyComponent={mentors.isLoading ? <SkeletonList variant="card" count={3} /> : <EmptyState icon={GraduationCap} title="No mentors in this area yet" />}
+        ListEmptyComponent={mentors.isLoading ? <SkeletonList variant="card" count={3} /> : mentors.isError ? <EmptyState icon={GraduationCap} title={t('Mentors could not be loaded')} message={describeError(mentors.error)} actionLabel={t('Try again')} onAction={() => void mentors.refetch()} /> : <EmptyState icon={GraduationCap} title={t("No mentors in this area yet")} />}
         contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 40, width: '100%', maxWidth: CONTENT_MAX, alignSelf: 'center' }}
       />
 
       <Sheet
         open={!!selected}
         onClose={() => setSelected(null)}
-        title={selected ? `Book ${selected.profile.full_name.split(' ')[0]}` : undefined}
-        subtitle={selected ? `30-minute video call · ${money(selected.rate_cents)}` : undefined}
-        footer={<Button title={slot ? `Confirm · ${slot}` : 'Pick a time'} size="lg" block disabled={!slot} loading={book.isPending} onPress={confirmBooking} />}
+        title={selected ? t('Book {{name}}', { name: selected.profile.full_name.split(' ')[0] }) : undefined}
+        subtitle={selected ? t('30-minute session · {{price}}', { price: money(selected.rate_cents) }) : undefined}
+        footer={<Button title={slot ? t('Confirm · {{slot}}', { slot }) : t('Pick a time')} size="lg" block disabled={!slot} loading={book.isPending} onPress={confirmBooking} />}
       >
         {selected && (
           <View style={{ gap: 18 }}>
             <View style={{ gap: 10 }}>
-              <Text variant="label" color="textSubtle">AVAILABLE TIMES</Text>
+              <Text variant="label" color="textSubtle">{t("AVAILABLE TIMES")}</Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {!selected.slots.length && <Text color="textSubtle">{t('No times available')}</Text>}
                 {selected.slots.map((s) => {
                   const on = slot === s;
                   return (
@@ -148,8 +155,8 @@ export default function Mentors() {
                 })}
               </View>
             </View>
-            <Input label="What do you want to cover? (optional)" value={note} onChangeText={setNote} multiline maxLength={400} placeholder="Context helps your mentor prepare." />
-            <Text variant="caption" color="textSubtle">You can cancel this booking from My bookings.</Text>
+            <Input label={t("What do you want to cover? (optional)")} value={note} onChangeText={setNote} multiline maxLength={400} placeholder={t("Context helps your mentor prepare.")} />
+            <Text variant="caption" color="textSubtle">{t("You can cancel this booking from My bookings.")}</Text>
           </View>
         )}
       </Sheet>

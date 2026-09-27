@@ -1,4 +1,6 @@
 import React from 'react';
+import { useTranslation } from '@/i18n';
+import { describeError } from '@/lib/errors';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -24,13 +26,14 @@ const EARN = [
 ] as const;
 
 function ActiveChallenge({ ch }: { ch: Challenge }) {
+  const { t } = useTranslation();
   const { c } = useTheme();
   const advance = useAdvanceChallenge();
   const done = ch.my_step >= ch.steps.length;
   return (
     <Card variant="accent" style={{ gap: 14 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Badge tone="accent" dot>This week</Badge>
+        <Badge tone="accent" dot>{t('Active challenge')}</Badge>
         <Badge icon={Clock}>{countdown(ch.ends_at)}</Badge>
       </View>
       <View style={{ gap: 6 }}>
@@ -40,14 +43,14 @@ function ActiveChallenge({ ch }: { ch: Challenge }) {
       <View style={{ flexDirection: 'row', gap: 16 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
           <Users size={14} color={c.textSubtle} />
-          <Text variant="mono" color="textSubtle">{compact(ch.participants)} taking part</Text>
+          <Text variant="mono" color="textSubtle">{t('{{count}} taking part', { count: compact(ch.participants) })}</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
           <Trophy size={14} color={c.accentText} />
           <Text variant="mono" color="accentText">+{ch.reward_xp} XP</Text>
         </View>
       </View>
-      <ProgressBar value={ch.my_step} max={ch.steps.length} tone="gold" valueText={`${ch.my_step} / ${ch.steps.length} steps`} label="Your progress" />
+      <ProgressBar value={ch.my_step} max={ch.steps.length} tone="gold" valueText={t('{{done}} / {{total}} steps', { done: ch.my_step, total: ch.steps.length })} label={t('Your progress')} />
       <View style={{ gap: 10 }}>
         {ch.steps.map((s, i) => {
           const complete = i < ch.my_step;
@@ -76,7 +79,7 @@ function ActiveChallenge({ ch }: { ch: Challenge }) {
         })}
       </View>
       <Button
-        title={done ? 'Challenge completed' : `Mark “${ch.steps[ch.my_step]}” as done`}
+        title={done ? t('Challenge completed') : t('Mark “{{step}}” as done', { step: ch.steps[ch.my_step] })}
         icon={done ? Trophy : Check}
         variant={done ? 'secondary' : 'accent'}
         block
@@ -89,6 +92,7 @@ function ActiveChallenge({ ch }: { ch: Challenge }) {
 }
 
 export default function Challenges() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { c } = useTheme();
   const { profile } = useAuth();
@@ -100,30 +104,36 @@ export default function Challenges() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <Header back title="Challenges" />
+      <Header back title={t('Challenges')} />
       <ScrollView contentContainerStyle={{ padding: 16, gap: 26, paddingBottom: insets.bottom + 40, width: '100%', maxWidth: CONTENT_MAX, alignSelf: 'center' }}>
         {challenges.isLoading ? (
           <SkeletonList variant="card" count={1} />
+        ) : challenges.isError ? (
+          <EmptyState icon={Trophy} title={t('Challenges could not be loaded')} message={describeError(challenges.error)} actionLabel={t('Try again')} onAction={() => void challenges.refetch()} />
         ) : active ? (
           <ActiveChallenge ch={active} />
         ) : (
-          <EmptyState icon={Trophy} title="No challenge this week" message="A new one drops every Monday." />
+          <EmptyState icon={Trophy} title={t('No active challenge')} message={t('New challenges will appear here when available.')} />
         )}
 
         {profile && (
           <Card style={{ gap: 10 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <Trophy size={18} color={c.accentText} />
-              <Text variant="headline" style={{ flex: 1 }}>Level {profile.level}</Text>
+              <Text variant="headline" style={{ flex: 1 }}>{t('Level {{level}}', { level: profile.level })}</Text>
               <Text variant="mono" color="textSubtle">{compact(profile.xp)} XP</Text>
             </View>
-            <ProgressBar value={xpInLevel} max={500} tone="gold" valueText={`${500 - xpInLevel} XP to level ${profile.level + 1}`} />
+            <ProgressBar value={xpInLevel} max={500} tone="gold" valueText={t('{{xp}} XP to level {{level}}', { xp: 500 - xpInLevel, level: profile.level + 1 })} />
           </Card>
         )}
 
-        <Section title="Leaderboard">
+        <Section title={t('Leaderboard')}>
           {board.isLoading ? (
             <SkeletonList count={5} />
+          ) : board.isError ? (
+            <EmptyState icon={Medal} title={t('Leaderboard could not be loaded')} message={describeError(board.error)} actionLabel={t('Try again')} onAction={() => void board.refetch()} />
+          ) : !board.data?.length ? (
+            <EmptyState icon={Medal} title={t('No rankings yet')} />
           ) : (
             <View style={{ gap: 4 }}>
               {(board.data ?? []).map((l) => (
@@ -136,8 +146,8 @@ export default function Challenges() {
                   </View>
                   <Avatar uri={l.avatar_url} name={l.full_name} size={38} ring={l.verified} />
                   <View style={{ flex: 1, minWidth: 0 }}>
-                    <Text variant="headline" numberOfLines={1}>{l.is_me ? 'You' : l.full_name}</Text>
-                    <Text variant="caption" color="textSubtle">Level {l.level}</Text>
+                    <Text variant="headline" numberOfLines={1}>{l.is_me ? t('You') : l.full_name}</Text>
+                    <Text variant="caption" color="textSubtle">{t('Level {{level}}', { level: l.level })}</Text>
                   </View>
                   <Text variant="mono" color={l.rank <= 3 ? 'accentText' : 'text'}>{compact(l.xp)} XP</Text>
                 </View>
@@ -146,11 +156,11 @@ export default function Challenges() {
           )}
         </Section>
 
-        <Section title="How to earn XP">
+        <Section title={t('How to earn XP')}>
           <Card padded={false}>
             {EARN.map(([label, xp], i) => (
               <View key={label} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 16, borderBottomWidth: i === EARN.length - 1 ? 0 : 1, borderBottomColor: c.hairline }}>
-                <Text variant="callout" style={{ flex: 1 }}>{label}</Text>
+                <Text variant="callout" style={{ flex: 1 }}>{t(label)}</Text>
                 <Text variant="mono" color="accentText">+{xp}</Text>
               </View>
             ))}
@@ -158,7 +168,7 @@ export default function Challenges() {
         </Section>
 
         {past.length > 0 && (
-          <Section title="Past challenges">
+          <Section title={t('Past challenges')}>
             <View style={{ gap: 10 }}>
               {past.map((ch) => {
                 const completed = ch.my_step >= ch.steps.length;
@@ -169,7 +179,7 @@ export default function Challenges() {
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text variant="headline">{ch.title}</Text>
-                      <Text variant="caption" color="textSubtle">{compact(ch.participants)} took part</Text>
+                      <Text variant="caption" color="textSubtle">{t('{{count}} took part', { count: compact(ch.participants) })}</Text>
                     </View>
                     {completed ? <Badge tone="success" icon={Check}>+{ch.reward_xp} XP</Badge> : <Badge>{ch.my_step}/{ch.steps.length}</Badge>}
                   </Card>
