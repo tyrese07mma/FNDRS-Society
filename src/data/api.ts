@@ -123,7 +123,7 @@ export interface Api {
   listConversations(): Promise<Conversation[]>;
   getConversation(id: string): Promise<Conversation>;
   listMessages(conversationId: string, before?: { created_at: string; id: string }): Promise<Message[]>;
-  sendMessage(conversationId: string, body: string): Promise<Message>;
+  sendMessage(conversationId: string, body: string, requestId: string): Promise<Message>;
   markRead(conversationId: string): Promise<void>;
   openConversation(userId: string): Promise<string>;
   subscribeThread(conversationId: string, handlers: ThreadHandlers): () => void;

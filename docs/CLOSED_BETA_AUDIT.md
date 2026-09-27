@@ -55,3 +55,7 @@ Keine destruktive Migration erforderlich oder durchgeführt. Nachrichten besitze
 8. Release-Aufgaben, Monitoring/Restore und geschlossene Beta mit dokumentierten echten Testergebnissen abschließen.
 
 Keiner dieser offenen Nachweise wird allein durch einen erfolgreichen Build als erledigt markiert.
+
+## Nachtrag: Nachrichten und Matching
+
+Der zuvor offene serverseitige Schutz gegen wiederholtes Senden wurde mit Migration 202609270001 bereitgestellt und lokal getestet. Kennungen bleiben bei Wiederholung im geöffneten Chat erhalten; sie überleben noch keinen Neustart. Details und Grenzen: MESSAGING_VERIFICATION.md. Zusätzliche Matching-/XP-Prüfungen bestehen; insgesamt 47 lokale Tests. Die übrigen offenen Auditpunkte bleiben bestehen.

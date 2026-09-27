@@ -85,6 +85,40 @@ test('mutual interest creates one match and nonmembers cannot read messages',asy
  await asUser(C,async()=>{assert.equal((await db.query('select * from messages')).rows.length,0);});
  await assert.rejects(asUser(C,()=>db.query('insert into messages(conversation_id,sender_id,body) values($1,$2,$3)',[result.conversation_id,C,'Intrusion'])));
 });
+test('repeated matching and community toggles cannot duplicate matches or their XP rewards',async()=>{
+ const original=(await db.query('select id from conversations where user_a=$1 and user_b=$2',[A,B])).rows[0].id;
+ const result=await asUser(A,async()=> (await db.query("select swipe($1,'connect') data",[B])).rows[0].data);
+ assert.equal(result.conversation_id,original);
+ assert.equal((await db.query('select count(*)::int n from matches where user_a=$1 and user_b=$2',[A,B])).rows[0].n,1);
+ assert.equal((await db.query("select count(*)::int n from xp_ledger where user_id=$1 and reason='match' and ref=$2",[A,B])).rows[0].n,1);
+ for(const field of ['xp','level','founder_score']) await assert.rejects(asUser(A,()=>db.exec(`update profiles set ${field}=999 where id='${A}'`)),/permission denied/);
+ const community=(await db.query("insert into communities(slug,name) values('xp-toggle','XP test') returning id")).rows[0].id;
+ const beforeXp=(await db.query('select xp from profiles where id=$1',[A])).rows[0].xp;
+ await asUser(A,async()=>{
+  await db.query('insert into community_members(community_id,user_id) values($1,$2)',[community,A]);
+  await db.query('delete from community_members where community_id=$1 and user_id=$2',[community,A]);
+  await db.query('insert into community_members(community_id,user_id) values($1,$2)',[community,A]);
+ });
+ assert.equal((await db.query('select xp from profiles where id=$1',[A])).rows[0].xp,beforeXp+5);
+});
+
+test('message retries return one stored message and reject changed payloads and outsiders',async()=>{
+ const conv=(await db.query('select id from conversations where user_a=$1 and user_b=$2',[A,B])).rows[0].id;
+ const send=(user,body,key)=>asUser(user,async()=> (await db.query('select to_jsonb(send_message($1,$2,$3)) data',[conv,body,key])).rows[0].data);
+ const first=await send(A,' Retry-safe message ','retry-one');
+ const again=await send(A,'Retry-safe message','retry-one');
+ assert.equal(first.id,again.id);
+ assert.equal(first.sender_id,A);
+ assert.equal(first.body,'Retry-safe message');
+ assert.equal((await db.query('select count(*)::int n from messages where sender_id=$1 and client_request_id=$2',[A,'retry-one'])).rows[0].n,1);
+ await assert.rejects(send(A,'Changed payload','retry-one'),/VALIDATION/);
+ await assert.rejects(send(C,'Intrusion','retry-one'),/FORBIDDEN/);
+ await assert.rejects(send(A,'Empty key',''),/VALIDATION/);
+ await assert.rejects(asUser(A,()=>db.query('insert into messages(conversation_id,sender_id,body,created_at) values($1,$2,$3,now())',[conv,A,'Forged time'])),/permission denied/);
+ const other=await send(B,'Independent sender','retry-one');
+ assert.notEqual(first.id,other.id);
+});
+
 test('private community posts cannot leak through feed RPC or comments',async()=>{
  await db.query("select set_config('request.jwt.claim.sub',$1,false)",[B]);
  const community=(await db.query("insert into communities(slug,name,is_private) values('private','Private',true) returning id")).rows[0].id;

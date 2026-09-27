@@ -161,6 +161,7 @@ export interface Conversation {
 }
 
 export interface Message {
+  client_request_id?: string | null;
   id: string;
   conversation_id: string;
   sender_id: string;

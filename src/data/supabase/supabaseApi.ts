@@ -329,12 +329,8 @@ export const supabaseApi: Api = {
     const rows = await rpc<T.Message[]>('message_page', { p_conversation: conversationId, p_before: before?.created_at, p_before_id: before?.id, p_limit: 50 });
     return rows.reverse();
   },
-  async sendMessage(conversationId, body) {
-    const me = await uid();
-    return run<T.Message>(
-      sb().from('messages').insert({ conversation_id: conversationId, sender_id: me, body: body.trim() })
-        .select('id, conversation_id, sender_id, body, created_at').single(),
-    );
+  async sendMessage(conversationId, body, requestId) {
+    return rpc<T.Message>('send_message', { p_conversation: conversationId, p_body: body.trim(), p_request_id: requestId });
   },
   markRead: (conversationId) => rpc<void>('mark_read', { p_conversation: conversationId }),
   openConversation: (userId) => rpc<string>('open_conversation', { p_other: userId }),

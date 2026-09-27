@@ -87,3 +87,11 @@ Die älteren Prüfangaben oben sind historische Zwischenstände. Dieser Abschnit
 - Profil-/Startup-/Kalenderlinks zentral validiert und Öffnungsfehler abgefangen. Chat-Doppeltippen gesperrt, fehlgeschlagene Entwürfe bleiben erhalten. Serverseitige Versand-Idempotenz weiterhin offen.
 - TypeScript, ESLint und 43 lokale Tests am 27. September bestanden. Erneuter Export des aktuellen Standes für Web, Android und iOS ebenfalls bestanden.
 - Konstruktorfehler und gemeldetes blaues Zahnrad noch nicht eindeutig reproduziert; keine Behauptung einer Behebung.
+
+## Nachrichtenabsicherung – 27. September
+
+- Dreizehnte Migration `202609270001_idempotent_messages.sql` nach Dry-Run bereitgestellt. Serverseitige Wiederholungen derselben Sendekennung liefern dieselbe Nachricht; gefälschte Zeitstempel sind gesperrt.
+- Chat gleicht HTTP und Realtime nach Kennung ab und sortiert chronologisch. Fehlgeschlagene Versuche behalten ihre Kennung innerhalb des geöffneten Chats. Kein persistenter Offline-Ausgangskorb; siehe MESSAGING_VERIFICATION.md.
+- Zusätzliche Matching-/XP-Tests prüfen doppelte Matches, Belohnungen durch Beitritt/Austritt und direkte Score-Manipulation. TypeScript, ESLint und alle 47 lokalen Tests bestanden.
+- GitHub-Prüflauf für den vorigen Stand a433858 war erfolgreich; die aktuellen Änderungen benötigen einen eigenen Lauf.
+- Auch der aktuelle Expo-Export für Web, Android und iOS ist erfolgreich; kein signierter Store-Build.

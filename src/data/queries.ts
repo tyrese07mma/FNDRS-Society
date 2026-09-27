@@ -14,6 +14,8 @@ import { useAccountMutation as useMutation } from './useAccountMutation';
 import { useEffect, useRef, useState } from 'react';
 
 import { haptic } from '@/lib/haptics';
+import { messageAttempt, type MessageAttempt } from '@/lib/message-request';
+import { mergeThreadMessages } from '@/lib/thread-messages';
 import { translateNow } from '@/i18n';
 import { describeError } from '@/lib/errors';
 import { toast } from '@/state/toast';
@@ -363,19 +365,6 @@ export function useOpenConversation() {
   });
 }
 
-function mergeIncoming(cur: T.Message[], m: T.Message, myId: string | null): T.Message[] {
-  if (cur.some((x) => x.id === m.id)) return cur;
-  if (m.sender_id === myId) {
-    const i = cur.findIndex((x) => x.pending && x.body === m.body);
-    if (i >= 0) {
-      const next = cur.slice();
-      next[i] = m;
-      return next;
-    }
-  }
-  return [...cur, m];
-}
-
 /**
  * A live thread: initial history from the backend, realtime inserts, typing
  * and read receipts, plus optimistic sending with automatic de-duplication.
@@ -387,7 +376,7 @@ export function useThread(conversationId: string, myId: string | null) {
   const [typing, setTyping] = useState(false);
   const sendingRef = useRef(false);
   const [sending, setSending] = useState(false);
-  const sendSequence = useRef(0);
+  const lastAttempt = useRef<MessageAttempt | null>(null);
   const olderBusy = useRef(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [oldestReached, setOldestReached] = useState<string | null>(null);
@@ -412,7 +401,7 @@ export function useThread(conversationId: string, myId: string | null) {
     if (!conversationId) return;
     return api.subscribeThread(conversationId, {
       onMessage: (m) => {
-        qc.setQueryData<T.Message[]>(key, (cur) => mergeIncoming(cur ?? [], m, myId));
+        qc.setQueryData<T.Message[]>(key, (cur) => mergeThreadMessages(cur ?? [], [m]));
         if (m.sender_id !== myId) {
           setTyping(false);
           api.markRead(conversationId).catch(() => {});
@@ -431,19 +420,22 @@ export function useThread(conversationId: string, myId: string | null) {
     // A ref closes the double-tap race before React can render the disabled button.
     sendingRef.current = true;
     setSending(true);
-    const tempId = `tmp_${Date.now()}_${++sendSequence.current}`;
-    const temp: T.Message = { id: tempId, conversation_id: conversationId, sender_id: myId, body: text, created_at: iso(), pending: true };
+    const attempt = messageAttempt(lastAttempt.current, conversationId, text);
+    lastAttempt.current = attempt;
+    const tempId = `tmp_${attempt.requestId}`;
+    const temp: T.Message = { id: tempId, client_request_id: attempt.requestId, conversation_id: conversationId, sender_id: myId, body: text, created_at: iso(), pending: true };
     qc.setQueryData<T.Message[]>(key, (cur) => [...(cur ?? []), temp]);
     haptic.light();
     try {
       const session = await api.getSession();
       if (session?.userId !== myId) throw new Error('You are signed out.');
-      const real = await api.sendMessage(conversationId, text);
+      const real = await api.sendMessage(conversationId, text, attempt.requestId);
       qc.setQueryData<T.Message[]>(key, (cur = []) => {
         const withoutTemp = cur.filter((x) => x.id !== tempId);
-        return withoutTemp.some((x) => x.id === real.id) ? withoutTemp : [...withoutTemp, real];
+        return mergeThreadMessages(withoutTemp, [real]);
       });
       qc.invalidateQueries({ queryKey: qk.conversations });
+      lastAttempt.current = null;
       return true;
     } catch (e) {
       qc.setQueryData<T.Message[]>(key, (cur = []) => cur.filter((x) => x.id !== tempId));
