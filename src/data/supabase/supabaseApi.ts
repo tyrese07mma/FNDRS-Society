@@ -13,6 +13,7 @@ import { sb } from './client';
 import { streamCopilot } from './copilot';
 import { useSettings } from '@/state/settings';
 import { authErrorMessage } from '@/lib/auth-errors';
+import { realtimeLifecycle } from '@/lib/realtime-lifecycle';
 import type { ExportPage } from '@/lib/export-data';
 
 const LITE = 'id, handle, full_name, avatar_url, headline, verified';
@@ -336,6 +337,10 @@ export const supabaseApi: Api = {
   openConversation: (userId) => rpc<string>('open_conversation', { p_other: userId }),
   subscribeThread(conversationId, handlers: ThreadHandlers) {
     let typingTimer: ReturnType<typeof setTimeout> | undefined;
+    const lifecycle = realtimeLifecycle(() => handlers.onReady?.(), () => {
+      handlers.onTyping?.(false);
+      handlers.onInterrupted?.();
+    });
     const channel = sb()
       .channel(`thread:${conversationId}`, { config: { private: true } })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, (payload) =>
@@ -350,9 +355,10 @@ export const supabaseApi: Api = {
         if (typingTimer) clearTimeout(typingTimer);
         typingTimer = setTimeout(() => handlers.onTyping?.(false), 3500);
       })
-      .subscribe();
+      .subscribe(lifecycle.status);
     threadChannels.set(conversationId, channel);
     return () => {
+      lifecycle.stop();
       if (typingTimer) clearTimeout(typingTimer);
       threadChannels.delete(conversationId);
       sb().removeChannel(channel);
@@ -366,12 +372,14 @@ export const supabaseApi: Api = {
     void channel.send({ type: 'broadcast', event: 'typing', payload: { at: now } });
   },
   subscribeInbox(onChange) {
+    const lifecycle = realtimeLifecycle(onChange);
     const channel = sb()
       .channel(`inbox:${Date.now()}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => onChange())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, () => onChange())
-      .subscribe();
+      .subscribe(lifecycle.status);
     return () => {
+      lifecycle.stop();
       sb().removeChannel(channel);
     };
   },
@@ -503,6 +511,7 @@ export const supabaseApi: Api = {
     await run(sb().from('notifications').update({ read: true }).eq('user_id', me).eq('read', false));
   },
   subscribeNotifications(onNew) {
+    const lifecycle = realtimeLifecycle(onNew);
     const channel = sb()
       .channel(`notifications:${Date.now()}`)
       .on(
@@ -510,8 +519,9 @@ export const supabaseApi: Api = {
         { event: 'INSERT', schema: 'public', table: 'notifications', ...(uidCache ? { filter: `user_id=eq.${uidCache}` } : {}) },
         () => onNew(),
       )
-      .subscribe();
+      .subscribe(lifecycle.status);
     return () => {
+      lifecycle.stop();
       sb().removeChannel(channel);
     };
   },

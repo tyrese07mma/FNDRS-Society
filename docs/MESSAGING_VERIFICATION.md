@@ -13,3 +13,7 @@ Rollback: restore the previous client insert adapter before dropping the new RPC
 ## October 2 persistence checks
 
 Tests recreate the outbox with the same backing store, verify account isolation and retry identity, confirm removal of saved content after acknowledgment, reject corrupt/full storage, and ensure late acknowledgments cannot erase a newer attempt. These are storage-adapter tests, not physical device tests.
+
+## October 2 reconnect recovery
+
+A successful channel subscription now invalidates thread history, conversation details/read state and inbox queries, including after interruption. Inbox and notification subscriptions also refresh on reconnect. The chat reports an interrupted live connection and offers retry for failed history loads. Lifecycle tests ensure duplicate SUBSCRIBED statuses do not repeatedly refetch, reconnects do refetch, and stopped subscriptions ignore later status callbacks. This verifies callback behavior, not a physical network-loss test. Read acknowledgments still require the separate hosted/device checks noted above.

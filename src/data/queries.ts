@@ -375,6 +375,7 @@ export function useThread(conversationId: string, myId: string | null) {
   const key = qk.messages(conversationId);
   const query = useQuery({ queryKey: key, queryFn: () => api.listMessages(conversationId), enabled: !!conversationId });
   const [typing, setTyping] = useState(false);
+  const [liveInterrupted, setLiveInterrupted] = useState(false);
   const sendingRef = useRef(false);
   const [sending, setSending] = useState(false);
   const [outbox] = useState(() => createMessageOutbox(sessionStorage));
@@ -413,6 +414,14 @@ export function useThread(conversationId: string, myId: string | null) {
   useEffect(() => {
     if (!conversationId) return;
     return api.subscribeThread(conversationId, {
+      onReady: () => {
+        setLiveInterrupted(false);
+        setOtherReadAt(null);
+        void qc.invalidateQueries({ queryKey: key });
+        void qc.invalidateQueries({ queryKey: qk.conversation(conversationId) });
+        void qc.invalidateQueries({ queryKey: qk.conversations });
+      },
+      onInterrupted: () => setLiveInterrupted(true),
       onMessage: (m) => {
         qc.setQueryData<T.Message[]>(key, (cur) => mergeThreadMessages(cur ?? [], [m]));
         if (m.sender_id !== myId) {
@@ -463,10 +472,12 @@ export function useThread(conversationId: string, myId: string | null) {
 
   return {
     messages: query.data ?? [],
+    retry: query.refetch,
     hasOlder, loadOlder, loadingOlder,
     loading: query.isLoading,
     error: query.error,
     typing,
+    liveInterrupted,
     otherReadAt,
     send,
     sending,

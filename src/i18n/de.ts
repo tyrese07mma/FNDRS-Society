@@ -1,5 +1,8 @@
 /** Explicit interface copy only. User-generated content never passes through this map. */
 export const de: Record<string,string> = {
+ 'You matched with {{name}}':'Du hast ein Match mit {{name}}',
+ 'Say hi to {{name}}':'Sag {{name}} Hallo',
+ 'Live updates interrupted. Reconnecting…':'Live-Aktualisierung unterbrochen. Verbindung wird wiederhergestellt …',
  'Message draft could not be restored':'Der Nachrichtenentwurf konnte nicht wiederhergestellt werden',
  'Message sent, but the local draft could not be cleared':'Nachricht gesendet, aber der lokale Entwurf konnte nicht gelöscht werden',
  'Back to the app':'Zurück zur App',

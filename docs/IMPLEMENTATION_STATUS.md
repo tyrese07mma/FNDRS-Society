@@ -103,3 +103,10 @@ Die älteren Prüfangaben oben sind historische Zwischenstände. Dieser Abschnit
 - Speicherfehler verhindern den Versand ohne gesicherte Kennung. Verspätete Bestätigungen dürfen einen neueren Entwurf nicht löschen. Konten sind getrennt.
 - TypeScript, ESLint und alle 49 lokalen Tests bestanden. Reale Geräte-/Mehrkontenprüfung bleibt offen; siehe MESSAGING_VERIFICATION.md.
 - Expo-Export des korrigierten Standes für Web, Android und iOS ebenfalls bestanden.
+
+## Wiederverbindung – 2. Oktober 2026
+
+- Chat, Postfach und Benachrichtigungen laden nach erfolgreicher Echtzeit-Wiederverbindung erneut. Der Chat verwirft den veralteten lokalen Lesestatus zugunsten eines frischen Gesprächsabrufs.
+- Verbindungsunterbrechung wird angezeigt; Nachrichtenhistorie kann nach Ladefehler manuell wiederholt werden. Zwei verbliebene englische Chat-Leerzustände übersetzt.
+- TypeScript, ESLint und alle 50 lokalen Tests bestanden. Physische Netzabbruch-/Mehrkonten-Tests bleiben offen.
+- Auch der aktuelle Web-/Android-/iOS-Export war erfolgreich.

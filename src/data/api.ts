@@ -58,6 +58,8 @@ export function isApiError(e: unknown, code?: ApiErrorCode): e is ApiError {
 }
 
 export interface ThreadHandlers {
+  onReady?: () => void;
+  onInterrupted?: () => void;
   onMessage: (m: Message) => void;
   onTyping?: (typing: boolean) => void;
   onRead?: (at: string) => void;

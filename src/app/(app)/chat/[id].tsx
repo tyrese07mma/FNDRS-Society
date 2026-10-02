@@ -36,7 +36,7 @@ export default function Chat() {
   const { c } = useTheme();
   const { userId } = useAuth();
   const convo = useConversation(id);
-  const { messages, loading, error, typing, otherReadAt, send, sending, restoredDraft, hasOlder, loadOlder, loadingOlder } = useThread(id, userId);
+  const { messages, loading, error, retry, typing, liveInterrupted, otherReadAt, send, sending, restoredDraft, hasOlder, loadOlder, loadingOlder } = useThread(id, userId);
   const report = useReport();
   const [editedText, setText] = useState<string | null>(null);
   const text = editedText ?? restoredDraft ?? '';
@@ -150,16 +150,17 @@ export default function Chat() {
         </Pressable>
         <IconButton icon={Ellipsis} variant="plain" size={40} onPress={() => setMenu(true)} accessibilityLabel={t("Conversation options")} />
       </View>
+      {liveInterrupted && <Text variant="caption" color="textSubtle" accessibilityRole="alert" style={{ paddingHorizontal: 16, paddingVertical: 8 }}>{t('Live updates interrupted. Reconnecting…')}</Text>}
 
       {error ? (
-        <EmptyState icon={CircleAlert} title={t("Conversation unavailable")} message={describeError(error)} />
+        <EmptyState icon={CircleAlert} title={t("Conversation unavailable")} message={describeError(error)} actionLabel={t('Try again')} onAction={() => void retry()} />
       ) : loading ? (
         <View style={{ flex: 1, padding: 16 }}><SkeletonList count={5} /></View>
       ) : messages.length === 0 ? (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24, gap: 18 }} keyboardShouldPersistTaps="handled">
           <View style={{ alignItems: 'center', gap: 12 }}>
             <Avatar uri={other?.avatar_url} name={other?.full_name} size={84} ring={other?.verified} />
-            <Text variant="title2" align="center">{convo.data?.is_match ? `You matched with ${name}` : `Say hi to ${name}`}</Text>
+            <Text variant="title2" align="center">{convo.data?.is_match ? t('You matched with {{name}}', { name }) : t('Say hi to {{name}}', { name })}</Text>
             {!!other?.headline && <Text variant="callout" color="textSubtle" align="center">{other.headline}</Text>}
           </View>
           <View style={{ gap: 8, alignItems: 'center' }}>
