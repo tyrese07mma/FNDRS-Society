@@ -14,7 +14,8 @@ import { useAccountMutation as useMutation } from './useAccountMutation';
 import { useEffect, useRef, useState } from 'react';
 
 import { haptic } from '@/lib/haptics';
-import { messageAttempt, type MessageAttempt } from '@/lib/message-request';
+import { createMessageOutbox } from '@/lib/message-request';
+import { sessionStorage } from '@/lib/session-storage';
 import { mergeThreadMessages } from '@/lib/thread-messages';
 import { translateNow } from '@/i18n';
 import { describeError } from '@/lib/errors';
@@ -376,7 +377,19 @@ export function useThread(conversationId: string, myId: string | null) {
   const [typing, setTyping] = useState(false);
   const sendingRef = useRef(false);
   const [sending, setSending] = useState(false);
-  const lastAttempt = useRef<MessageAttempt | null>(null);
+  const [outbox] = useState(() => createMessageOutbox(sessionStorage));
+  const [draft, setDraft] = useState<{ owner: string; conversation: string; body: string } | null>(null);
+  useEffect(() => {
+    let active = true;
+    if (myId && conversationId) {
+      outbox.read(myId, conversationId).then(attempt => {
+        if (active) setDraft(attempt ? { owner: myId, conversation: conversationId, body: attempt.body } : null);
+      }).catch(() => {
+        if (active) toast.error(translateNow('Message draft could not be restored'));
+      });
+    }
+    return () => { active = false; };
+  }, [myId, conversationId, outbox]);
   const olderBusy = useRef(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [oldestReached, setOldestReached] = useState<string | null>(null);
@@ -420,22 +433,23 @@ export function useThread(conversationId: string, myId: string | null) {
     // A ref closes the double-tap race before React can render the disabled button.
     sendingRef.current = true;
     setSending(true);
-    const attempt = messageAttempt(lastAttempt.current, conversationId, text);
-    lastAttempt.current = attempt;
-    const tempId = `tmp_${attempt.requestId}`;
-    const temp: T.Message = { id: tempId, client_request_id: attempt.requestId, conversation_id: conversationId, sender_id: myId, body: text, created_at: iso(), pending: true };
-    qc.setQueryData<T.Message[]>(key, (cur) => [...(cur ?? []), temp]);
-    haptic.light();
+    let tempId: string | undefined;
     try {
+      const attempt = await outbox.prepare(myId, conversationId, text);
       const session = await api.getSession();
       if (session?.userId !== myId) throw new Error('You are signed out.');
+      tempId = `tmp_${attempt.requestId}`;
+      const temp: T.Message = { id: tempId, client_request_id: attempt.requestId, conversation_id: conversationId, sender_id: myId, body: text, created_at: iso(), pending: true };
+      qc.setQueryData<T.Message[]>(key, (cur) => [...(cur ?? []), temp]);
+      haptic.light();
       const real = await api.sendMessage(conversationId, text, attempt.requestId);
       qc.setQueryData<T.Message[]>(key, (cur = []) => {
         const withoutTemp = cur.filter((x) => x.id !== tempId);
         return mergeThreadMessages(withoutTemp, [real]);
       });
       qc.invalidateQueries({ queryKey: qk.conversations });
-      lastAttempt.current = null;
+      try { await outbox.confirm(myId, attempt); }
+      catch { toast.error(translateNow('Message sent, but the local draft could not be cleared')); }
       return true;
     } catch (e) {
       qc.setQueryData<T.Message[]>(key, (cur = []) => cur.filter((x) => x.id !== tempId));
@@ -456,6 +470,7 @@ export function useThread(conversationId: string, myId: string | null) {
     otherReadAt,
     send,
     sending,
+    restoredDraft: draft?.owner === myId && draft.conversation === conversationId ? draft.body : null,
   };
 }
 

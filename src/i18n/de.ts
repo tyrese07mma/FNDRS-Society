@@ -1,5 +1,7 @@
 /** Explicit interface copy only. User-generated content never passes through this map. */
 export const de: Record<string,string> = {
+ 'Message draft could not be restored':'Der Nachrichtenentwurf konnte nicht wiederhergestellt werden',
+ 'Message sent, but the local draft could not be cleared':'Nachricht gesendet, aber der lokale Entwurf konnte nicht gelöscht werden',
  'Back to the app':'Zurück zur App',
  'This link is invalid or has expired.':'Dieser Link ist ungültig oder abgelaufen.',
  'Verifying your account…':'Dein Konto wird überprüft …',

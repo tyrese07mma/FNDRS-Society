@@ -95,3 +95,11 @@ Die älteren Prüfangaben oben sind historische Zwischenstände. Dieser Abschnit
 - Zusätzliche Matching-/XP-Tests prüfen doppelte Matches, Belohnungen durch Beitritt/Austritt und direkte Score-Manipulation. TypeScript, ESLint und alle 47 lokalen Tests bestanden.
 - GitHub-Prüflauf für den vorigen Stand a433858 war erfolgreich; die aktuellen Änderungen benötigen einen eigenen Lauf.
 - Auch der aktuelle Expo-Export für Web, Android und iOS ist erfolgreich; kein signierter Store-Build.
+
+## Persistenter Sendeversuch – 2. Oktober 2026
+
+- Der letzte Sendeversuch je Konto und Chat wird vor der Übertragung gespeichert und nach erneutem Öffnen wiederhergestellt. Gleicher Text verwendet dieselbe Sendekennung. Gesendete Inhalte werden lokal durch einen Bestätigungsstatus ohne Nachrichtentext ersetzt.
+- Native Speicherung nutzt SecureStore, Web den vorhandenen lokalen Browserspeicher. Kein automatisches Senden und keine Warteschlange mehrerer Nachrichten. Unversendete Tastatureingaben werden nicht gesichert.
+- Speicherfehler verhindern den Versand ohne gesicherte Kennung. Verspätete Bestätigungen dürfen einen neueren Entwurf nicht löschen. Konten sind getrennt.
+- TypeScript, ESLint und alle 49 lokalen Tests bestanden. Reale Geräte-/Mehrkontenprüfung bleibt offen; siehe MESSAGING_VERIFICATION.md.
+- Expo-Export des korrigierten Standes für Web, Android und iOS ebenfalls bestanden.

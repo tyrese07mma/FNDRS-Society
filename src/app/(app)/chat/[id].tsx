@@ -36,9 +36,10 @@ export default function Chat() {
   const { c } = useTheme();
   const { userId } = useAuth();
   const convo = useConversation(id);
-  const { messages, loading, error, typing, otherReadAt, send, sending, hasOlder, loadOlder, loadingOlder } = useThread(id, userId);
+  const { messages, loading, error, typing, otherReadAt, send, sending, restoredDraft, hasOlder, loadOlder, loadingOlder } = useThread(id, userId);
   const report = useReport();
-  const [text, setText] = useState('');
+  const [editedText, setText] = useState<string | null>(null);
+  const text = editedText ?? restoredDraft ?? '';
   const [menu, setMenu] = useState(false);
   const [reporting, setReporting] = useState(false);
   const listRef = useRef<FlatList<Row>>(null);
@@ -69,7 +70,7 @@ export default function Chat() {
     if (!value || sending) return;
     const sent = await send(value);
     // Keep a failed draft, and never erase text typed while a request was pending.
-    if (sent && !body) setText(current => current.trim() === value ? '' : current);
+    if (sent && !body) setText(current => (current ?? value).trim() === value ? '' : current);
   };
 
   const scrollToEnd = (animated = true) => requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated }));

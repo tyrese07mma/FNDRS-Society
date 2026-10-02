@@ -59,3 +59,7 @@ Keiner dieser offenen Nachweise wird allein durch einen erfolgreichen Build als 
 ## Nachtrag: Nachrichten und Matching
 
 Der zuvor offene serverseitige Schutz gegen wiederholtes Senden wurde mit Migration 202609270001 bereitgestellt und lokal getestet. Kennungen bleiben bei Wiederholung im geöffneten Chat erhalten; sie überleben noch keinen Neustart. Details und Grenzen: MESSAGING_VERIFICATION.md. Zusätzliche Matching-/XP-Prüfungen bestehen; insgesamt 47 lokale Tests. Die übrigen offenen Auditpunkte bleiben bestehen.
+
+## Nachtrag vom 2. Oktober
+
+Der letzte fehlgeschlagene Sendeversuch wird jetzt kontobezogen dauerhaft gespeichert und bei erneutem Öffnen wiederhergestellt. Die unveränderte Wiederholung behält ihre Sendekennung. Speicheradapter-Tests bestehen, reale Neustart-/Gerätetests noch offen. Es handelt sich nicht um eine automatische Offline-Warteschlange.
