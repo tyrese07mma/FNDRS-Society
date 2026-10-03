@@ -132,3 +132,9 @@ Release score remains 10/20 (50%) using the original equal-weight rubric. Hosted
 ## Auth update — 3 October
 
 See AUTH_VERIFICATION_2026-10-03.md: confirmation resend and request guards implemented; 7 hosted Auth checks passed; exact native/local callback allowlist deployed and rechecked. Owner mailbox resend accepted, delivery and Expo Go return unverified. Production SMTP/domain remain open.
+
+## Password policy follow-up — 3 October
+
+Found a mismatch: signup/reset UI required 12 characters but hosted Auth accepted a minimum of 6. Reviewed a minimal config diff and deployed only auth.minimum_password_length=12. An authenticated attempt to change the synthetic account password to 9 characters was rejected with weak_password. All 8 hosted Auth checks then passed, and the synthetic account was removed. Existing user passwords were not changed.
+
+Signup now requires repeating the password; too-short passwords no longer receive a misleading strength label. Confirmation copy avoids asserting delivery, and explains the sign-in/reset path for existing accounts. Email receipt and the exact Expo Go return address are still pending owner feedback. No additional emails were sent in this follow-up.

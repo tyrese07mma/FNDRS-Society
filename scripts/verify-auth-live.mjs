@@ -26,6 +26,8 @@ try {
  const used=await member.auth.verifyOtp({token_hash:signup.properties.hashed_token,type:'signup'});
  check(!!used.error,'Used confirmation accepted twice');pass('Confirmation token is single use');
  await ok(member.auth.signInWithPassword({email,password}),'Password sign in');pass('Confirmed account can sign in');
+ const weak=await member.auth.updateUser({password:'Aa1!short'});
+ check(weak.error?.code==='weak_password','Server did not reject a password below 12 characters');pass('Server enforces the app password minimum');
  await ok(member.auth.signOut(),'Sign out before recovery');
  const recovery=await ok(admin.auth.admin.generateLink({type:'recovery',email}),'Generate recovery');
  await ok(member.auth.verifyOtp({token_hash:recovery.properties.hashed_token,type:'recovery'}),'Verify recovery');

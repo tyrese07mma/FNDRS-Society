@@ -13,6 +13,7 @@ import { Button, EmptyState, Header, Input, Text } from '@/ui';
 import { Lock, Mail, User } from '@/ui/icons';
 
 function strength(pw: string) {
+  if (pw.length < 12) return 0;
   let s = 0;
   if (pw.length >= 12) s++;
   if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) s++;
@@ -30,6 +31,7 @@ export default function SignUp() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [repeat, setRepeat] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
@@ -41,6 +43,7 @@ export default function SignUp() {
     if (name.trim().length < 2) return setError(t("Please tell us your name."));
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError(t("Enter a valid email address."));
     if (password.length < 12) return setError(t("Use at least 12 characters for your password."));
+    if (password !== repeat) return setError(t('Passwords do not match.'));
     submitting.current = true; setBusy(true);
     setError(null);
     try {
@@ -68,7 +71,7 @@ export default function SignUp() {
           <EmptyState
             icon={Mail}
             title={t("Check your inbox")}
-            message={t('We sent a confirmation link to {{email}}. Open it on this device to finish creating your account.', { email: sentTo })}
+            message={t('Check {{email}} for your confirmation email, including spam. If you already have an account, sign in or reset your password.', { email: sentTo })}
             actionLabel={t("Back to sign in")}
             onAction={() => router.replace('/sign-in')}
           />
@@ -129,6 +132,7 @@ export default function SignUp() {
           )}
         </View>
 
+        <Input label={t('Confirm password')} icon={Lock} secure value={repeat} onChangeText={setRepeat} autoComplete="new-password" textContentType="newPassword" onSubmitEditing={submit} />
         <Button title={t("Create account")} size="lg" block loading={busy} onPress={submit} />
 
         <Text variant="caption" color="textSubtle" align="center">

@@ -675,4 +675,5 @@ export const de: Record<string,string> = {
  'Try again in {{seconds}} seconds':'In {{seconds}} Sekunden erneut versuchen',
  'Send confirmation email':'Bestätigungsmail senden',
  'Confirmation email missing?':'Bestätigungsmail fehlt?',
+ 'Check {{email}} for your confirmation email, including spam. If you already have an account, sign in or reset your password.':'Prüfe {{email}} und den Spamordner auf die Bestätigungsmail. Wenn du bereits ein Konto hast, melde dich an oder setze dein Passwort zurück.',
 };

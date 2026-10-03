@@ -11,3 +11,9 @@ Remote configuration freshly read: site_url remained http://localhost:3000, redi
 Pending: exact exp:// or exps:// address used by owner's Expo Go connection, to add only that callback; actual signup/confirmation/recovery email receipt and phone return; final public domain/site URL and production SMTP. A store scheme is not an Expo Go callback. Do not disable confirmation to work around missing redirects. Once testing ends, remove temporary local redirects before public release.
 
 Validation: TypeScript and ESLint passed, existing 53 regression tests passed; three-platform Expo export succeeded on retry after a prior process returned 1 despite writing output. Final callback follow-up is checked by typecheck/lint; device confirmation is still pending.
+
+## Password policy follow-up — 3 October
+
+Found a mismatch: signup/reset UI required 12 characters but hosted Auth accepted a minimum of 6. Reviewed a minimal config diff and deployed only auth.minimum_password_length=12. An authenticated attempt to change the synthetic account password to 9 characters was rejected with weak_password. All 8 hosted Auth checks then passed, and the synthetic account was removed. Existing user passwords were not changed.
+
+Signup now requires repeating the password; too-short passwords no longer receive a misleading strength label. Confirmation copy avoids asserting delivery, and explains the sign-in/reset path for existing accounts. Email receipt and the exact Expo Go return address are still pending owner feedback. No additional emails were sent in this follow-up.
