@@ -47,7 +47,7 @@ try {
  const match=await ok(b.client.rpc('swipe',{p_target:a.id,p_action:'connect'}),'Mutual swipe');check(match.matched&&match.conversation_id,'Mutual match missing');
  const conv=match.conversation_id;pass('Mutual match creates a conversation');
  let receive;const received=new Promise(resolve=>{receive=resolve;});
- let timer;const channel=b.client.channel(`thread:${conv}`,{config:{private:true}})
+ let timer;const channel=b.client.channel(`thread:${conv}`,{config:{private:true,postgres_changes_options:{wait:true}}})
   .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`conversation_id=eq.${conv}`},payload=>receive(payload.new));
  await new Promise((resolve,reject)=>{timer=setTimeout(()=>reject(Error('Realtime subscription timeout')),20000);channel.subscribe(status=>{if(status==='SUBSCRIBED'){clearTimeout(timer);resolve();}else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){clearTimeout(timer);reject(Error('Realtime subscription failed'));}});});
  const requestId=randomUUID();const args={p_conversation:conv,p_body:'Temporary private message',p_request_id:requestId};
@@ -63,6 +63,20 @@ try {
  const reads=await ok(a.client.from('conversation_reads').select('last_read_at').eq('conversation_id',conv).eq('user_id',b.id).single(),'Read receipt');check(!!reads.last_read_at,'Read receipt missing');pass('Read receipt persists');
  const fresh=client(publicKey);await ok(fresh.auth.signInWithPassword({email:b.email,password:b.password}),'Fresh session login');
  const history=await ok(fresh.rpc('message_page',{p_conversation:conv,p_limit:50}),'Persisted history');check(history.some(row=>row.id===one.id),'Message missing after fresh login');pass('Fresh client login retains message history');
+ // Controlled subscription interruption, not a physical airplane-mode/device test.
+ check(await b.client.removeChannel(channel)==='ok','Subscription removal failed');
+ const missed=await ok(a.client.rpc('send_message',{p_conversation:conv,p_body:'Message during subscription interruption',p_request_id:randomUUID()}),'Send while unsubscribed');
+ let receiveAfterReconnect;
+ const afterReconnect=new Promise(resolve=>{receiveAfterReconnect=resolve;});
+ const reconnected=b.client.channel(`thread:${conv}`,{config:{private:true,postgres_changes_options:{wait:true}}})
+  .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`conversation_id=eq.${conv}`},payload=>{if(payload.new.body === 'Message after resubscription')receiveAfterReconnect(payload.new);});
+ await new Promise((resolve,reject)=>{timer=setTimeout(()=>reject(Error('Resubscription timeout')),20000);reconnected.subscribe(status=>{if(status==='SUBSCRIBED'){clearTimeout(timer);resolve();}else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){clearTimeout(timer);reject(Error('Resubscription failed'));}});});
+ const recovered=await ok(b.client.rpc('message_page',{p_conversation:conv,p_limit:50}),'History after resubscription');
+ check(recovered.filter(row=>row.id===missed.id).length===1&&recovered.some(row=>row.id===one.id),'Resubscription history incomplete');
+ pass('Resubscription history recovers messages sent while unsubscribed');
+ const later=await ok(a.client.rpc('send_message',{p_conversation:conv,p_body:'Message after resubscription',p_request_id:randomUUID()}),'Send after resubscription');
+ const laterEvent=await Promise.race([afterReconnect,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Delivery after resubscription timeout')),20000);})]);clearTimeout(timer);
+ check(laterEvent.id===later.id,'Resubscribed message mismatch');pass('Realtime delivery resumes after resubscription');
  const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aXioAAAAASUVORK5CYII=','base64');
  const path=`${a.id}/integration.png`;
  await ok(a.client.storage.from('avatars').upload(path,png,{contentType:'image/png'}),'Owned avatar upload');

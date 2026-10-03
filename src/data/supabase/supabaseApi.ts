@@ -342,7 +342,7 @@ export const supabaseApi: Api = {
       handlers.onInterrupted?.();
     });
     const channel = sb()
-      .channel(`thread:${conversationId}`, { config: { private: true } })
+      .channel(`thread:${conversationId}`, { config: { private: true, postgres_changes_options: { wait: true } } })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, (payload) =>
         handlers.onMessage(payload.new as T.Message),
       )
@@ -374,7 +374,7 @@ export const supabaseApi: Api = {
   subscribeInbox(onChange) {
     const lifecycle = realtimeLifecycle(onChange);
     const channel = sb()
-      .channel(`inbox:${Date.now()}`)
+      .channel(`inbox:${Date.now()}`, { config: { postgres_changes_options: { wait: true } } })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => onChange())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, () => onChange())
       .subscribe(lifecycle.status);
@@ -513,7 +513,7 @@ export const supabaseApi: Api = {
   subscribeNotifications(onNew) {
     const lifecycle = realtimeLifecycle(onNew);
     const channel = sb()
-      .channel(`notifications:${Date.now()}`)
+      .channel(`notifications:${Date.now()}`, { config: { postgres_changes_options: { wait: true } } })
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'notifications', ...(uidCache ? { filter: `user_id=eq.${uidCache}` } : {}) },

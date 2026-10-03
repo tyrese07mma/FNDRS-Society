@@ -25,3 +25,13 @@ The hosted two-account check on 2 October passed 11 checks and deployed migratio
 The extended 3 October run verified the exact inbox RPC and notification query with actor joins, plus marking notifications read. First run hit a Realtime delivery timeout before those assertions; all fixtures were deleted. The second run passed all 13 checks with cleanup complete. This intermittent timeout is not considered resolved.
 
 For the reported notification/inbox screen error, relative timestamp formatting now supports runtimes without Intl.RelativeTimeFormat; invalid dates are guarded. Inbox query failures now show a translated retry state instead of an empty list. Typecheck, lint and all 53 local tests pass. The user's specific UI error/platform has not yet been confirmed, so this is not a verified resolution of their report. Device/UI confirmation remains required.
+
+## 3 October — confirmed device fix and subscription readiness
+
+Owner confirmed the notification/inbox error is gone on their phone in Expo Go. This closes that specific reported error, not the full iOS/Android acceptance criterion.
+
+Further live testing reproduced the initial Realtime delivery timeout. Installed realtime-js documents that default SUBSCRIBED can precede the database change subscription. Chat, inbox and notifications now request postgres_changes_options.wait=true, so lifecycle resync follows database readiness. No access policies or message content were changed.
+
+The expanded test deliberately removes a subscription, sends a message during the gap, subscribes again, checks persisted history and receives a subsequent live message. An intermediate assertion incorrectly treated a buffered older event as the new event; the test now waits for the intended message. Final live run: 15 passed, zero failed; both synthetic accounts deleted. Report directory: work/live-verification-2026-10-03-ready-run2. This verifies controlled resubscription, not airplane mode, app suspension or all possible transport failures.
+
+Release score remains 10/20 (50%) using the original equal-weight rubric. Hosted checks improve evidence within partial criteria; they do not complete whole UI, email, security, privacy or device acceptance. Fresh release:check still rejects missing public origin, terms, privacy, imprint, guidelines and support address. AI and payments remain deferred.
