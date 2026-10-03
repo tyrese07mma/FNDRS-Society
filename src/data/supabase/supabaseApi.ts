@@ -154,6 +154,10 @@ export const supabaseApi: Api = {
     const { error } = await sb().auth.resetPasswordForEmail(email.trim(), { redirectTo: appUrl('/auth-callback?next=reset-password') });
     if (error) throw new ApiError('VALIDATION', authErrorMessage(error.code));
   },
+  async resendConfirmation(email) {
+    const { error } = await sb().auth.resend({ type: 'signup', email: email.trim(), options: { emailRedirectTo: appUrl('/auth-callback') } });
+    if (error) throw new ApiError('AUTH', authErrorMessage(error.code));
+  },
   async updatePassword(password) {
     if (password.length < 12) throw new ApiError('VALIDATION', 'Use at least 12 characters.');
     const { error } = await sb().auth.updateUser({ password });

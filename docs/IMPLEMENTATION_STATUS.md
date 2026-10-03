@@ -128,3 +128,7 @@ Further live testing reproduced the initial Realtime delivery timeout. Installed
 The expanded test deliberately removes a subscription, sends a message during the gap, subscribes again, checks persisted history and receives a subsequent live message. An intermediate assertion incorrectly treated a buffered older event as the new event; the test now waits for the intended message. Final live run: 15 passed, zero failed; both synthetic accounts deleted. Report directory: work/live-verification-2026-10-03-ready-run2. This verifies controlled resubscription, not airplane mode, app suspension or all possible transport failures.
 
 Release score remains 10/20 (50%) using the original equal-weight rubric. Hosted checks improve evidence within partial criteria; they do not complete whole UI, email, security, privacy or device acceptance. Fresh release:check still rejects missing public origin, terms, privacy, imprint, guidelines and support address. AI and payments remain deferred.
+
+## Auth update — 3 October
+
+See AUTH_VERIFICATION_2026-10-03.md: confirmation resend and request guards implemented; 7 hosted Auth checks passed; exact native/local callback allowlist deployed and rechecked. Owner mailbox resend accepted, delivery and Expo Go return unverified. Production SMTP/domain remain open.

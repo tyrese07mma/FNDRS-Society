@@ -1,7 +1,7 @@
 import { describeError } from '@/lib/errors';
 import { useTranslation } from '@/i18n';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
 
 import { api } from '@/data';
@@ -18,16 +18,18 @@ export default function ForgotPassword() {
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
 
+  const submitting = useRef(false);
   const submit = async () => {
+    if (submitting.current) return;
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError(t("Enter a valid email address."));
-    setBusy(true);
+    submitting.current = true; setBusy(true);
     setError(null);
     try {
       await api.resetPassword(email);
       setSent(true);
     } catch (e) {
       setError(describeError(e));
-    } finally {
+    } finally { submitting.current = false;
       setBusy(false);
     }
   };

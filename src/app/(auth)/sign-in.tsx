@@ -1,7 +1,7 @@
 import { describeError } from '@/lib/errors';
 import { useTranslation } from '@/i18n';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -22,10 +22,12 @@ export default function SignIn() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<'password' | null>(null);
 
+  const submitting = useRef(false);
   const submit = async () => {
+    if (submitting.current) return;
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError(t("Enter a valid email address."));
     if (!password) return setError(t("Enter your password."));
-    setBusy('password');
+    submitting.current = true; setBusy('password');
     setError(null);
     try {
       await api.signIn(email, password);
@@ -33,6 +35,9 @@ export default function SignIn() {
     } catch (e) {
       haptic.error();
       setError(describeError(e));
+      setBusy(null);
+    } finally {
+      submitting.current = false;
       setBusy(null);
     }
   };
@@ -81,6 +86,7 @@ export default function SignIn() {
         </Pressable>
 
         <Button title={t("Sign in")} size="lg" block loading={busy === 'password'} disabled={!!busy} onPress={submit} />
+        <Button title={t('Confirmation email missing?')} variant="ghost" onPress={() => router.push('/resend-confirmation')} />
 
 
         <Text variant="footnote" color="textSubtle" align="center" style={{ marginTop: 8 }}>

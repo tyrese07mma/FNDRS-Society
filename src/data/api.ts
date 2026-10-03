@@ -78,6 +78,7 @@ export interface Api {
   signUp(input: { email: string; password: string; fullName: string }): Promise<{ needsConfirmation: boolean }>;
   signOut(): Promise<void>;
   resetPassword(email: string): Promise<void>;
+  resendConfirmation(email: string): Promise<void>;
   updatePassword(password: string): Promise<void>;
   updateEmail(email: string): Promise<void>;
   deleteAccount(password: string): Promise<void>;

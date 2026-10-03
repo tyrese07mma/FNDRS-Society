@@ -669,4 +669,10 @@ export const de: Record<string,string> = {
  "Short and specific wins. We forward it with your profile.":"Halte deine Anfrage kurz und konkret. Dein Profil wird mit der Anfrage verknüpft.",
  "Hi {{name}}, I am {{sender}}. I would like to introduce my startup and learn more about your investment focus.":"Hallo {{name}}, ich bin {{sender}}. Ich möchte dir mein Startup vorstellen und mehr über deinen Investitionsschwerpunkt erfahren.",
  "Messages could not be loaded":"Nachrichten konnten nicht geladen werden",
+ 'Confirm your email':'E-Mail bestätigen',
+ 'Request a new confirmation email for the address you registered with.':'Fordere eine neue Bestätigungsmail für die Adresse an, mit der du dich registriert hast.',
+ 'If this address has an unconfirmed account, a new confirmation email will arrive. Check your spam folder too.':'Falls zu dieser Adresse ein unbestätigtes Konto gehört, erhältst du eine neue Bestätigungsmail. Prüfe auch deinen Spamordner.',
+ 'Try again in {{seconds}} seconds':'In {{seconds}} Sekunden erneut versuchen',
+ 'Send confirmation email':'Bestätigungsmail senden',
+ 'Confirmation email missing?':'Bestätigungsmail fehlt?',
 };

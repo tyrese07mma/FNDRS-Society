@@ -14,14 +14,17 @@ export default function AuthCallback() {
   const router = useRouter();
   const { status } = useAuth();
   const url = Linking.useLinkingURL();
-  const started = useRef(false);
+  const started = useRef<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const [recovery, setRecovery] = useState(false);
   const { c } = useTheme();
   useEffect(() => {
-    if (!url || started.current) return;
-    started.current = true;
+    if (!url || started.current === url) return;
+    started.current = url;
+    setFailed(false);
     void (async () => {
       const params = authCallbackParams(url);
+      setRecovery(params.recovery);
       if (params.error) throw new Error('Invalid auth link');
       if (params.code) {
         const { error } = await sb().auth.exchangeCodeForSession(params.code);
@@ -30,9 +33,11 @@ export default function AuthCallback() {
         const { error } = await sb().auth.setSession({ access_token: params.accessToken, refresh_token: params.refreshToken });
         if (error) throw error;
       } else throw new Error('Missing auth credentials');
+      if (started.current !== url) return;
       if (Platform.OS === 'web') window.history.replaceState({}, '', '/auth-callback');
       router.replace(params.recovery ? '/reset-password' : '/');
     })().catch(() => {
+      if (started.current !== url) return;
       // Expired or rejected credentials should not remain in the address bar either.
       if (Platform.OS === 'web') window.history.replaceState({}, '', '/auth-callback');
       setFailed(true);
@@ -41,5 +46,6 @@ export default function AuthCallback() {
   return <View style={{ flex: 1, backgroundColor: c.bg, padding: 24, justifyContent: 'center', gap: 16 }}>
     <Text variant="title2">{failed ? t('This link is invalid or has expired.') : t('Verifying your account…')}</Text>
     {failed && <Button title={status === 'signedIn' ? t('Back to the app') : t('Back to sign in')} onPress={() => router.replace(status === 'signedIn' ? '/' : '/sign-in')} />}
+    {failed && status !== 'signedIn' && <Button title={recovery ? t('Send reset link') : t('Confirmation email missing?')} variant="ghost" onPress={() => router.replace(recovery ? '/forgot-password' : '/resend-confirmation')} />}
   </View>;
 }

@@ -1,6 +1,6 @@
 import { useTranslation } from '@/i18n';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { api } from '@/data';
 import { useAuth } from '@/providers/AuthProvider';
@@ -16,13 +16,15 @@ export default function ResetPassword() {
   const [repeat, setRepeat] = useState('');
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
+  const submitting = useRef(false);
   const submit = async () => {
+    if (submitting.current) return;
     if (password.length < 12) return setError(t("Use at least 12 characters."));
     if (password !== repeat) return setError(t("Passwords do not match."));
-    setBusy(true); setError(undefined);
+    submitting.current = true; setBusy(true); setError(undefined);
     try { await api.updatePassword(password); router.replace('/'); }
     catch { setError(t("Could not change your password. Request a new link and try again.")); }
-    finally { setBusy(false); }
+    finally { submitting.current = false; setBusy(false); }
   };
   return <View style={{ flex: 1, backgroundColor: c.bg }}><Header back title={t("Change password")} />
     <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 24, gap: 16, maxWidth: 520, width: '100%', alignSelf: 'center' }}>

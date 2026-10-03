@@ -1,7 +1,7 @@
 import { describeError } from '@/lib/errors';
 import { useTranslation } from '@/i18n';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -35,11 +35,13 @@ export default function SignUp() {
   const [sentTo, setSentTo] = useState<string | null>(null);
   const score = strength(password);
 
+  const submitting = useRef(false);
   const submit = async () => {
+    if (submitting.current) return;
     if (name.trim().length < 2) return setError(t("Please tell us your name."));
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError(t("Enter a valid email address."));
     if (password.length < 12) return setError(t("Use at least 12 characters for your password."));
-    setBusy(true);
+    submitting.current = true; setBusy(true);
     setError(null);
     try {
       const { needsConfirmation } = await api.signUp({ email, password, fullName: name });
@@ -51,6 +53,9 @@ export default function SignUp() {
     } catch (e) {
       haptic.error();
       setError(describeError(e));
+      setBusy(false);
+    } finally {
+      submitting.current = false;
       setBusy(false);
     }
   };
@@ -67,6 +72,7 @@ export default function SignUp() {
             actionLabel={t("Back to sign in")}
             onAction={() => router.replace('/sign-in')}
           />
+          <Button title={t('Confirmation email missing?')} variant="ghost" onPress={() => router.push('/resend-confirmation')} />
         </Animated.View>
       </View>
     );
