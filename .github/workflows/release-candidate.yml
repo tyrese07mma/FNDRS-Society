@@ -1,0 +1,49 @@
+name: FNDRS release candidate
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: release-candidate
+  cancel-in-progress: false
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    env:
+      CI: '1'
+      EXPO_NO_TELEMETRY: '1'
+      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+      EXPO_PUBLIC_WEB_ORIGIN: ${{ vars.EXPO_PUBLIC_WEB_ORIGIN }}
+      EXPO_PUBLIC_SUPPORT_EMAIL: ${{ vars.EXPO_PUBLIC_SUPPORT_EMAIL }}
+      EXPO_PUBLIC_TERMS_URL: ${{ vars.EXPO_PUBLIC_TERMS_URL }}
+      EXPO_PUBLIC_PRIVACY_URL: ${{ vars.EXPO_PUBLIC_PRIVACY_URL }}
+      EXPO_PUBLIC_IMPRINT_URL: ${{ vars.EXPO_PUBLIC_IMPRINT_URL }}
+      EXPO_PUBLIC_GUIDELINES_URL: ${{ vars.EXPO_PUBLIC_GUIDELINES_URL }}
+      EXPO_PUBLIC_AI_ENABLED: 'false'
+      EXPO_PUBLIC_BILLING_ENABLED: 'false'
+      EXPO_PUBLIC_LOCAL_PREVIEW: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run release:check
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno check --config supabase/functions/deno.json supabase/functions/*/index.ts
+      - run: npm run build:release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-candidate-${{ github.sha }}
+          path: dist
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,8 @@
+# Edge Function settings (used by `supabase functions deploy`).
+# Browser redirects and Stripe webhooks carry no Supabase JWT.
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.stripe-return]
+verify_jwt = false

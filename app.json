@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "FNDRS Society",
+    "slug": "fndrs-society-v2",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/app-icon-1024.png",
+    "scheme": "fndrs",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#0A0A0C",
+    "ios": {
+      "bundleIdentifier": "com.fndrs.society.v2",
+      "supportsTablet": true,
+      "config": { "usesNonExemptEncryption": false },
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Choose a photo for your FNDRS profile.",
+        "NSCameraUsageDescription": "Take a photo for your FNDRS profile."
+      }
+    },
+    "android": {
+      "package": "com.fndrs.society.v2",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0A0A0C"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "single",
+      "favicon": "./assets/favicon-32.png",
+      "backgroundColor": "#0A0A0C"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0A0A0C",
+          "image": "./assets/mark-ivory.png",
+          "imageWidth": 96
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Choose a photo for your FNDRS profile.",
+          "cameraPermission": "Take a photo for your FNDRS profile."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
