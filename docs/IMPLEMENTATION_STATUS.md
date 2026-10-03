@@ -110,3 +110,11 @@ Die älteren Prüfangaben oben sind historische Zwischenstände. Dieser Abschnit
 - Verbindungsunterbrechung wird angezeigt; Nachrichtenhistorie kann nach Ladefehler manuell wiederholt werden. Zwei verbliebene englische Chat-Leerzustände übersetzt.
 - TypeScript, ESLint und alle 50 lokalen Tests bestanden. Physische Netzabbruch-/Mehrkonten-Tests bleiben offen.
 - Auch der aktuelle Web-/Android-/iOS-Export war erfolgreich.
+
+## Update — 3 October 2026
+
+The hosted two-account check on 2 October passed 11 checks and deployed migration `202610020001_post_returning_visibility.sql` (14 total). It fixes authenticated post INSERT RETURNING while preserving private-community and block policies. See LIVE_VERIFICATION_2026-10-02.md.
+
+The extended 3 October run verified the exact inbox RPC and notification query with actor joins, plus marking notifications read. First run hit a Realtime delivery timeout before those assertions; all fixtures were deleted. The second run passed all 13 checks with cleanup complete. This intermittent timeout is not considered resolved.
+
+For the reported notification/inbox screen error, relative timestamp formatting now supports runtimes without Intl.RelativeTimeFormat; invalid dates are guarded. Inbox query failures now show a translated retry state instead of an empty list. Typecheck, lint and all 53 local tests pass. The user's specific UI error/platform has not yet been confirmed, so this is not a verified resolution of their report. Device/UI confirmation remains required.

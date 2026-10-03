@@ -45,6 +45,12 @@ test('new accounts contain no fabricated activity',async()=>{
  const {rows}=await db.query('select count(*)::int n from posts'); assert.equal(rows[0].n,0);
  await asUser(A,async()=>{assert.deepEqual((await db.query('select get_posts() data')).rows[0].data,[]);});
 });
+
+test('post creation can return the new row under the author session',async()=>{
+ const row=await asUser(A,async()=> (await db.query('insert into posts(author_id,body) values($1,$2) returning id',[A,'Author insert returning regression'])).rows[0]);
+ assert.ok(row.id);
+ await asUser(A,()=>db.query('delete from posts where id=$1',[row.id]));
+});
 test('cannot edit another profile or grant own verification',async()=>{
  await asUser(A,async()=>{assert.equal((await db.query('update profiles set bio=$1 where id=$2 returning id',['hacked',B])).rows.length,0);});
  await assert.rejects(asUser(A,()=>db.exec('update profiles set verified=true')));
@@ -123,7 +129,10 @@ test('private community posts cannot leak through feed RPC or comments',async()=
  await db.query("select set_config('request.jwt.claim.sub',$1,false)",[B]);
  const community=(await db.query("insert into communities(slug,name,is_private) values('private','Private',true) returning id")).rows[0].id;
  const post=(await db.query('insert into posts(author_id,body,community_id) values($1,$2,$3) returning id',[B,'Secret',community]).catch(e=>{throw e;})).rows[0].id;
- await asUser(A,async()=>{assert.deepEqual((await db.query("select get_posts('post',$1) data",[post])).rows[0].data,[]);});
+ await asUser(A,async()=>{
+  assert.deepEqual((await db.query("select get_posts('post',$1) data",[post])).rows[0].data,[]);
+  assert.equal((await db.query('select id from posts where id=$1',[post])).rows.length,0);
+ });
  await assert.rejects(asUser(A,()=>db.query('insert into comments(post_id,author_id,body) values($1,$2,$3)',[post,A,'Intrusion'])));
 });
 test('clients cannot invoke quota or notification internals',async()=>{

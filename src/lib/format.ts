@@ -1,6 +1,7 @@
 import type { OpportunityType, StartupStage, UserRole } from '@/data/types';
 
 import { currentLocale, translateNow } from '@/i18n';
+import { relativeTime } from './relative-time';
 
 
 const MINUTE = 60_000;
@@ -10,7 +11,8 @@ const DAY = 24 * HOUR;
 export function timeAgo(iso: string | null | undefined): string {
   if (!iso) return '';
   const diff = Date.now() - new Date(iso).getTime();
-  const relative = new Intl.RelativeTimeFormat(currentLocale(), { numeric: 'auto', style: 'narrow' });
+  if (!Number.isFinite(diff)) return '';
+  const relative = { format: (value: number, unit: 'second' | 'minute' | 'hour' | 'day' | 'week') => relativeTime(value, unit, currentLocale()) };
   if (Math.abs(diff) < MINUTE) return relative.format(0, 'second');
   if (Math.abs(diff) < HOUR) return relative.format(-Math.floor(diff / MINUTE), 'minute');
   if (Math.abs(diff) < DAY) return relative.format(-Math.floor(diff / HOUR), 'hour');
@@ -35,8 +37,9 @@ export function sameDay(a: string, b: string) {
 /** "Today", "Yesterday", "Monday", or "3 Mar" — for chat day separators. */
 export function dayLabel(iso: string): string {
   const d = new Date(iso);
+  if (!Number.isFinite(d.getTime())) return '';
   const days = Math.round((startOfDay(new Date()) - startOfDay(d)) / DAY);
-  if (days === 0 || days === 1) return new Intl.RelativeTimeFormat(currentLocale(), { numeric: 'auto' }).format(-days, 'day');
+  if (days === 0 || days === 1) return relativeTime(-days, 'day', currentLocale(), false);
   if (days < 7) return d.toLocaleDateString(currentLocale(), { weekday: 'long' });
   return d.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short', year: days > 300 ? 'numeric' : undefined });
 }

@@ -17,3 +17,11 @@ Tests recreate the outbox with the same backing store, verify account isolation 
 ## October 2 reconnect recovery
 
 A successful channel subscription now invalidates thread history, conversation details/read state and inbox queries, including after interruption. Inbox and notification subscriptions also refresh on reconnect. The chat reports an interrupted live connection and offers retry for failed history loads. Lifecycle tests ensure duplicate SUBSCRIBED statuses do not repeatedly refetch, reconnects do refetch, and stopped subscriptions ignore later status callbacks. This verifies callback behavior, not a physical network-loss test. Read acknowledgments still require the separate hosted/device checks noted above.
+
+## Update — 3 October 2026
+
+The hosted two-account check on 2 October passed 11 checks and deployed migration `202610020001_post_returning_visibility.sql` (14 total). It fixes authenticated post INSERT RETURNING while preserving private-community and block policies. See LIVE_VERIFICATION_2026-10-02.md.
+
+The extended 3 October run verified the exact inbox RPC and notification query with actor joins, plus marking notifications read. First run hit a Realtime delivery timeout before those assertions; all fixtures were deleted. The second run passed all 13 checks with cleanup complete. This intermittent timeout is not considered resolved.
+
+For the reported notification/inbox screen error, relative timestamp formatting now supports runtimes without Intl.RelativeTimeFormat; invalid dates are guarded. Inbox query failures now show a translated retry state instead of an empty list. Typecheck, lint and all 53 local tests pass. The user's specific UI error/platform has not yet been confirmed, so this is not a verified resolution of their report. Device/UI confirmation remains required.

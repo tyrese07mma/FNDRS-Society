@@ -39,3 +39,7 @@ Migration `202609260001_moderation_review_queue.sql` applied after a dry run ide
 ## Deployment update — 27 September 2026
 
 Migration `202609270001_idempotent_messages.sql` applied successfully after a dry run showed exactly this migration. Thirteen migrations are deployed. The idempotent message RPC keeps existing data and RLS. See MESSAGING_VERIFICATION.md for verified behavior and remaining hosted test coverage.
+
+## Deployment update — 2 October 2026
+
+Migration 202610020001_post_returning_visibility.sql deployed after an exact dry run; 14 migrations total. Hosted free-account deletion, own-avatar cleanup, message persistence and RLS isolation passed with two synthetic accounts. See LIVE_VERIFICATION_2026-10-02.md. Email and device tests remain open.

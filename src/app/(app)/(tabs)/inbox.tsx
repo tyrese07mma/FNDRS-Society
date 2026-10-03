@@ -6,6 +6,7 @@ import { FlatList, Platform, RefreshControl, ScrollView, TextInput, View } from 
 import { useConversations, useMatches, useOpenConversation } from '@/data/queries';
 import type { Conversation } from '@/data/types';
 import { firstName, timeAgo } from '@/lib/format';
+import { describeError } from '@/lib/errors';
 import { CONTENT_MAX, useTabBarPadding } from '@/lib/layout';
 import { useAuth } from '@/providers/AuthProvider';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -91,6 +92,9 @@ export default function Inbox() {
 
   const header = (
     <View style={{ gap: 16, paddingBottom: 6 }}>
+      {(conversations.isError || matches.isError) && (
+        <EmptyState compact icon={MessageCircle} title={t('Messages could not be loaded')} message={describeError(conversations.error ?? matches.error)} actionLabel={t('Try again')} onAction={() => void refresh()} />
+      )}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, height: 44, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: c.input, borderWidth: 1, borderColor: c.border }}>
         <Search size={17} color={c.textSubtle} />
         <TextInput
@@ -155,7 +159,7 @@ export default function Inbox() {
         ListEmptyComponent={
           conversations.isLoading ? (
             <SkeletonList count={6} />
-          ) : (
+          ) : conversations.isError ? null : (
             <EmptyState
               icon={MessageCircle}
               title={q ? t('No results for “{{query}}”', {query}) : filter === 'unread' ? t("You’re all caught up") : t("No conversations yet")}

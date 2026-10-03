@@ -668,4 +668,5 @@ export const de: Record<string,string> = {
  "Your note":"Deine Nachricht",
  "Short and specific wins. We forward it with your profile.":"Halte deine Anfrage kurz und konkret. Dein Profil wird mit der Anfrage verknüpft.",
  "Hi {{name}}, I am {{sender}}. I would like to introduce my startup and learn more about your investment focus.":"Hallo {{name}}, ich bin {{sender}}. Ich möchte dir mein Startup vorstellen und mehr über deinen Investitionsschwerpunkt erfahren.",
+ "Messages could not be loaded":"Nachrichten konnten nicht geladen werden",
 };
